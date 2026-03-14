@@ -243,9 +243,13 @@ These Home Assistant entities must exist for full functionality:
 - `sensor.washer_water_consumption` — Lifetime water (L, used for monthly statistics)
 - `sensor.washer_cycle_count` — Wash cycle counter (requires counter helper + automation, see below)
 
-**Washer cycle counting (optional, for exact per-month counts):**
+**Washer cycle counting setup (required for per-month cycle stats):**
 
-Add to `configuration.yaml`:
+The Samsung SmartThings integration does not expose a cycle counter entity. To track how many wash cycles have run per month/year, you need to create three things in Home Assistant: a **counter helper**, a **template sensor**, and an **automation**. Without these, the washer panel will still show live status, energy, and water stats — but the "cycles" column in the monthly breakdown will be missing.
+
+**Step 1 — Counter helper** (`configuration.yaml`)
+
+Add a top-level `counter:` block (not inside any other block). This stores the raw count and persists across restarts:
 
 ```yaml
 counter:
@@ -255,9 +259,13 @@ counter:
     step: 1
 ```
 
-Add this template sensor inside your existing `template:` → `sensor:` block:
+**Step 2 — Template sensor** (`configuration.yaml`)
+
+Add this inside your existing `template:` → `sensor:` block. The `state_class: total_increasing` is critical — it tells HA's recorder to track long-term statistics (monthly/yearly totals), which is what the dashboard reads via `recorder/statistics_during_period`:
 
 ```yaml
+template:
+  - sensor:
       - name: "Washer Cycle Count"
         unique_id: washer_cycle_count
         state: "{{ states('counter.washer_cycles') | int(0) }}"
@@ -265,7 +273,11 @@ Add this template sensor inside your existing `template:` → `sensor:` block:
         unit_of_measurement: "cycles"
 ```
 
-Add this automation (via UI or `automations.yaml`):
+> If you already have a `template:` block, just add the sensor entry to the existing `sensor:` list — don't duplicate the `template:` key.
+
+**Step 3 — Automation** (via UI or `automations.yaml`)
+
+This increments the counter each time the washer enters the `wash` phase. The condition prevents double-counting if the state bounces:
 
 ```yaml
 - alias: "Count washer cycles"
@@ -281,6 +293,14 @@ Add this automation (via UI or `automations.yaml`):
       target:
         entity_id: counter.washer_cycles
 ```
+
+**Step 4 — Restart Home Assistant**
+
+A full restart is required (not just "Reload YAML") because counter entities are only created at boot. After restart, verify both entities exist in **Developer Tools → States**:
+- `counter.washer_cycles` — should show `0`
+- `sensor.washer_cycle_count` — should show `0` with `state_class: total_increasing`
+
+> **Note**: Statistics data starts accumulating from the moment the template sensor is created. Historical cycles before setup are not retroactively counted.
 
 **Power (per-room):**
 - `sensor.*_power` — Smart plug power sensors
