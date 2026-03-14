@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>WEYLAND-YUTANI // MU/TH/UR 6000</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --amber:     #FF9900;
+  --amber-dim: #996600;
+  --amber-glow: rgba(255,153,0,0.3);
+  --green:     #33FF33;
+  --red:       #FF3333;
+  --white:     #FFFFFF;
+  --bg:        #0a0a0a;
+  --bg2:       #111111;
+  --grey:      #444444;
+  --grey-mid:  #888888;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--amber);
+  font-family: 'Share Tech Mono', monospace;
+  height: 100%;
+  overflow: hidden;
+  cursor: default;
+  letter-spacing: 0.5px;
+}
+
+/* =======================================
+   CRT EFFECTS
+======================================= */
+.scanlines {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none; z-index: 9998;
+}
+@keyframes flicker { 0%{opacity:0.97} 5%{opacity:0.95} 10%{opacity:0.97} 15%{opacity:0.94} 20%{opacity:0.98} 100%{opacity:0.97} }
+.crt-flicker { animation: flicker 8s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-flicker { animation: none; }
+  .scanlines { display: none; }
+  @keyframes pulse-y { 0%,100% { opacity:1; } }
+  @keyframes blink-y { 0%,100% { opacity:1; } }
+}
+
+/* =======================================
+   SKIP LINK
+======================================= */
+.skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: var(--amber); color: var(--bg);
+  padding: 8px 16px; z-index: 99999;
+  font-family: 'VT323', monospace; font-size: 1rem;
+  letter-spacing: 1px; transition: top 0.2s; text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* =======================================
+   WY FRAME
+======================================= */
+.wy-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* =======================================
+   HEADER
+======================================= */
+.wy-header {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-bottom: 3px solid var(--amber);
+  padding: 0 20px;
+  gap: 16px;
+  transition: opacity 0.3s;
+}
+.wy-logo {
+  font-family: 'VT323', monospace;
+  font-size: 1.6rem;
+  color: var(--amber);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px var(--amber-glow);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.wy-title {
+  font-family: 'VT323', monospace;
+  font-size: 0.9rem;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.wy-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--amber);
+  white-space: nowrap;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--grey-mid);
+  display: inline-block;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+.status-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.connecting { background: var(--amber); animation: pulse-y 1s infinite; }
+.status-dot.offline { background: var(--red); }
+@keyframes pulse-y { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+/* =======================================
+   TABS
+======================================= */
+.wy-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg2);
+  border-bottom: 2px solid var(--grey);
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+.wy-tab {
+  background: var(--bg);
+  color: var(--amber-dim);
+  border: 1px solid var(--grey);
+  border-bottom: none;
+  padding: 6px 20px;
+  font-family: 'VT323', monospace;
+  font-size: 0.95rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.wy-tab:hover {
+  background: #1a1a00;
+  color: var(--amber);
+}
+.wy-tab.active {
+  background: var(--bg);
+  color: var(--amber);
+  border-color: var(--amber);
+  border-bottom: 2px solid var(--bg);
+  margin-bottom: -2px;
+  text-shadow: 0 0 6px var(--amber-glow);
+}
+
+/* =======================================
+   CONTENT AREA
+======================================= */
+.wy-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--grey-mid) var(--bg);
+}
+.wy-content::-webkit-scrollbar { width: 4px; }
+.wy-content::-webkit-scrollbar-track { background: var(--bg); }
+.wy-content::-webkit-scrollbar-thumb { background: var(--grey-mid); border-radius: 2px; }
+
+/* =======================================
+   FOOTER
+======================================= */
+.wy-footer {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-top: 2px solid var(--amber);
+  padding: 0 20px;
+  gap: 16px;
+  font-family: 'VT323', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--amber-dim);
+  text-transform: uppercase;
+}
+
+/* =======================================
+   PAGE VISIBILITY
+======================================= */
+.page { display: none; }
+.page.active { display: block; animation: fadein 0.2s ease; }
+@keyframes fadein { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:none; } }
+
+/* =======================================
+   SECTION TITLES
+======================================= */
+.lc-section {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 14px;
+  margin-top: 20px;
+}
+.lc-section:first-child { margin-top: 0; }
+.lc-section-pill {
+  background: var(--amber);
+  color: var(--bg);
+  font-family: 'VT323', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  white-space: nowrap;
+}
+.lc-section-line {
+  flex: 1;
+  height: 2px;
+  background: var(--grey);
+}
+.lc-section-end {
+  width: 8px; height: 8px;
+  background: var(--amber);
+  margin-left: 6px;
+}
+
+/* =======================================
+   ROOM GRID
+======================================= */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+}
+
+.room-card {
+  border: 2px solid var(--grey);
+  background: var(--bg2);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.room-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--grey-mid);
+  transition: background 0.2s;
+}
+.room-card.lit { border-color: var(--amber); }
+.room-card.lit::before { background: var(--amber); box-shadow: 0 0 8px var(--amber-glow); }
+
+.room-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px 8px 16px;
+  border-bottom: 1px solid var(--grey);
+}
+.room-name {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--amber);
+  flex: 1;
+}
+.room-lit-badge {
+  font-family: 'VT323', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: var(--bg);
+  background: var(--amber);
+  padding: 1px 8px;
+  display: none;
+}
+.room-card.lit .room-lit-badge { display: block; }
+
+.room-body { padding: 10px 12px 12px 16px; }
+
+/* Sensor chips */
+.sensor-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.sensor-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  background: var(--grey);
+  color: var(--grey-mid);
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+.sensor-chip.active {
+  background: #1a1200;
+  color: var(--amber);
+  border: 1px solid var(--amber-dim);
+}
+.sensor-chip.active.temp  { color: var(--amber); border-color: var(--amber); }
+.sensor-chip.active.hum   { color: #99ccff; border-color: #6699cc; }
+.sensor-chip.active.lux   { color: #ffcc00; border-color: #cc9900; }
+.sensor-chip.active.power { color: var(--green); border-color: var(--green); }
+
+/* Light rows */
+.light-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.light-row:last-child { border-bottom: none; }
+.light-indicator {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--grey-mid);
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.light-row.on .light-indicator {
+  background: var(--amber);
+  box-shadow: 0 0 6px var(--amber);
+}
+.light-label {
+  flex: 1;
+  color: var(--grey-mid);
+}
+.light-row.on .light-label { color: var(--white); }
+.light-state {
+  font-size: 0.65rem;
+  color: var(--grey-mid);
+}
+.light-row.on .light-state { color: var(--amber); }
+
+/* Toggle */
+.lc-toggle {
+  position: relative;
+  width: 40px; height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.lc-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.lc-toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--grey);
+  border-radius: 9px;
+  transition: background 0.2s;
+}
+.lc-toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--grey-mid);
+  transition: all 0.2s;
+}
+.lc-toggle input:checked ~ .lc-toggle-track {
+  background: #331a00;
+}
+.lc-toggle input:checked ~ .lc-toggle-thumb {
+  left: 24px;
+  background: var(--amber);
+  box-shadow: 0 0 6px var(--amber);
+}
+
+/* Dimmer */
+.dimmer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 4px 14px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s, max-height 0.2s;
+}
+.dimmer-row.visible { opacity: 1; max-height: 28px; }
+.dimmer-label { font-size: 0.65rem; color: var(--grey-mid); width: 24px; }
+.lc-dimmer {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 3px;
+  background: var(--grey);
+  outline: none;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.lc-dimmer::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 4px var(--amber);
+  cursor: pointer;
+}
+.lc-dimmer::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--amber);
+  border: none;
+  box-shadow: 0 0 4px var(--amber);
+}
+.dimmer-pct { font-size: 0.65rem; color: var(--amber); width: 30px; text-align: right; }
+
+/* Load bar */
+.load-bar-wrap { margin-top: 8px; }
+.load-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--grey-mid);
+  margin-bottom: 3px; letter-spacing: 1px; text-transform: uppercase;
+}
+.load-bar {
+  height: 4px;
+  background: var(--grey);
+  overflow: hidden;
+}
+.load-bar-fill {
+  height: 100%;
+  background: var(--amber);
+  transition: width 0.8s ease;
+  box-shadow: 0 0 4px var(--amber);
+}
+
+/* =======================================
+   STATUS STRIP
+======================================= */
+.status-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.status-block {
+  flex: 1;
+  min-width: 120px;
+  background: var(--bg2);
+  border: 2px solid var(--grey);
+  padding: 10px 14px;
+  border-left: 4px solid var(--amber-dim);
+}
+.status-block.orange { border-left-color: var(--amber); }
+.status-block.purple { border-left-color: var(--amber); }
+.status-block.teal   { border-left-color: var(--green); }
+.status-block label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--grey-mid);
+  margin-bottom: 4px;
+}
+.status-block .val {
+  font-family: 'VT323', monospace;
+  font-size: 1.2rem;
+  color: var(--amber);
+  letter-spacing: 1px;
+}
+.status-block.orange .val { color: var(--amber); }
+.status-block.purple .val { color: var(--amber); }
+.status-block.teal   .val { color: var(--green); }
+
+/* =======================================
+   DATA TAB
+======================================= */
+.data-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.data-label { width: 80px; color: var(--grey-mid); }
+.data-bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: var(--grey);
+  overflow: hidden;
+}
+.data-bar-fill {
+  height: 100%;
+  transition: width 0.8s;
+}
+.data-bar-fill.low    { background: var(--green);  box-shadow: 0 0 4px var(--green);  }
+.data-bar-fill.mid    { background: var(--amber);  box-shadow: 0 0 4px var(--amber);  }
+.data-bar-fill.high   { background: var(--red);    box-shadow: 0 0 4px var(--red);    }
+.data-val { width: 80px; text-align: right; color: var(--amber); font-size: 0.7rem; }
+.data-val.low  { color: var(--green);  }
+.data-val.mid  { color: var(--amber);  }
+.data-val.high { color: var(--red);    }
+
+/* Solar strip */
+.solar-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.solar-block {
+  flex: 1;
+  min-width: 110px;
+  background: var(--bg2);
+  border: 2px solid var(--grey);
+  border-top: 3px solid var(--amber);
+  padding: 8px 14px;
+  text-align: center;
+}
+.solar-block label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--grey-mid);
+  margin-bottom: 4px;
+}
+.solar-block .val {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  color: var(--amber);
+  letter-spacing: 1px;
+}
+
+/* Weather forecast cards */
+.weather-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+.weather-card {
+  flex-shrink: 0;
+  min-width: 70px;
+  background: var(--bg2);
+  border: 2px solid var(--grey);
+  padding: 8px 6px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.weather-card.now { border-color: var(--amber); }
+.weather-card .wc-time { font-size: 0.65rem; color: var(--grey-mid); letter-spacing: 1px; margin-bottom: 4px; }
+.weather-card .wc-icon { font-size: 1.1rem; margin: 2px 0; }
+.weather-card .wc-temp { font-family: 'VT323', monospace; font-size: 0.95rem; color: var(--amber); }
+.weather-card .wc-detail { font-size: 0.65rem; color: #99ccff; margin-top: 2px; }
+.weather-card .wc-wind  { font-size: 0.65rem; color: var(--grey-mid); margin-top: 1px; }
+
+/* 48h nordpool chart */
+.np48-chart {
+  position: relative;
+  height: 90px;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+.np48-bar-wrap {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+}
+.np48-bar {
+  width: 100%;
+  border-radius: 1px 1px 0 0;
+  transition: height 0.5s;
+  position: relative;
+}
+.np48-bar.current {
+  box-shadow: 0 0 8px var(--amber);
+  border-top: 2px solid var(--white);
+}
+.np48-midnight {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--grey-mid);
+  opacity: 0.6;
+  left: 0;
+}
+.np48-xaxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--grey-mid);
+  letter-spacing: 1px;
+  margin-top: 3px;
+  margin-bottom: 8px;
+}
+.np48-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+.np48-legend span { display: flex; align-items: center; gap: 4px; }
+
+/* Temp graph */
+.temp-graph-wrap {
+  height: 70px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.temp-bar {
+  flex: 1;
+  border-radius: 1px 1px 0 0;
+  cursor: pointer;
+  transition: height 0.5s;
+}
+.temp-xaxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--grey-mid);
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+.temp-minmax {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--grey-mid);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+/* Diagnostics */
+.diag-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+.diag-row:last-child { border-bottom: none; }
+.diag-key { color: var(--grey-mid); text-transform: uppercase; }
+.diag-val { color: var(--amber); }
+
+/* =======================================
+   TOAST
+======================================= */
+.toast {
+  position: fixed;
+  bottom: 50px; right: 20px;
+  background: #0a0a0a;
+  border: 2px solid var(--amber);
+  border-left: 4px solid var(--amber);
+  color: var(--amber);
+  padding: 10px 18px;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  font-family: 'Share Tech Mono', monospace;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.25s;
+  pointer-events: none;
+  z-index: 9999;
+  text-transform: uppercase;
+  max-width: 300px;
+}
+.toast.show { opacity: 1; transform: none; }
+
+/* Washer badge */
+.washer-badge {
+  font-family: 'VT323', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  padding: 1px 10px;
+  border: 1px solid var(--grey-mid);
+  color: var(--grey-mid);
+  text-transform: uppercase;
+  display: inline-block;
+}
+.washer-badge.running {
+  border-color: var(--amber);
+  color: var(--amber);
+  animation: blink-y 0.9s step-end infinite;
+}
+@keyframes blink-y { 50% { opacity: 0.3; } }
+
+/* =======================================
+   MEDIA PAGE
+======================================= */
+.media-strip {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.media-stat-block {
+  flex: 1; min-width: 100px; background: var(--bg2);
+  border: 2px solid var(--grey); border-left: 4px solid var(--amber-dim);
+  padding: 8px 12px;
+}
+.media-stat-block label {
+  display: block; font-size: 0.65rem;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--grey-mid); margin-bottom: 3px;
+}
+.media-stat-block .val { font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--amber); }
+
+.sessions-grid { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+
+.session-card {
+  display: flex; gap: 14px;
+  border: 2px solid var(--grey); background: var(--bg2);
+  padding: 12px; flex: 1; min-width: 300px;
+  position: relative; transition: border-color 0.3s;
+  border-left: 4px solid var(--grey);
+}
+.session-card.playing { border-left-color: var(--amber); border-color: var(--amber-dim); }
+.session-card.paused  { border-left-color: var(--grey-mid); opacity: 0.75; }
+
+.session-poster {
+  width: 90px; flex-shrink: 0; aspect-ratio: 2/3;
+  background: #050505; border: 1px solid var(--grey); overflow: hidden;
+}
+.session-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.session-poster-ph {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: var(--grey-mid);
+}
+
+.session-info { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden; }
+.session-show {
+  font-size: 0.66rem; color: var(--grey-mid); letter-spacing: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;
+}
+.session-title {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem; color: var(--amber); letter-spacing: 1px; line-height: 1.2;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.session-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.sbadge {
+  font-size: 0.65rem; letter-spacing: 1px; padding: 1px 6px;
+  background: var(--grey); color: var(--grey-mid); text-transform: uppercase;
+}
+.sbadge.hi     { background: #0a1a00; color: var(--green);  border: 1px solid var(--green); }
+.sbadge.amber  { background: #1a1000; color: var(--amber);  border: 1px solid var(--amber); }
+.sbadge.orange { background: #1a0800; color: var(--amber);  border: 1px solid var(--amber); }
+
+.session-summary {
+  font-size: 0.65rem; color: var(--grey-mid); line-height: 1.6; margin-top: 2px;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+.session-user {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.65rem; color: var(--grey-mid);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.session-avatar {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1px solid var(--grey-mid); overflow: hidden; flex-shrink: 0;
+}
+.session-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.session-progress-wrap { margin-top: auto; }
+.session-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--grey-mid); letter-spacing: 1px; margin-bottom: 3px;
+}
+.session-progress-bar { height: 5px; background: var(--grey); overflow: hidden; }
+.session-progress-fill {
+  height: 100%; background: var(--amber);
+  box-shadow: 0 0 4px var(--amber); transition: width 2s ease;
+}
+.session-progress-fill.paused { background: var(--grey-mid); box-shadow: 0 0 4px var(--grey-mid); }
+
+.no-streams {
+  width: 100%; text-align: center; padding: 40px;
+  font-family: 'VT323', monospace;
+  font-size: 1rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--grey-mid); border: 2px solid var(--grey); border-left: 4px solid var(--amber-dim);
+}
+
+/* Media Player Cards */
+.mp-grid {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch;
+}
+.mp-card {
+  display: flex; gap: 14px;
+  border: 2px solid var(--grey); background: var(--bg2);
+  padding: 12px; flex: 1; min-width: 260px; max-width: 400px;
+  position: relative; transition: border-color 0.3s;
+  border-left: 4px solid var(--grey);
+}
+.mp-card.playing { border-left-color: var(--green); border-color: var(--green); }
+.mp-card.paused  { border-left-color: var(--grey-mid); opacity: 0.75; }
+.mp-art {
+  width: 60px; height: 60px; flex-shrink: 0;
+  background: #050505; border: 1px solid var(--grey); overflow: hidden;
+}
+.mp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mp-art-ph {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; color: var(--grey-mid);
+}
+.mp-info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; overflow: hidden; }
+.mp-name {
+  font-size: 0.66rem; color: var(--grey-mid); letter-spacing: 1px;
+  text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+}
+.mp-type {
+  font-size: 0.6rem; padding: 0 5px;
+  background: var(--grey); color: var(--grey-mid);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.mp-card.playing .mp-type { background: #001a00; color: var(--green); border: 1px solid var(--green); }
+.mp-title {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem; color: var(--amber); letter-spacing: 1px; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mp-artist {
+  font-size: 0.7rem; color: var(--white); letter-spacing: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mp-source {
+  font-size: 0.65rem; color: var(--grey-mid); letter-spacing: 1px; text-transform: uppercase;
+}
+.mp-vol-wrap {
+  display: flex; align-items: center; gap: 6px; margin-top: 2px;
+}
+.mp-vol-label { font-size: 0.6rem; color: var(--grey-mid); letter-spacing: 1px; }
+.mp-vol-bar {
+  flex: 1; height: 4px; background: var(--grey); overflow: hidden;
+}
+.mp-vol-fill {
+  height: 100%; background: var(--green);
+  box-shadow: 0 0 4px var(--green); transition: width 0.5s;
+}
+.mp-vol-pct { font-size: 0.6rem; color: var(--green); width: 28px; text-align: right; }
+.mp-state-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.mp-card.playing .mp-state-dot {
+  background: var(--green); box-shadow: 0 0 6px var(--green);
+}
+.mp-card.paused .mp-state-dot {
+  background: var(--grey-mid); box-shadow: 0 0 4px var(--grey-mid);
+}
+.mp-progress-wrap { margin-top: 3px; }
+.mp-progress-bar {
+  height: 4px; background: var(--grey); overflow: hidden;
+}
+.mp-progress-fill {
+  height: 100%; background: var(--amber);
+  box-shadow: 0 0 4px var(--amber); transition: width 2s ease;
+}
+.mp-card.paused .mp-progress-fill {
+  background: var(--grey-mid); box-shadow: 0 0 4px var(--grey-mid);
+}
+.mp-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.58rem; color: var(--grey-mid); letter-spacing: 1px; margin-top: 2px;
+}
+.mp-badge {
+  display: inline-block; font-size: 0.55rem; letter-spacing: 1px; padding: 0 5px;
+  background: var(--grey); color: var(--grey-mid); margin-left: 4px;
+  vertical-align: middle;
+}
+.mp-badge.muted { background: #1a0000; color: var(--red); border: 1px solid var(--red); }
+.no-mp {
+  width: 100%; text-align: center; padding: 20px;
+  font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--grey-mid);
+}
+
+/* =======================================
+   ENERGY
+======================================= */
+.lc-energy-wrap { margin-bottom: 14px; }
+.lc-energy-header {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.lc-energy-stat {
+  flex: 1; min-width: 100px; background: var(--bg2);
+  border: 2px solid var(--grey); border-left: 4px solid var(--amber);
+  padding: 8px 12px;
+}
+.lc-energy-stat label {
+  display: block; font-size: 0.65rem;
+  letter-spacing: 2px; color: var(--grey-mid); text-transform: uppercase; margin-bottom: 3px;
+}
+.lc-energy-stat .val { font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--amber); }
+.lc-energy-chart {
+  position: relative; height: 80px;
+  display: flex; align-items: flex-end; gap: 1px; background: var(--bg2);
+  border: 2px solid var(--grey); padding: 4px;
+}
+.lc-energy-bar {
+  flex: 1; position: relative; height: 100%;
+  display: flex; align-items: flex-end; cursor: pointer;
+}
+.lc-energy-bar-price {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  opacity: 0.3; transition: height 1s ease;
+}
+.lc-energy-bar-power {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--amber); opacity: 0.9;
+  box-shadow: 0 0 4px var(--amber);
+  transition: height 1s ease;
+}
+.lc-energy-bar.current .lc-energy-bar-power {
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+}
+.lc-energy-xaxis {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--grey-mid); letter-spacing: 1px;
+  margin-top: 3px;
+}
+.lc-energy-legend {
+  display: flex; gap: 16px; font-size: 0.65rem; letter-spacing: 1px;
+  margin-top: 6px; flex-wrap: wrap; color: var(--grey-mid);
+}
+
+/* =======================================
+   MOTHER TERMINAL
+======================================= */
+.mother-terminal {
+  background: #000; border: 2px solid var(--green); padding: 16px; margin-bottom: 16px;
+  font-family: 'VT323', monospace;
+  box-shadow: 0 0 12px rgba(51,255,51,0.15);
+}
+.mother-header { color: var(--green); font-size: 1.1rem; margin-bottom: 12px; letter-spacing: 2px; }
+.mother-readout { color: var(--green); font-size: 0.9rem; line-height: 1.8; white-space: pre-line; letter-spacing: 1px; }
+
+/* =======================================
+   NIGHT MODE
+======================================= */
+body.night-mode .room-card { border-color: #333; }
+body.night-mode .wy-header { opacity: 0.9; }
+
+/* =======================================
+   WCAG FOCUS STYLES
+======================================= */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--amber-glow);
+}
+.wy-tab:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 2px;
+}
+.lc-toggle input:focus-visible ~ .lc-toggle-track {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+.lc-dimmer:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 4px;
+}
+
+/* THEME SWITCHER */
+.theme-zone { position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998; cursor: pointer; }
+.theme-switcher {
+  position: fixed; bottom: 12px; left: 12px; z-index: 9999;
+  display: flex; gap: 6px; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.theme-switcher.visible { opacity: 1; pointer-events: auto; }
+.theme-switcher-btn {
+  width: 40px; height: 40px; border: 2px solid var(--amber); border-radius: 0;
+  background: var(--bg); color: var(--amber); font-size: 11px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'VT323', monospace; font-weight: bold; letter-spacing: 1px;
+  transition: background 0.2s, transform 0.2s;
+}
+.theme-switcher-btn:hover { background: var(--amber); color: var(--bg); transform: scale(1.05); }
+.theme-switcher-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+.theme-menu {
+  display: none; position: absolute; bottom: 48px; left: 0;
+  background: #0c0c0c; border: 2px solid var(--amber); padding: 6px 0;
+  min-width: 180px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.theme-menu.open { display: block; }
+.theme-menu a {
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+  color: var(--amber-dim); text-decoration: none; font-size: 0.85rem;
+  font-family: 'VT323', monospace; letter-spacing: 2px; white-space: nowrap;
+}
+.theme-menu a:hover { background: rgba(255,153,0,0.1); color: var(--amber); }
+.theme-menu a.active { color: var(--amber); }
+.theme-menu a .tm-icon { width: 22px; text-align: center; font-size: 14px; }
+
+/* NIGHT PROTOCOL BUTTON */
+.night-protocol-btn {
+  display: block; margin: 0 0 12px 0; padding: 10px 24px;
+  background: transparent; border: 2px solid var(--amber); border-radius: 0;
+  color: var(--amber); font-family: 'VT323', monospace; font-size: 1rem;
+  letter-spacing: 3px; cursor: pointer; transition: background 0.2s, color 0.2s;
+}
+.night-protocol-btn:hover { background: var(--amber); color: var(--bg); }
+.night-protocol-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+</style>
+</head>
+<body class="crt-flicker">
+
+<div class="scanlines"></div>
+
+<a href="#main-content" class="skip-link">Skip to Content</a>
+
+<div class="wy-frame" role="application" aria-label="Weyland-Yutani MU/TH/UR 6000 Home Automation Interface">
+
+  <!-- HEADER -->
+  <div class="wy-header">
+    <div class="wy-logo">WEYLAND-YUTANI</div>
+    <div class="wy-title">MU/TH/UR 6000 INTERFACE</div>
+    <div class="wy-status">
+      <span id="conn-dot" class="status-dot connecting"></span>
+      <span id="conn-label">ESTABLISHING UPLINK...</span>
+      <span style="opacity:0.4;">|</span>
+      <span id="clock-wy">--:--:--</span>
+      <span id="date-wy" style="opacity:0.7;">--- -- ----</span>
+      <span style="opacity:0.4;">|</span>
+      <span id="wy-cycle" style="letter-spacing:2px;">DAY CYCLE</span>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="wy-tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="wy-tab active" role="tab" aria-selected="true" onclick="switchTab('systems')">HABITATION</button>
+    <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('controls')">ENVIRONMENTAL</button>
+    <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('data')">TELEMETRY</button>
+    <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('media')">COMMS</button>
+    <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('sensors')">CONTAINMENT</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="wy-content" id="main-content" tabindex="-1">
+
+    <!-- ========== HABITATION (SYSTEMS) ========== -->
+    <div class="page active" id="page-systems">
+
+      <div class="status-strip">
+        <div class="status-block orange">
+          <label>Ext. Atmosphere</label>
+          <div class="val" id="stat-temp">-- &deg;C</div>
+        </div>
+        <div class="status-block">
+          <label>Power Grid Rate</label>
+          <div class="val" id="stat-elec">-- SEK/kWh</div>
+        </div>
+        <div class="status-block purple">
+          <label>Active Luminaires</label>
+          <div class="val" id="stat-lights">--</div>
+        </div>
+        <div class="status-block teal">
+          <label>Decon Unit</label>
+          <div class="val"><span id="stat-washer" class="washer-badge">IDLE</span></div>
+        </div>
+        <div class="status-block">
+          <label>Star Status</label>
+          <div class="val" id="stat-sun">--</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Compartment Status</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="room-grid" id="rooms-systems"></div>
+    </div>
+
+    <!-- ========== ENVIRONMENTAL (CONTROLS) ========== -->
+    <div class="page" id="page-controls">
+      <div class="lc-section">
+        <div class="lc-section-pill">Luminaire Controls</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">CREW HIBERNATION</button>
+      <div class="room-grid" id="rooms-controls"></div>
+    </div>
+
+    <!-- ========== TELEMETRY (DATA) ========== -->
+    <div class="page" id="page-data">
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Solar Telemetry</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="solar-strip">
+        <div class="solar-block">
+          <label>Next Sunrise</label>
+          <div class="val" id="d-sunrise">--:--</div>
+        </div>
+        <div class="solar-block">
+          <label>Next Sunset</label>
+          <div class="val" id="d-sunset">--:--</div>
+        </div>
+        <div class="solar-block">
+          <label>Daylight Cycle</label>
+          <div class="val" id="d-daylight">-- hrs</div>
+        </div>
+        <div class="solar-block">
+          <label>Star Position</label>
+          <div class="val" id="d-sunstate">--</div>
+        </div>
+        <div class="solar-block">
+          <label>Elevation</label>
+          <div class="val" id="d-elevation">--&deg;</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Atmospheric Forecast 24H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="weather-row" id="d-weather">
+        <div style="color:var(--grey-mid);font-size:0.75rem;padding:10px;">AWAITING TELEMETRY...</div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Power Grid Rates 48H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="np48-chart" id="d-np48">
+        <div style="color:var(--grey-mid);font-size:0.75rem;align-self:center;">AWAITING TELEMETRY...</div>
+      </div>
+      <div class="np48-xaxis" id="d-np48-xaxis"></div>
+      <div class="np48-legend">
+        <span><span style="width:10px;height:10px;background:var(--amber);display:inline-block;"></span> CURRENT</span>
+        <span><span style="width:10px;height:10px;background:var(--green);display:inline-block;"></span> LOW</span>
+        <span><span style="width:10px;height:10px;background:var(--amber);display:inline-block;"></span> MED</span>
+        <span><span style="width:10px;height:10px;background:var(--red);display:inline-block;"></span> HIGH</span>
+        <span id="d-np48-minmax" style="margin-left:auto;color:var(--grey-mid);"></span>
+      </div>
+
+      <div class="lc-section" style="margin-top:20px;">
+        <div class="lc-section-pill">Rate Summary</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Last Hour</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-last-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-last-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Now</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-now-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-now-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Next Hour</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-next-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-next-val">--</span>
+      </div>
+
+      <div class="lc-section" style="margin-top:20px;">
+        <div class="lc-section-pill">Thermal Forecast 24H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="temp-graph-wrap" id="d-tempgraph">
+        <div style="color:var(--grey-mid);font-size:0.75rem;align-self:center;">AWAITING TELEMETRY...</div>
+      </div>
+      <div class="temp-xaxis"><span>NOW</span><span>+6H</span><span>+12H</span><span>+18H</span><span>+24H</span></div>
+      <div class="temp-minmax" id="d-tempminmax"></div>
+
+      <div class="lc-section" style="margin-top:20px;">
+        <div class="lc-section-pill">System Diagnostics</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="diag-row"><span class="diag-key">Designation</span><span class="diag-val">WY-6000 MU/TH/UR INTERFACE</span></div>
+      <div class="diag-row"><span class="diag-key">Colony</span><span class="diag-val">SOLNA, SECTOR 7</span></div>
+      <div class="diag-row"><span class="diag-key">Entities</span><span class="diag-val">9 LUMINAIRES / 16 SENSORS</span></div>
+      <div class="diag-row"><span class="diag-key">Subsystems</span><span class="diag-val">Z-WAVE / NORDPOOL / MET.NO / TMDB</span></div>
+      <div class="diag-row"><span class="diag-key">Protocols</span><span class="diag-val">7 ACTIVE</span></div>
+      <div class="diag-row"><span class="diag-key">NFC Tags</span><span class="diag-val">1 ACTIVE (SOFA)</span></div>
+      <div class="diag-row"><span class="diag-key">Core Host</span><span class="diag-val" id="diag-host">—</span></div>
+    </div>
+
+    <!-- ========== COMMS (MEDIA) ========== -->
+    <div class="page" id="page-media">
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Transmission Status</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="media-strip">
+        <div class="media-stat-block">
+          <label>Active Feeds</label>
+          <div class="val" id="m-stream-count">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Direct Play</label>
+          <div class="val" id="m-direct-play">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Transcoding</label>
+          <div class="val" id="m-transcode">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Total Bandwidth</label>
+          <div class="val" id="m-bandwidth">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>LAN / WAN</label>
+          <div class="val" id="m-lan-wan">-- / --</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Now Transmitting</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div id="no-media-msg" class="no-streams">INTERFACE 2037 READY FOR INQUIRY</div>
+      <div class="sessions-grid" id="sessions-grid"></div>
+      <div class="mp-grid" id="mp-grid"></div>
+
+    </div>
+
+    <!-- ========== CONTAINMENT (SENSORS) ========== -->
+    <div class="page" id="page-sensors">
+
+      <div class="lc-section">
+        <div class="lc-section-pill">MU/TH/UR Status Readout</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+
+      <div class="mother-terminal" aria-label="MOTHER AI Status Terminal">
+        <div class="mother-header">&gt; INTERFACE 2037 READY FOR INQUIRY</div>
+        <div class="mother-readout" id="mother-readout">ATMOSPHERIC PROCESSORS: NOMINAL
+LIFE SUPPORT: --
+PERIMETER: SECURE
+POWER CONSUMPTION: -- W
+HULL INTEGRITY: 100%</div>
+      </div>
+
+      <div class="lc-section" style="margin-top:8px;">
+        <div class="lc-section-pill">Energy Consumption vs Rate</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+
+      <div class="lc-energy-wrap">
+        <div class="lc-energy-header">
+          <div class="lc-energy-stat">
+            <label>Current Load</label>
+            <div class="val" id="lc-energy-total">-- W</div>
+          </div>
+          <div class="lc-energy-stat">
+            <label>Est. Cost/Hour</label>
+            <div class="val" id="lc-energy-cost">-- SEK/h</div>
+          </div>
+          <div class="lc-energy-stat">
+            <label>Rate Now</label>
+            <div class="val" id="lc-energy-price">-- SEK/kWh</div>
+          </div>
+        </div>
+        <div class="lc-energy-chart" id="lc-energy-chart">
+          <div style="color:var(--grey-mid);font-size:0.75rem;align-self:center;">Awaiting telemetry...</div>
+        </div>
+        <div class="lc-energy-xaxis" id="lc-energy-xaxis"></div>
+        <div class="lc-energy-legend">
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--amber);opacity:0.9;margin-right:4px;"></span>Power (W)</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--green);opacity:0.35;margin-right:4px;"></span>Rate overlay</span>
+          <span style="margin-left:auto;" id="lc-energy-minmax"></span>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <div class="wy-footer">
+    <span>BUILDING BETTER WORLDS</span>
+    <span style="opacity:0.4;">|</span>
+    <span>WY-6000 REL 3.7</span>
+    <span style="opacity:0.4;">|</span>
+    <span id="footer-status">SYSTEM INITIALIZING</span>
+  </div>
+
+</div><!-- /frame -->
+
+<!-- THEME SWITCHER -->
+<div class="theme-zone" onclick="showSwitcher()"></div>
+<div class="theme-switcher" id="theme-switcher">
+  <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme">W-Y</button>
+  <div class="theme-menu" id="theme-menu">
+    <a href="lcars-dashboard.html"><span class="tm-icon">&#9651;</span> LCARS</a>
+    <a href="pipboy-dashboard.html"><span class="tm-icon">&#9762;</span> PIP-BOY</a>
+    <a href="c64-dashboard.html"><span class="tm-icon">C=</span> C64</a>
+    <a href="matrix-dashboard.html"><span class="tm-icon">&#9679;</span> MATRIX</a>
+    <a href="weyland-dashboard.html" class="active"><span class="tm-icon">W-Y</span> WEYLAND</a>
+  </div>
+  <button class="theme-switcher-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#9974;</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="config.js"></script>
+<script>
+const THEME = {
+  title: 'WEYLAND-YUTANI CORP',
+  subtitle: 'MU/TH/UR 6000 INTERFACE',
+  footer: 'BUILDING BETTER WORLDS',
+  tabs: ['HABITATION', 'ENVIRONMENTAL', 'TELEMETRY', 'COMMS', 'CONTAINMENT'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  emptyMedia: 'INTERFACE 2037 READY FOR INQUIRY',
+  connOnline: 'UPLINK ACTIVE',
+  connOffline: 'UPLINK FAILURE',
+  connConnecting: 'ESTABLISHING UPLINK...',
+  connToast: 'MU/TH/UR UPLINK ESTABLISHED',
+  footerOnline: 'ALL SYSTEMS NOMINAL',
+  footerConnecting: 'ESTABLISHING UPLINK...',
+  footerOffline: 'UPLINK FAILURE — RETRYING',
+  sensors: { temp: {icon:'🌡 ',unit:'°C'}, hum: {icon:'💧 ',unit:'%'}, lux: {icon:'☀ ',unit:' lx'} },
+  dimmerColors: { fill: '--amber', bg: '--grey' },
+  clockEl: 'clock-wy',
+  dateEl: 'date-wy',
+  lightCountEls: ['stat-lights'],
+  nightToast: 'CREW HIBERNATION INITIATED',
+  toastArrow: '→',
+  onInit() {
+    renderMother();
+  },
+  onStatesLoaded() {
+    renderMother();
+  },
+  onStateChanged(id, s) {
+    if (id.includes('sensor.') || id.includes('power') || id.includes('motion')) renderMother();
+  },
+  intervals: [
+    [() => renderMother(), 30000]
+  ]
+};
+
+function renderMother() {
+  const el = document.getElementById('mother-readout');
+  if (!el) return;
+
+  // ATMOSPHERIC PROCESSORS: average temperature across rooms
+  const tempSensors = rooms.map(r => r.sensors.temp).filter(Boolean);
+  const tempVals = tempSensors.map(sid => liveData.sensors[sid]).filter(v => v !== null && v !== undefined);
+  const avgTemp = tempVals.length > 0 ? (tempVals.reduce((a, b) => a + b, 0) / tempVals.length).toFixed(1) : null;
+  const atmoLine = avgTemp !== null ? `${avgTemp}°C AVG [${tempVals.length} SENSORS]` : 'NOMINAL';
+
+  // LIFE SUPPORT: outside temp + humidity
+  const outsideT = liveData.outsideTemp;
+  const lifeLine = outsideT !== null ? `EXT ${outsideT.toFixed(1)}°C` : '--';
+
+  // PERIMETER: check motion sensors
+  const perimeterLine = liveData.motionDetected ? 'MOTION DETECTED' : 'SECURE';
+
+  // POWER CONSUMPTION: total watts
+  const totalW = LC_POWER_SENSORS.reduce((s, id) => s + (liveData.power[id] ?? 0), 0);
+  const powerLine = totalW > 0 ? `${totalW.toFixed(1)} W` : '-- W';
+
+  // HULL INTEGRITY: based on all sensors reporting
+  const allSensorIds = Array.from(ALL_SENSOR_IDS);
+  const reporting = allSensorIds.filter(sid => liveData.sensors[sid] !== null && liveData.sensors[sid] !== undefined).length;
+  const integrityPct = allSensorIds.length > 0 ? Math.round((reporting / allSensorIds.length) * 100) : 100;
+
+  el.textContent = `ATMOSPHERIC PROCESSORS: ${atmoLine}
+LIFE SUPPORT: ${lifeLine}
+PERIMETER: ${perimeterLine}
+POWER CONSUMPTION: ${powerLine}
+HULL INTEGRITY: ${integrityPct}%`;
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

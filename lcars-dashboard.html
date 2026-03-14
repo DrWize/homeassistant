@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>LCARS // HOME SYSTEMS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap');
+
+:root {
+  --bg:        #000000;
+  --orange:    #ff9900;
+  --tan:       #ffcc99;
+  --blue:      #9999ff;
+  --purple:    #cc99cc;
+  --red:       #ff3300;
+  --yellow:    #ffff00;
+  --teal:      #66cccc;
+  --white:     #ffffff;
+  --grey:      #626272;
+  --grey-mid:  #808090;
+  --text-dim:  #996644;
+  --radius:    28px;
+  --bar-h:     48px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--tan);
+  font-family: 'Titillium Web', sans-serif;
+  height: 100%;
+  overflow: hidden;
+  cursor: default;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════
+   LCARS FRAME LAYOUT
+═══════════════════════════════════ */
+.lcars-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 0;
+}
+
+/* TOP BAR */
+.lcars-top {
+  display: flex;
+  align-items: stretch;
+  height: var(--bar-h);
+  flex-shrink: 0;
+}
+.lcars-top-corner {
+  width: 220px;
+  background: var(--orange);
+  border-radius: var(--radius) 0 0 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 18px;
+}
+.lcars-top-corner span {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--bg);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.lcars-top-gap { width: 12px; background: var(--bg); flex-shrink: 0; }
+.lcars-top-bar {
+  flex: 1;
+  background: var(--orange);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 8px;
+}
+.lcars-top-bar-end {
+  width: 80px;
+  background: var(--orange);
+  border-radius: 0 0 0 var(--radius);
+  flex-shrink: 0;
+}
+
+/* NAV TABS in top bar */
+.lcars-nav {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+}
+.lcars-nav-btn {
+  background: var(--bg);
+  color: var(--orange);
+  border: none;
+  padding: 4px 18px;
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.lcars-nav-btn:hover { background: var(--grey); }
+.lcars-nav-btn.active {
+  background: var(--purple);
+  color: var(--bg);
+}
+
+/* TOP RIGHT status */
+.lcars-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--bg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--bg);
+  display: inline-block;
+  margin-right: 4px;
+}
+.status-dot.online { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
+.status-dot.connecting { background: var(--yellow); animation: pulse-y 1s infinite; }
+.status-dot.offline { background: var(--red); }
+@keyframes pulse-y { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+/* MAIN BODY */
+.lcars-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* LEFT SIDEBAR */
+.lcars-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.lcars-sidebar-top {
+  height: 60px;
+  background: var(--blue);
+  border-radius: 0 0 0 var(--radius);
+  flex-shrink: 0;
+}
+.lcars-sidebar-buttons {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  overflow: hidden;
+}
+.lcars-btn {
+  height: 36px;
+  background: var(--purple);
+  color: var(--bg);
+  border: none;
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: right;
+  padding-right: 16px;
+  border-radius: 0 18px 18px 0;
+  transition: all 0.15s;
+  width: 85%;
+}
+.lcars-btn:hover { background: var(--tan); width: 95%; }
+.lcars-btn.active { background: var(--orange); width: 100%; border-radius: 0; }
+.lcars-btn.blue   { background: var(--teal); }
+.lcars-btn.blue:hover { background: var(--white); }
+.lcars-btn.red    { background: #cc3333; }
+
+.lcars-sidebar-bottom {
+  height: 40px;
+  background: var(--purple);
+  border-radius: 0 var(--radius) 0 0;
+  flex-shrink: 0;
+}
+
+/* GAP between sidebar and content */
+.lcars-gap {
+  width: 12px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+/* CONTENT AREA */
+.lcars-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 20px 16px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--grey-mid) var(--bg);
+}
+.lcars-content::-webkit-scrollbar { width: 4px; }
+.lcars-content::-webkit-scrollbar-track { background: var(--bg); }
+.lcars-content::-webkit-scrollbar-thumb { background: var(--grey-mid); border-radius: 2px; }
+
+/* BOTTOM BAR */
+.lcars-bottom {
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  flex-shrink: 0;
+}
+.lcars-bottom-left {
+  width: 220px;
+  background: var(--orange);
+  border-radius: 0 var(--radius) 0 0;
+  flex-shrink: 0;
+}
+.lcars-bottom-gap { width: 12px; background: var(--bg); flex-shrink: 0; }
+.lcars-bottom-bar {
+  flex: 1;
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--bg);
+  text-transform: uppercase;
+}
+.lcars-bottom-bar-end {
+  width: 80px;
+  background: var(--blue);
+  border-radius: var(--radius) 0 0 0;
+  flex-shrink: 0;
+}
+
+/* PAGE visibility */
+.page { display: none; }
+.page.active { display: block; animation: fadein 0.2s ease; }
+@keyframes fadein { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:none; } }
+
+/* ═══════════════════════════════════
+   SECTION TITLES
+═══════════════════════════════════ */
+.lc-section {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 14px;
+  margin-top: 20px;
+}
+.lc-section:first-child { margin-top: 0; }
+.lc-section-pill {
+  background: var(--blue);
+  color: var(--bg);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 4px 16px;
+  border-radius: 20px 0 0 20px;
+  white-space: nowrap;
+}
+.lc-section-line {
+  flex: 1;
+  height: 2px;
+  background: var(--grey);
+}
+.lc-section-end {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  margin-left: 6px;
+}
+
+/* ═══════════════════════════════════
+   ROOM GRID
+═══════════════════════════════════ */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+}
+
+.room-card {
+  border: 1px solid var(--grey);
+  background: #05050f;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.room-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 6px; height: 100%;
+  background: var(--grey-mid);
+  transition: background 0.2s;
+}
+.room-card.lit { border-color: var(--orange); }
+.room-card.lit::before { background: var(--orange); }
+
+.room-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px 8px 16px;
+  border-bottom: 1px solid var(--grey);
+}
+.room-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--orange);
+  flex: 1;
+}
+.room-lit-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--bg);
+  background: var(--orange);
+  padding: 1px 8px;
+  border-radius: 10px;
+  display: none;
+}
+.room-card.lit .room-lit-badge { display: block; }
+
+.room-body { padding: 10px 12px 12px 16px; }
+
+/* Sensor chips */
+.sensor-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.sensor-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--grey);
+  color: var(--grey-mid);
+  transition: all 0.3s;
+}
+.sensor-chip.active {
+  background: #1a1a2e;
+  color: var(--teal);
+  border: 1px solid var(--teal);
+}
+.sensor-chip.active.temp  { color: var(--orange); border-color: var(--orange); }
+.sensor-chip.active.hum   { color: var(--blue);   border-color: var(--blue);   }
+.sensor-chip.active.lux   { color: var(--yellow); border-color: var(--yellow); }
+.sensor-chip.active.power { color: var(--teal); border-color: var(--teal); }
+
+/* Light rows */
+.light-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #0d0d1a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.light-row:last-child { border-bottom: none; }
+.light-indicator {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--grey-mid);
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.light-row.on .light-indicator {
+  background: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
+}
+.light-label {
+  flex: 1;
+  color: var(--grey-mid);
+}
+.light-row.on .light-label { color: var(--tan); }
+.light-state {
+  font-size: 0.65rem;
+  color: var(--grey-mid);
+}
+.light-row.on .light-state { color: var(--orange); }
+
+/* LCARS toggle */
+.lc-toggle {
+  position: relative;
+  width: 40px; height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.lc-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.lc-toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--grey);
+  border-radius: 9px;
+  transition: background 0.2s;
+}
+.lc-toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--grey-mid);
+  transition: all 0.2s;
+}
+.lc-toggle input:checked ~ .lc-toggle-track {
+  background: #331a00;
+}
+.lc-toggle input:checked ~ .lc-toggle-thumb {
+  left: 24px;
+  background: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
+}
+
+/* Dimmer */
+.dimmer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 4px 14px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s, max-height 0.2s;
+}
+.dimmer-row.visible { opacity: 1; max-height: 28px; }
+.dimmer-label { font-size: 0.65rem; color: var(--grey-mid); width: 24px; }
+.lc-dimmer {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 3px;
+  background: var(--grey);
+  outline: none;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.lc-dimmer::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 4px var(--orange);
+  cursor: pointer;
+}
+.lc-dimmer::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--orange);
+  border: none;
+  box-shadow: 0 0 4px var(--orange);
+}
+.dimmer-pct { font-size: 0.65rem; color: var(--orange); width: 30px; text-align: right; }
+
+/* Load bar */
+.load-bar-wrap { margin-top: 8px; }
+.load-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--grey-mid);
+  margin-bottom: 3px; letter-spacing: 1px; text-transform: uppercase;
+}
+.load-bar {
+  height: 4px;
+  background: var(--grey);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.load-bar-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 2px;
+  transition: width 0.8s ease;
+  box-shadow: 0 0 4px var(--orange);
+}
+
+/* ═══════════════════════════════════
+   STATUS STRIP (STAT tab top)
+═══════════════════════════════════ */
+.status-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.status-block {
+  flex: 1;
+  min-width: 120px;
+  background: #05050f;
+  border: 1px solid var(--grey);
+  padding: 10px 14px;
+  border-left: 4px solid var(--blue);
+}
+.status-block.orange { border-left-color: var(--orange); }
+.status-block.purple { border-left-color: var(--purple); }
+.status-block.teal   { border-left-color: var(--teal);   }
+.status-block label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--grey-mid);
+  margin-bottom: 4px;
+}
+.status-block .val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--tan);
+  letter-spacing: 1px;
+}
+.status-block.orange .val { color: var(--orange); }
+.status-block.purple .val { color: var(--purple); }
+.status-block.teal   .val { color: var(--teal);   }
+
+/* ═══════════════════════════════════
+   DATA TAB
+═══════════════════════════════════ */
+.data-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #0d0d1a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.data-label { width: 80px; color: var(--grey-mid); }
+.data-bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: var(--grey);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.data-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.8s;
+}
+.data-bar-fill.low    { background: var(--teal);   box-shadow: 0 0 4px var(--teal);   }
+.data-bar-fill.mid    { background: var(--yellow);  box-shadow: 0 0 4px var(--yellow);  }
+.data-bar-fill.high   { background: var(--red);    box-shadow: 0 0 4px var(--red);    }
+.data-val { width: 80px; text-align: right; color: var(--tan); font-size: 0.7rem; }
+.data-val.low  { color: var(--teal);   }
+.data-val.mid  { color: var(--yellow);  }
+.data-val.high { color: var(--red);    }
+
+/* Solar strip */
+.solar-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.solar-block {
+  flex: 1;
+  min-width: 110px;
+  background: #05050f;
+  border: 1px solid var(--grey);
+  border-top: 3px solid var(--yellow);
+  padding: 8px 14px;
+  text-align: center;
+}
+.solar-block label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--grey-mid);
+  margin-bottom: 4px;
+}
+.solar-block .val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 1px;
+}
+
+/* Weather forecast cards */
+.weather-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+.weather-card {
+  flex-shrink: 0;
+  min-width: 70px;
+  background: #05050f;
+  border: 1px solid var(--grey);
+  padding: 8px 6px;
+  text-align: center;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+.weather-card.now { border-color: var(--orange); }
+.weather-card .wc-time { font-size: 0.65rem; color: var(--grey-mid); letter-spacing: 1px; margin-bottom: 4px; }
+.weather-card .wc-icon { font-size: 1.1rem; margin: 2px 0; }
+.weather-card .wc-temp { font-size: 0.85rem; font-weight: 700; color: var(--orange); }
+.weather-card .wc-detail { font-size: 0.65rem; color: var(--blue); margin-top: 2px; }
+.weather-card .wc-wind  { font-size: 0.65rem; color: var(--grey-mid); margin-top: 1px; }
+
+/* 48h nordpool chart */
+.np48-chart {
+  position: relative;
+  height: 90px;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+.np48-bar-wrap {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+}
+.np48-bar {
+  width: 100%;
+  border-radius: 1px 1px 0 0;
+  transition: height 0.5s;
+  position: relative;
+}
+.np48-bar.current {
+  box-shadow: 0 0 8px var(--orange);
+  border-top: 2px solid var(--white);
+}
+.np48-midnight {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--grey-mid);
+  opacity: 0.6;
+  left: 0;
+}
+.np48-xaxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--grey-mid);
+  letter-spacing: 1px;
+  margin-top: 3px;
+  margin-bottom: 8px;
+}
+.np48-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+.np48-legend span { display: flex; align-items: center; gap: 4px; }
+
+/* Temp graph */
+.temp-graph-wrap {
+  height: 70px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.temp-bar {
+  flex: 1;
+  border-radius: 1px 1px 0 0;
+  cursor: pointer;
+  transition: height 0.5s;
+}
+.temp-xaxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--grey-mid);
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+.temp-minmax {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--grey-mid);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+/* Diagnostics */
+.diag-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid #0d0d1a;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+.diag-row:last-child { border-bottom: none; }
+.diag-key { color: var(--grey-mid); text-transform: uppercase; }
+.diag-val { color: var(--tan); font-weight: 600; }
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 50px; right: 20px;
+  background: #0a0a1a;
+  border: 1px solid var(--orange);
+  border-left: 4px solid var(--orange);
+  color: var(--tan);
+  padding: 10px 18px;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  font-family: 'Titillium Web', sans-serif;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.25s;
+  pointer-events: none;
+  z-index: 9999;
+  text-transform: uppercase;
+  max-width: 300px;
+}
+.toast.show { opacity: 1; transform: none; }
+
+/* Washer badge */
+.washer-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 1px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--grey-mid);
+  color: var(--grey-mid);
+  text-transform: uppercase;
+  display: inline-block;
+}
+.washer-badge.running {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  animation: blink-y 0.9s step-end infinite;
+}
+@keyframes blink-y { 50% { opacity: 0.3; } }
+
+  /* ── MEDIA PAGE ── */
+  .media-strip {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .media-stat-block {
+    flex: 1; min-width: 100px; background: #05050f;
+    border: 1px solid var(--grey); border-left: 4px solid var(--purple);
+    padding: 8px 12px;
+  }
+  .media-stat-block label {
+    display: block; font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--grey-mid); margin-bottom: 3px;
+  }
+  .media-stat-block .val { font-size: 1rem; font-weight: 700; color: var(--purple); }
+
+  .sessions-grid { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+
+  .session-card {
+    display: flex; gap: 14px;
+    border: 1px solid var(--grey); background: #05050f;
+    padding: 12px; flex: 1; min-width: 300px;
+    position: relative; transition: border-color 0.3s;
+    border-left: 4px solid var(--grey);
+  }
+  .session-card.playing { border-left-color: var(--orange); border-color: #2a2a0a; }
+  .session-card.paused  { border-left-color: var(--blue); opacity: 0.75; }
+
+  .session-poster {
+    width: 90px; flex-shrink: 0; aspect-ratio: 2/3;
+    background: #0a0a1a; border: 1px solid var(--grey); overflow: hidden;
+  }
+  .session-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .session-poster-ph {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: var(--grey-mid);
+  }
+
+  .session-info { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden; }
+  .session-show {
+    font-size: 0.66rem; font-weight: 700; color: var(--grey-mid); letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;
+  }
+  .session-title {
+    font-size: 1rem; font-weight: 700; color: var(--orange); letter-spacing: 1px; line-height: 1.2;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .session-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sbadge {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; padding: 1px 6px;
+    border-radius: 10px; background: var(--grey); color: var(--grey-mid); text-transform: uppercase;
+  }
+  .sbadge.hi     { background: #0a1a0a; color: var(--teal);   border: 1px solid var(--teal);   }
+  .sbadge.amber  { background: #1a1000; color: var(--yellow); border: 1px solid var(--yellow); }
+  .sbadge.orange { background: #1a0800; color: var(--orange); border: 1px solid var(--orange); }
+
+  .session-summary {
+    font-size: 0.65rem; color: var(--grey-mid); line-height: 1.6; margin-top: 2px;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  }
+  .session-user {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.65rem; font-weight: 600; color: var(--grey-mid);
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .session-avatar {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1px solid var(--grey-mid); overflow: hidden; flex-shrink: 0;
+  }
+  .session-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .session-progress-wrap { margin-top: auto; }
+  .session-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: var(--grey-mid); letter-spacing: 1px; margin-bottom: 3px;
+  }
+  .session-progress-bar { height: 5px; background: var(--grey); border-radius: 3px; overflow: hidden; }
+  .session-progress-fill {
+    height: 100%; background: var(--orange); border-radius: 3px;
+    box-shadow: 0 0 4px var(--orange); transition: width 2s ease;
+  }
+  .session-progress-fill.paused { background: var(--blue); box-shadow: 0 0 4px var(--blue); }
+
+  .no-streams {
+    width: 100%; text-align: center; padding: 40px;
+    font-size: 0.85rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--grey-mid); border: 1px solid var(--grey); border-left: 4px solid var(--purple);
+  }
+
+  /* ── MEDIA PLAYER CARDS (Sonos / Apple TV) ── */
+  .mp-grid {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch;
+  }
+  .mp-card {
+    display: flex; gap: 14px;
+    border: 1px solid var(--grey); background: #05050f;
+    padding: 12px; flex: 1; min-width: 260px; max-width: 400px;
+    position: relative; transition: border-color 0.3s;
+    border-left: 4px solid var(--grey);
+  }
+  .mp-card.playing { border-left-color: var(--teal); border-color: var(--teal); }
+  .mp-card.paused  { border-left-color: var(--blue); opacity: 0.75; }
+  .mp-art {
+    width: 60px; height: 60px; flex-shrink: 0;
+    background: #0a0a1a; border: 1px solid var(--grey); overflow: hidden;
+  }
+  .mp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mp-art-ph {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; color: var(--grey-mid);
+  }
+  .mp-info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; overflow: hidden; }
+  .mp-name {
+    font-size: 0.66rem; font-weight: 700; color: var(--grey-mid); letter-spacing: 1px;
+    text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+  }
+  .mp-type {
+    font-size: 0.6rem; font-weight: 700; padding: 0 5px;
+    border-radius: 10px; background: var(--grey); color: var(--grey-mid);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .mp-card.playing .mp-type { background: #0a1a1a; color: var(--teal); border: 1px solid var(--teal); }
+  .mp-title {
+    font-size: 1rem; font-weight: 700; color: var(--orange); letter-spacing: 1px; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mp-artist {
+    font-size: 0.7rem; font-weight: 600; color: var(--tan); letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mp-source {
+    font-size: 0.65rem; font-weight: 700; color: var(--grey-mid); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .mp-vol-wrap {
+    display: flex; align-items: center; gap: 6px; margin-top: 2px;
+  }
+  .mp-vol-label { font-size: 0.6rem; font-weight: 700; color: var(--grey-mid); letter-spacing: 1px; }
+  .mp-vol-bar {
+    flex: 1; height: 4px; background: var(--grey); border-radius: 2px; overflow: hidden;
+  }
+  .mp-vol-fill {
+    height: 100%; background: var(--teal); border-radius: 2px;
+    box-shadow: 0 0 4px var(--teal); transition: width 0.5s;
+  }
+  .mp-vol-pct { font-size: 0.6rem; font-weight: 700; color: var(--teal); width: 28px; text-align: right; }
+  .mp-state-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .mp-card.playing .mp-state-dot {
+    background: var(--teal); box-shadow: 0 0 6px var(--teal);
+  }
+  .mp-card.paused .mp-state-dot {
+    background: var(--blue); box-shadow: 0 0 4px var(--blue);
+  }
+  .mp-progress-wrap { margin-top: 3px; }
+  .mp-progress-bar {
+    height: 4px; background: var(--grey); border-radius: 2px; overflow: hidden;
+  }
+  .mp-progress-fill {
+    height: 100%; background: var(--orange); border-radius: 2px;
+    box-shadow: 0 0 4px var(--orange); transition: width 2s ease;
+  }
+  .mp-card.paused .mp-progress-fill {
+    background: var(--blue); box-shadow: 0 0 4px var(--blue);
+  }
+  .mp-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.58rem; font-weight: 600; color: var(--grey-mid); letter-spacing: 1px; margin-top: 2px;
+  }
+  .mp-badge {
+    display: inline-block; font-size: 0.55rem; font-weight: 700; letter-spacing: 1px; padding: 0 5px;
+    border-radius: 8px; background: var(--grey); color: var(--grey-mid); margin-left: 4px;
+    vertical-align: middle;
+  }
+  .mp-badge.muted { background: #1a0000; color: var(--red); border: 1px solid var(--red); }
+  .no-mp {
+    width: 100%; text-align: center; padding: 20px;
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--grey-mid);
+  }
+
+  /* ── WCAG 2.2 FOCUS STYLES ── */
+  :focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(255,153,0,0.25);
+  }
+  .lcars-nav-btn:focus-visible, .lcars-btn:focus-visible {
+    outline: 2px solid var(--tan);
+    outline-offset: 2px;
+  }
+  .lc-toggle input:focus-visible ~ .lc-toggle-track {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .lc-dimmer:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 4px;
+  }
+
+  /* ── DAY/NIGHT AWARENESS ── */
+  body.night-mode .lcars-sidebar-top { background: #6666aa; }
+  body.night-mode .lcars-sidebar-bottom { background: #9977aa; }
+  body.night-mode .lcars-top-corner,
+  body.night-mode .lcars-top-bar,
+  body.night-mode .lcars-top-bar-end { background: #cc8800; }
+  body.night-mode .lcars-bottom-bar,
+  body.night-mode .lcars-bottom-bar-end { background: #7777bb; }
+
+  /* ── STARDATE ── */
+  .stardate-display {
+    display: flex; flex-direction: column; align-items: flex-end;
+    line-height: 1.1;
+  }
+  .stardate-label {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
+    color: var(--grey-mid); text-transform: uppercase;
+  }
+  .stardate-val {
+    font-size: 1rem; font-weight: 700; color: var(--teal);
+    letter-spacing: 1px;
+  }
+
+  /* ── LONG RANGE SENSORS (RADAR) ── */
+  .lrs-wrap {
+    display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .lrs-radar-container {
+    position: relative; flex-shrink: 0;
+  }
+  .lrs-radar {
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, #001a00 0%, #000a00 60%, #000500 100%);
+    border: 2px solid var(--teal); position: relative; overflow: hidden;
+  }
+  .lrs-radar canvas { position: absolute; top: 0; left: 0; }
+  .lrs-radar-rings {
+    position: absolute; inset: 0; pointer-events: none;
+  }
+  .lrs-data-panel {
+    flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .lrs-data-row {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .lrs-stat {
+    flex: 1; min-width: 100px; background: #05050f;
+    border: 1px solid var(--grey); border-left: 4px solid var(--teal);
+    padding: 8px 12px;
+  }
+  .lrs-stat label {
+    display: block; font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 2px; color: var(--grey-mid); text-transform: uppercase; margin-bottom: 3px;
+  }
+  .lrs-stat .val { font-size: 1rem; font-weight: 700; color: var(--teal); }
+  .lrs-stat .val.orange { color: var(--orange); }
+  .lrs-stat .val.blue   { color: var(--blue);   }
+  .lrs-stat .val.yellow { color: var(--yellow);  }
+  .lrs-weather-row {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;
+  }
+  .lrs-weather-card {
+    flex: 1; min-width: 70px; text-align: center;
+    border: 1px solid var(--grey); border-top: 3px solid var(--orange);
+    padding: 6px 4px; background: #08080f;
+  }
+  .lrs-weather-card .wc-time  { font-size: 0.65rem; color: var(--grey-mid); letter-spacing: 1px; }
+  .lrs-weather-card .wc-icon  { font-size: 1.2rem; margin: 2px 0; }
+  .lrs-weather-card .wc-temp  { font-size: 0.85rem; font-weight: 700; color: var(--orange); }
+  .lrs-weather-card .wc-wind  { font-size: 0.65rem; color: var(--grey-mid); margin-top: 1px; }
+
+  /* ── ENERGY ── */
+  .lc-energy-wrap { margin-bottom: 14px; }
+  .lc-energy-header {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;
+  }
+  .lc-energy-stat {
+    flex: 1; min-width: 100px; background: #05050f;
+    border: 1px solid var(--grey); border-left: 4px solid var(--orange);
+    padding: 8px 12px;
+  }
+  .lc-energy-stat label {
+    display: block; font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 2px; color: var(--grey-mid); text-transform: uppercase; margin-bottom: 3px;
+  }
+  .lc-energy-stat .val { font-size: 1rem; font-weight: 700; color: var(--orange); }
+  .lc-energy-chart {
+    position: relative; height: 80px;
+    display: flex; align-items: flex-end; gap: 1px; background: #05050f;
+    border: 1px solid var(--grey); padding: 4px;
+  }
+  .lc-energy-bar {
+    flex: 1; position: relative; height: 100%;
+    display: flex; align-items: flex-end; cursor: pointer;
+  }
+  .lc-energy-bar-price {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    opacity: 0.3; transition: height 1s ease;
+  }
+  .lc-energy-bar-power {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--orange); opacity: 0.9;
+    box-shadow: 0 0 4px var(--orange);
+    transition: height 1s ease;
+  }
+  .lc-energy-bar.current .lc-energy-bar-power {
+    background: var(--teal); box-shadow: 0 0 8px var(--teal);
+  }
+  .lc-energy-xaxis {
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: var(--grey-mid); letter-spacing: 1px;
+    margin-top: 3px;
+  }
+  .lc-energy-legend {
+    display: flex; gap: 16px; font-size: 0.65rem; letter-spacing: 1px;
+    margin-top: 6px; flex-wrap: wrap; color: var(--grey-mid);
+  }
+
+  /* ── REDUCED MOTION ── */
+  @media (prefers-reduced-motion: reduce) {
+    .radar-sweep, .radar-ping { animation: none !important; }
+    * { transition-duration: 0s !important; animation-duration: 0s !important; }
+  }
+
+  /* ── HIGH CONTRAST ── */
+  @media (prefers-contrast: more) {
+    .room-card { border-width: 2px; }
+    .sensor-chip { border-width: 2px; }
+    .lcars-nav-btn { border-width: 2px; }
+  }
+/* THEME SWITCHER */
+.theme-zone { position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998; cursor: pointer; }
+.theme-switcher {
+  position: fixed; bottom: 12px; left: 12px; z-index: 9999;
+  display: flex; gap: 6px; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.theme-switcher.visible { opacity: 1; pointer-events: auto; }
+.theme-switcher-btn {
+  width: 40px; height: 40px; border: 2px solid var(--orange); border-radius: 50%;
+  background: var(--dark); color: var(--orange); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+}
+.theme-switcher-btn:hover { background: var(--orange); color: var(--dark); transform: scale(1.1); }
+.theme-switcher-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.theme-menu {
+  display: none; position: absolute; bottom: 48px; left: 0;
+  background: #1a1a2e; border: 2px solid var(--orange); border-radius: 8px;
+  padding: 6px 0; min-width: 180px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.theme-menu.open { display: block; }
+.theme-menu a {
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+  color: #cc99cc; text-decoration: none; font-size: 0.75rem; font-family: inherit;
+  letter-spacing: 1px; white-space: nowrap;
+}
+.theme-menu a:hover { background: rgba(255,153,0,0.15); color: var(--orange); }
+.theme-menu a.active { color: var(--orange); font-weight: bold; }
+.theme-menu a .tm-icon { width: 22px; text-align: center; font-size: 14px; }
+
+/* NIGHT PROTOCOL BUTTON */
+.night-protocol-btn {
+  display: block; margin: 0 0 12px 0; padding: 10px 24px;
+  background: transparent; border: 2px solid var(--orange); border-radius: 20px;
+  color: var(--orange); font-family: inherit; font-size: 0.8rem; font-weight: bold;
+  letter-spacing: 2px; cursor: pointer; transition: background 0.2s, color 0.2s;
+}
+.night-protocol-btn:hover { background: var(--orange); color: var(--dark); }
+.night-protocol-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link" style="position:absolute;top:-40px;left:0;background:var(--orange);color:var(--bg);padding:8px 16px;z-index:99999;font-family:'Titillium Web',sans-serif;font-weight:700;font-size:0.875rem;letter-spacing:1px;transition:top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to Main Content</a>
+
+<div class="lcars-frame" role="application" aria-label="LCARS Home Automation System">
+
+  <!-- TOP BAR -->
+  <div class="lcars-top">
+    <div class="lcars-top-corner"><span>LCARS</span></div>
+    <div class="lcars-top-gap"></div>
+    <div class="lcars-top-bar">
+      <div class="lcars-nav" role="tablist" aria-label="Dashboard sections">
+        <button class="lcars-nav-btn active" role="tab" aria-selected="true" aria-controls="page-systems" onclick="switchTab('systems')">SYSTEMS</button>
+        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-controls" onclick="switchTab('controls')">CONTROLS</button>
+        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-data" onclick="switchTab('data')">DATA</button>
+        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-media" onclick="switchTab('media')">MEDIA</button>
+        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-sensors" onclick="switchTab('sensors')">SENSORS</button>
+      </div>
+      <div class="lcars-status">
+        <span id="conn-dot" class="status-dot connecting"></span>
+        <span id="conn-label">INITIALIZING</span>
+        <span style="opacity:0.5;">|</span>
+        <span id="clock-lcars">--:--:--</span>
+        <span id="date-lcars" style="opacity:0.7;">--- -- ----</span>
+        <span style="opacity:0.4;">|</span>
+        <div class="stardate-display" aria-label="Stardate">
+          <span class="stardate-label">STARDATE</span>
+          <span class="stardate-val" id="stardate-val">-----.--</span>
+        </div>
+      </div>
+    </div>
+    <div class="lcars-top-bar-end"></div>
+  </div>
+
+  <!-- BODY -->
+  <div class="lcars-body">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="lcars-sidebar">
+      <div class="lcars-sidebar-top"></div>
+      <div class="lcars-sidebar-buttons">
+        <button class="lcars-btn active" onclick="switchTab('systems')">SYSTEMS</button>
+        <button class="lcars-btn" onclick="switchTab('controls')">CONTROLS</button>
+        <button class="lcars-btn" onclick="switchTab('data')">DATA</button>
+        <button class="lcars-btn" onclick="switchTab('media')">MEDIA</button>
+        <button class="lcars-btn" onclick="switchTab('sensors')">SENSORS</button>
+        <div style="height:10px;"></div>
+        <button class="lcars-btn blue">LIGHTS: <span id="sb-lights">--</span></button>
+        <button class="lcars-btn blue">TEMP OUT: <span id="sb-temp">--</span></button>
+        <button class="lcars-btn blue">ELEC: <span id="sb-elec">--</span></button>
+        <div style="flex:1;"></div>
+        <button class="lcars-btn red" id="washer-btn">WASHER: IDLE</button>
+      </div>
+      <div class="lcars-sidebar-bottom"></div>
+    </div>
+
+    <div class="lcars-gap"></div>
+
+    <!-- CONTENT -->
+    <div class="lcars-content" id="main-content" tabindex="-1">
+
+      <!-- ══════════ SYSTEMS TAB ══════════ -->
+      <div class="page active" id="page-systems">
+
+        <div class="status-strip">
+          <div class="status-block orange">
+            <label>Outside Temp</label>
+            <div class="val" id="stat-temp">-- °C</div>
+          </div>
+          <div class="status-block">
+            <label>Electricity Now</label>
+            <div class="val" id="stat-elec">-- SEK/kWh</div>
+          </div>
+          <div class="status-block purple">
+            <label>Active Lights</label>
+            <div class="val" id="stat-lights">--</div>
+          </div>
+          <div class="status-block teal">
+            <label>Washer</label>
+            <div class="val"><span id="stat-washer" class="washer-badge">IDLE</span></div>
+          </div>
+          <div class="status-block">
+            <label>Sun State</label>
+            <div class="val" id="stat-sun">--</div>
+          </div>
+        </div>
+
+        <div class="lc-section">
+          <div class="lc-section-pill">Room Status</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="room-grid" id="rooms-systems"></div>
+      </div>
+
+      <!-- ══════════ CONTROLS TAB ══════════ -->
+      <div class="page" id="page-controls">
+        <div class="lc-section">
+          <div class="lc-section-pill">Light Controls</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">DECK LIGHTS — STANDBY</button>
+        <div class="room-grid" id="rooms-controls"></div>
+      </div>
+
+      <!-- ══════════ DATA TAB ══════════ -->
+      <div class="page" id="page-data">
+
+        <div class="lc-section">
+          <div class="lc-section-pill">Solar Events</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="solar-strip">
+          <div class="solar-block">
+            <label>Next Sunrise</label>
+            <div class="val" id="d-sunrise">--:--</div>
+          </div>
+          <div class="solar-block">
+            <label>Next Sunset</label>
+            <div class="val" id="d-sunset">--:--</div>
+          </div>
+          <div class="solar-block">
+            <label>Daylight</label>
+            <div class="val" id="d-daylight">-- hrs</div>
+          </div>
+          <div class="solar-block">
+            <label>Sun Position</label>
+            <div class="val" id="d-sunstate">--</div>
+          </div>
+          <div class="solar-block">
+            <label>Elevation</label>
+            <div class="val" id="d-elevation">--°</div>
+          </div>
+        </div>
+
+        <div class="lc-section">
+          <div class="lc-section-pill">Weather Forecast 24H</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="weather-row" id="d-weather">
+          <div style="color:var(--grey-mid);font-size:0.75rem;padding:10px;">AWAITING DATA...</div>
+        </div>
+
+        <div class="lc-section">
+          <div class="lc-section-pill">Nordpool Prices 48H</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="np48-chart" id="d-np48">
+          <div style="color:var(--grey-mid);font-size:0.75rem;align-self:center;">AWAITING DATA...</div>
+        </div>
+        <div class="np48-xaxis" id="d-np48-xaxis"></div>
+        <div class="np48-legend">
+          <span><span style="width:10px;height:10px;background:var(--orange);border-radius:50%;display:inline-block;"></span> CURRENT</span>
+          <span><span style="width:10px;height:10px;background:var(--teal);border-radius:50%;display:inline-block;"></span> LOW</span>
+          <span><span style="width:10px;height:10px;background:var(--yellow);border-radius:50%;display:inline-block;"></span> MED</span>
+          <span><span style="width:10px;height:10px;background:var(--red);border-radius:50%;display:inline-block;"></span> HIGH</span>
+          <span id="d-np48-minmax" style="margin-left:auto;color:var(--grey-mid);"></span>
+        </div>
+
+        <div class="lc-section" style="margin-top:20px;">
+          <div class="lc-section-pill">Price Summary</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Last Hour</span>
+          <div class="data-bar-wrap"><div class="data-bar-fill" id="np-last-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-last-val">--</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Now</span>
+          <div class="data-bar-wrap"><div class="data-bar-fill" id="np-now-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-now-val">--</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Next Hour</span>
+          <div class="data-bar-wrap"><div class="data-bar-fill" id="np-next-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-next-val">--</span>
+        </div>
+
+        <div class="lc-section" style="margin-top:20px;">
+          <div class="lc-section-pill">Temperature Forecast 24H</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="temp-graph-wrap" id="d-tempgraph">
+          <div style="color:var(--grey-mid);font-size:0.75rem;align-self:center;">AWAITING DATA...</div>
+        </div>
+        <div class="temp-xaxis"><span>NOW</span><span>+6H</span><span>+12H</span><span>+18H</span><span>+24H</span></div>
+        <div class="temp-minmax" id="d-tempminmax"></div>
+
+        <div class="lc-section" style="margin-top:20px;">
+          <div class="lc-section-pill">System Diagnostics</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="diag-row"><span class="diag-key">Designation</span><span class="diag-val">LCARS HOME UNIT v1.0</span></div>
+        <div class="diag-row"><span class="diag-key">Location</span><span class="diag-val">SOLNA, SECTOR 7</span></div>
+        <div class="diag-row"><span class="diag-key">Entities</span><span class="diag-val">9 LIGHTS · 16 SENSORS</span></div>
+        <div class="diag-row"><span class="diag-key">Integrations</span><span class="diag-val">Z-WAVE · NORDPOOL · MET.NO · TMDB</span></div>
+        <div class="diag-row"><span class="diag-key">Automations</span><span class="diag-val">7 ACTIVE</span></div>
+        <div class="diag-row"><span class="diag-key">NFC Tags</span><span class="diag-val">1 ACTIVE (SOFA)</span></div>
+        <div class="diag-row"><span class="diag-key">HA Host</span><span class="diag-val" id="diag-host">—</span></div>
+      </div>
+
+
+      <!-- ══════════ MEDIA TAB ══════════ -->
+      <div class="page" id="page-media">
+
+        <div class="lc-section">
+          <div class="lc-section-pill">Plex Transmission Status</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="media-strip">
+          <div class="media-stat-block">
+            <label>Active Streams</label>
+            <div class="val" id="m-stream-count">--</div>
+          </div>
+          <div class="media-stat-block">
+            <label>Direct Play</label>
+            <div class="val" id="m-direct-play">--</div>
+          </div>
+          <div class="media-stat-block">
+            <label>Transcoding</label>
+            <div class="val" id="m-transcode">--</div>
+          </div>
+          <div class="media-stat-block">
+            <label>Total Bandwidth</label>
+            <div class="val" id="m-bandwidth">--</div>
+          </div>
+          <div class="media-stat-block">
+            <label>LAN / WAN</label>
+            <div class="val" id="m-lan-wan">-- / --</div>
+          </div>
+        </div>
+
+        <div class="lc-section">
+          <div class="lc-section-pill">Now Playing</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div id="no-media-msg" class="no-streams">No Active Transmissions</div>
+        <div class="sessions-grid" id="sessions-grid"></div>
+        <div class="mp-grid" id="mp-grid"></div>
+
+      </div>
+
+
+      <!-- ══════════ SENSORS TAB ══════════ -->
+      <div class="page" id="page-sensors">
+
+        <div class="lc-section">
+          <div class="lc-section-pill">Long Range Sensors</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+
+        <div class="lrs-wrap">
+          <div class="lrs-radar-container">
+            <div class="lrs-radar" aria-label="Atmospheric radar display">
+              <canvas id="radar-canvas" width="220" height="220"></canvas>
+            </div>
+          </div>
+          <div class="lrs-data-panel">
+            <div class="lrs-data-row">
+              <div class="lrs-stat">
+                <label>Outside Temp</label>
+                <div class="val orange" id="lrs-temp">-- °C</div>
+              </div>
+              <div class="lrs-stat">
+                <label>Sun Elevation</label>
+                <div class="val" id="lrs-elevation">-- °</div>
+              </div>
+              <div class="lrs-stat">
+                <label>Sun State</label>
+                <div class="val" id="lrs-sunstate">--</div>
+              </div>
+            </div>
+            <div class="lrs-data-row">
+              <div class="lrs-stat">
+                <label>Sunrise</label>
+                <div class="val blue" id="lrs-sunrise">--:--</div>
+              </div>
+              <div class="lrs-stat">
+                <label>Sunset</label>
+                <div class="val orange" id="lrs-sunset">--:--</div>
+              </div>
+              <div class="lrs-stat">
+                <label>Daylight</label>
+                <div class="val" id="lrs-daylight">-- h</div>
+              </div>
+            </div>
+            <div class="lrs-weather-row" id="lrs-weather-cards">
+              <div style="color:var(--grey-mid);font-size:0.75rem;padding:10px;">Awaiting forecast data...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lc-section" style="margin-top:8px;">
+          <div class="lc-section-pill">Energy Consumption vs Price</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+
+        <div class="lc-energy-wrap">
+          <div class="lc-energy-header">
+            <div class="lc-energy-stat">
+              <label>Current Load</label>
+              <div class="val" id="lc-energy-total">-- W</div>
+            </div>
+            <div class="lc-energy-stat">
+              <label>Est. Cost/Hour</label>
+              <div class="val" id="lc-energy-cost">-- SEK/h</div>
+            </div>
+            <div class="lc-energy-stat">
+              <label>Price Now</label>
+              <div class="val" id="lc-energy-price">-- SEK/kWh</div>
+            </div>
+          </div>
+          <div class="lc-energy-chart" id="lc-energy-chart">
+            <div style="color:var(--grey-mid);font-size:0.75rem;align-self:center;">Awaiting data...</div>
+          </div>
+          <div class="lc-energy-xaxis" id="lc-energy-xaxis"></div>
+          <div class="lc-energy-legend">
+            <span><span style="display:inline-block;width:10px;height:10px;background:var(--orange);opacity:0.9;margin-right:4px;"></span>Power (W)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:var(--blue);opacity:0.35;margin-right:4px;"></span>Price overlay</span>
+            <span style="margin-left:auto;" id="lc-energy-minmax"></span>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /body -->
+
+  <!-- BOTTOM BAR -->
+  <div class="lcars-bottom">
+    <div class="lcars-bottom-left"></div>
+    <div class="lcars-bottom-gap"></div>
+    <div class="lcars-bottom-bar">
+      <span>STARFLEET HOME AUTOMATION DIVISION</span>
+      <span style="opacity:0.5;">|</span>
+      <span>LCARS REL. 47.2</span>
+      <span style="opacity:0.5;">|</span>
+      <span id="footer-status">SYSTEM INITIALIZING</span>
+    </div>
+    <div class="lcars-bottom-bar-end"></div>
+  </div>
+
+</div><!-- /frame -->
+
+<!-- THEME SWITCHER -->
+<div class="theme-zone" onclick="showSwitcher()"></div>
+<div class="theme-switcher" id="theme-switcher">
+  <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme">&#9651;</button>
+  <div class="theme-menu" id="theme-menu">
+    <a href="lcars-dashboard.html" class="active"><span class="tm-icon">&#9651;</span> LCARS</a>
+    <a href="pipboy-dashboard.html"><span class="tm-icon">&#9762;</span> PIP-BOY</a>
+    <a href="c64-dashboard.html"><span class="tm-icon">C=</span> C64</a>
+    <a href="matrix-dashboard.html"><span class="tm-icon">&#9679;</span> MATRIX</a>
+    <a href="weyland-dashboard.html"><span class="tm-icon">W-Y</span> WEYLAND</a>
+  </div>
+  <button class="theme-switcher-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#9974;</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="config.js"></script>
+<script>
+const THEME = {
+  title: 'LCARS',
+  subtitle: 'HOME AUTOMATION SYSTEM',
+  footer: 'STARFLEET HOME AUTOMATION DIVISION',
+  tabs: ['SYSTEMS', 'CONTROLS', 'DATA', 'MEDIA', 'SENSORS'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  emptyMedia: 'No Active Transmissions',
+  connOnline: 'ONLINE',
+  connOffline: 'OFFLINE',
+  connConnecting: 'CONNECTING',
+  connToast: 'LCARS UPLINK ESTABLISHED',
+  footerOnline: 'ALL SYSTEMS NOMINAL',
+  footerConnecting: 'ESTABLISHING UPLINK...',
+  footerOffline: 'UPLINK FAILURE — RETRYING',
+  sensors: { temp: {icon:'🌡 ', unit:'°C'}, hum: {icon:'💧 ', unit:'%'}, lux: {icon:'☀ ', unit:' lx'} },
+  dimmerColors: { fill: '--orange', bg: '--grey' },
+  clockEl: 'clock-lcars',
+  dateEl: 'date-lcars',
+  lightCountEls: ['stat-lights', 'sb-lights'],
+  nightToast: 'DECK LIGHTS — STANDBY',
+  toastArrow: '→',
+  onClockUpdate() {
+    const sdEl = document.getElementById('stardate-val');
+    if (sdEl) sdEl.textContent = calcStardate(new Date());
+  },
+  onSwitchTab(tabId) {
+    document.querySelectorAll('.lcars-sidebar .lcars-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === tabId);
+    });
+  },
+  onInit() {
+    renderLrs();
+    startRadar();
+  },
+  onStatesLoaded() {
+    renderLrs();
+    renderLrsWeatherCards();
+  },
+  onIngest(id, s) {
+    if (id.includes('sun.sun') || id.includes('temperature') || id.includes('weather.')) renderLrs();
+  },
+  intervals: [
+    [() => renderLrs(), 60000]
+  ]
+};
+
+// LCARS-specific state
+let radarAngle = 0, radarInterval = null, radarBlips = [];
+
+function calcStardate(date) {
+  // TNG-era stardate: 1000 units per year, starting ~41000 at 2364
+  const refYear = 2364, refStardate = 41000;
+  const year = date.getFullYear();
+  const startOfYear = new Date(year, 0, 1);
+  const endOfYear   = new Date(year + 1, 0, 1);
+  const fracYear = (date - startOfYear) / (endOfYear - startOfYear);
+  const sd = refStardate + (year - refYear) * 1000 + fracYear * 1000;
+  return sd.toFixed(2);
+}
+
+function condIconLrs(c) {
+  if (!c) return '—';
+  c = c.toLowerCase();
+  if (c.includes('clear') || c.includes('sunny')) return '☀';
+  if (c.includes('partly') || c.includes('cloudy')) return '⛅';
+  if (c.includes('overcast')) return '☁';
+  if (c.includes('rain') || c.includes('drizzle')) return '🌧';
+  if (c.includes('snow')) return '❄';
+  if (c.includes('thunder') || c.includes('storm')) return '⚡';
+  if (c.includes('fog') || c.includes('mist')) return '🌫';
+  return '—';
+}
+
+function renderLrsWeatherCards() {
+  const el = document.getElementById('lrs-weather-cards');
+  if (!el) return;
+  const fc = liveData.weatherForecast;
+  if (!fc.length) return;
+  const slots = fc.filter((_, i) => i % 3 === 0).slice(0, 6);
+  el.innerHTML = slots.map(s => {
+    const d = new Date(s.datetime);
+    const hh = d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="lrs-weather-card">
+      <div class="wc-time">${hh}</div>
+      <div class="wc-icon">${condIconLrs(s.condition)}</div>
+      <div class="wc-temp">${s.temperature ?? '--'}°</div>
+      ${s.wind_speed ? `<div class="wc-wind">${s.wind_speed}m/s</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderLrs() {
+  const tempEl    = document.getElementById('lrs-temp');
+  const elevEl    = document.getElementById('lrs-elevation');
+  const sunEl     = document.getElementById('lrs-sunstate');
+  const riseEl    = document.getElementById('lrs-sunrise');
+  const setEl     = document.getElementById('lrs-sunset');
+  const daylightEl = document.getElementById('lrs-daylight');
+
+  if (tempEl) tempEl.textContent = liveData.outsideTemp !== null ? liveData.outsideTemp.toFixed(1) + ' °C' : '-- °C';
+  if (elevEl) elevEl.textContent = liveData.sun.elevation !== null ? liveData.sun.elevation.toFixed(1) + '°' : '--°';
+  if (sunEl)  sunEl.textContent  = (liveData.sun.state || '--').toUpperCase();
+
+  if (liveData.sun.nextRising) {
+    const r = new Date(liveData.sun.nextRising);
+    if (riseEl) riseEl.textContent = r.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  }
+  if (liveData.sun.nextSetting) {
+    const s = new Date(liveData.sun.nextSetting);
+    if (setEl) setEl.textContent = s.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  }
+  if (liveData.sun.nextRising && liveData.sun.nextSetting) {
+    const r = new Date(liveData.sun.nextRising);
+    const s = new Date(liveData.sun.nextSetting);
+    const diff = Math.abs(s - r) / 3600000;
+    const hrs = Math.min(diff, 24);
+    if (daylightEl) daylightEl.textContent = hrs.toFixed(1) + ' h';
+  }
+  renderLrsWeatherCards();
+}
+
+function startRadar() {
+  const canvas = document.getElementById('radar-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 220, H = 220, cx = W/2, cy = H/2, R = 105;
+
+  // Seed blips from real data
+  function refreshBlips() {
+    radarBlips = [];
+    // Sun position as blip
+    const elev = liveData.sun.elevation;
+    if (elev !== null) {
+      const elevNorm = Math.max(0, Math.min(90, elev)) / 90;
+      const sunDist = (1 - elevNorm) * 0.8;
+      const now = new Date();
+      const hourAngle = ((now.getHours() + now.getMinutes()/60) / 24) * Math.PI * 2 - Math.PI/2;
+      radarBlips.push({ angle: hourAngle, dist: sunDist, label: '☀', color: '#ffcc00', decay: 1.0 });
+    }
+    // Weather condition blip
+    const fc = liveData.weatherForecast;
+    if (fc.length) {
+      const cond = (fc[0].condition || '').toLowerCase();
+      const color = cond.includes('rain') ? '#6699ff' :
+                    cond.includes('snow') ? '#ccccff' :
+                    cond.includes('clear') ? '#ffff00' : '#66cccc';
+      radarBlips.push({ angle: -0.8, dist: 0.55, label: condIconLrs(cond), color, decay: 1.0 });
+    }
+    // Outside temp blip — position by temp (-20 to +40 mapped to angle)
+    if (liveData.outsideTemp !== null) {
+      const t = liveData.outsideTemp;
+      const tAngle = ((t + 20) / 60) * Math.PI * 1.5 + Math.PI;
+      radarBlips.push({ angle: tAngle, dist: 0.4, label: '🌡', color: '#ff9900', decay: 1.0 });
+    }
+  }
+  refreshBlips();
+  setInterval(refreshBlips, 30000);
+
+  function drawFrame() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Background rings
+    ctx.strokeStyle = 'rgba(102,204,204,0.15)';
+    ctx.lineWidth = 1;
+    [0.25, 0.5, 0.75, 1.0].forEach(r => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, R * r, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+
+    // Cross-hairs
+    ctx.strokeStyle = 'rgba(102,204,204,0.1)';
+    ctx.beginPath(); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.stroke();
+
+    // Sweep gradient
+    const sweepGrad = ctx.createConicalGradient
+      ? null // fallback below
+      : null;
+
+    // Draw sweep arc manually
+    const sweepLen = Math.PI / 2;
+    for (let i = 0; i < 60; i++) {
+      const a = radarAngle - (i / 60) * sweepLen;
+      const alpha = (1 - i / 60) * 0.4;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, R, a, a + sweepLen / 60);
+      ctx.lineTo(cx, cy);
+      ctx.fillStyle = `rgba(102,204,204,${alpha})`;
+      ctx.fill();
+    }
+
+    // Sweep line
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(radarAngle) * R, cy + Math.sin(radarAngle) * R);
+    ctx.strokeStyle = 'rgba(102,204,204,0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Blips
+    radarBlips.forEach(blip => {
+      const bx = cx + Math.cos(blip.angle) * R * blip.dist;
+      const by = cy + Math.sin(blip.angle) * R * blip.dist;
+
+      // Ping ring
+      ctx.beginPath();
+      ctx.arc(bx, by, 8, 0, Math.PI * 2);
+      ctx.strokeStyle = blip.color + '88';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Label
+      ctx.font = '14px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(blip.label, bx, by);
+    });
+
+    // Center dot
+    ctx.beginPath();
+    ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+    ctx.fillStyle = 'var(--teal, #66cccc)';
+    ctx.fill();
+
+    radarAngle += 0.025;
+    if (radarAngle > Math.PI * 2) radarAngle -= Math.PI * 2;
+  }
+
+  if (radarInterval) cancelAnimationFrame(radarInterval);
+  function loop() { drawFrame(); radarInterval = requestAnimationFrame(loop); }
+  loop();
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

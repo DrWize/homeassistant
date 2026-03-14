@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>C64 HOME SYSTEM</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --c64-black: #000000;
+  --c64-white: #FFFFFF;
+  --c64-red: #880000;
+  --c64-cyan: #AAFFEE;
+  --c64-purple: #CC44CC;
+  --c64-green: #00CC55;
+  --c64-blue: #0000AA;
+  --c64-yellow: #EEEE77;
+  --c64-orange: #DD8855;
+  --c64-brown: #664400;
+  --c64-light-red: #FF7777;
+  --c64-dark-grey: #333333;
+  --c64-grey: #777777;
+  --c64-light-green: #AAFF66;
+  --c64-light-blue: #7B71D5;
+  --c64-light-grey: #BBBBBB;
+  --bg: #40318D;
+  --text: #7B71D5;
+  --text-bright: #FFFFFF;
+  --border: #7B71D5;
+  --card-bg: #302070;
+  --card-border: #7B71D5;
+  --active: #AAFF66;
+  --orange: var(--c64-orange);
+  --yellow: var(--c64-yellow);
+  --teal: var(--c64-cyan);
+  --blue: var(--c64-light-blue);
+  --red: var(--c64-light-red);
+  --purple: var(--c64-purple);
+  --tan: var(--c64-light-grey);
+  --white: var(--c64-white);
+  --grey: #554499;
+  --grey-mid: #9988CC;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Press Start 2P', monospace;
+  height: 100%;
+  overflow: hidden;
+  cursor: default;
+  font-size: 0.65rem;
+  line-height: 1.6;
+}
+
+/* Scanlines */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 99998;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+}
+
+body.night-mode::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,20,0.25);
+  pointer-events: none;
+  z-index: 99997;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px; left: 0;
+  background: var(--c64-yellow);
+  color: var(--c64-black);
+  padding: 8px 16px;
+  z-index: 99999;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  transition: top 0.2s;
+  text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* C64 Frame */
+.c64-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  border: 3px solid var(--border);
+}
+
+/* Header */
+.c64-header {
+  text-align: center;
+  padding: 12px 10px 8px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text);
+  line-height: 2;
+  flex-shrink: 0;
+}
+.c64-header .title { color: var(--c64-white); font-size: 0.7rem; }
+.c64-header .sub { color: var(--text); font-size: 0.55rem; }
+.c64-header .ready { color: var(--text); font-size: 0.6rem; }
+.blink-cursor {
+  animation: blink-c64 1s step-end infinite;
+  color: var(--text);
+}
+@keyframes blink-c64 { 50% { opacity: 0; } }
+
+/* Status bar */
+.c64-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 4px 10px;
+  border-bottom: 2px solid var(--border);
+  font-size: 0.55rem;
+  color: var(--text);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  display: inline-block;
+  margin-right: 4px;
+  background: var(--c64-grey);
+}
+.status-dot.online { background: var(--c64-green); box-shadow: 0 0 6px var(--c64-green); }
+.status-dot.connecting { background: var(--c64-yellow); animation: blink-c64 1s step-end infinite; }
+.status-dot.offline { background: var(--c64-red); }
+
+/* Tabs */
+.c64-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 3px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.c64-tab {
+  flex: 1;
+  background: var(--bg);
+  color: var(--text);
+  border: none;
+  border-right: 2px solid var(--border);
+  padding: 8px 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+.c64-tab:last-child { border-right: none; }
+.c64-tab:hover { background: #503da0; }
+.c64-tab.active {
+  background: var(--c64-light-blue);
+  color: var(--bg);
+}
+
+/* Content */
+.c64-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c64-light-blue) var(--bg);
+}
+.c64-content::-webkit-scrollbar { width: 6px; }
+.c64-content::-webkit-scrollbar-track { background: var(--bg); }
+.c64-content::-webkit-scrollbar-thumb { background: var(--c64-light-blue); }
+
+/* Footer */
+.c64-footer {
+  text-align: center;
+  padding: 6px 10px;
+  border-top: 3px solid var(--border);
+  font-size: 0.55rem;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+/* Page visibility */
+.page { display: none; }
+.page.active { display: block; animation: fadein 0.15s ease; }
+@keyframes fadein { from { opacity:0; } to { opacity:1; } }
+
+/* ═══ SECTION TITLES ═══ */
+.lc-section {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 10px;
+  margin-top: 16px;
+}
+.lc-section:first-child { margin-top: 0; }
+.lc-section-pill {
+  background: var(--c64-light-blue);
+  color: var(--bg);
+  font-size: 0.55rem;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.lc-section-line {
+  flex: 1;
+  height: 2px;
+  background: var(--grey);
+}
+.lc-section-end {
+  width: 8px; height: 8px;
+  background: var(--c64-light-blue);
+  margin-left: 4px;
+}
+
+/* ═══ ROOM GRID ═══ */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+.room-card {
+  border: 2px solid var(--grey);
+  background: var(--card-bg);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.room-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--grey);
+  transition: background 0.2s;
+}
+.room-card.lit { border-color: var(--c64-light-green); }
+.room-card.lit::before { background: var(--c64-light-green); }
+
+.room-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 8px 6px 12px;
+  border-bottom: 1px solid var(--grey);
+}
+.room-name {
+  font-size: 0.6rem;
+  color: var(--c64-light-blue);
+  flex: 1;
+}
+.room-card.lit .room-name { color: var(--c64-light-green); }
+.room-lit-badge {
+  font-size: 0.5rem;
+  color: var(--bg);
+  background: var(--c64-light-green);
+  padding: 1px 6px;
+  display: none;
+}
+.room-card.lit .room-lit-badge { display: block; }
+
+.room-body { padding: 8px 8px 8px 12px; }
+
+/* Sensor chips */
+.sensor-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.sensor-chip {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.55rem;
+  padding: 2px 6px;
+  background: var(--grey);
+  color: var(--grey-mid);
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+.sensor-chip.active {
+  background: #1a1040;
+  color: var(--c64-cyan);
+  border: 1px solid var(--c64-cyan);
+}
+.sensor-chip.active.temp  { color: var(--c64-orange); border-color: var(--c64-orange); }
+.sensor-chip.active.hum   { color: var(--c64-cyan);   border-color: var(--c64-cyan);   }
+.sensor-chip.active.lux   { color: var(--c64-yellow); border-color: var(--c64-yellow); }
+.sensor-chip.active.power { color: var(--c64-light-green); border-color: var(--c64-light-green); }
+
+/* Light rows */
+.light-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid #251a55;
+  font-size: 0.55rem;
+}
+.light-row:last-child { border-bottom: none; }
+.light-indicator {
+  width: 6px; height: 6px;
+  background: var(--grey);
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.light-row.on .light-indicator {
+  background: var(--c64-light-green);
+  box-shadow: 0 0 6px var(--c64-light-green);
+}
+.light-label {
+  flex: 1;
+  color: var(--grey-mid);
+}
+.light-row.on .light-label { color: var(--text-bright); }
+.light-state {
+  font-size: 0.5rem;
+  color: var(--grey-mid);
+}
+.light-row.on .light-state { color: var(--c64-light-green); }
+
+/* Toggle */
+.lc-toggle {
+  position: relative;
+  width: 36px; height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.lc-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.lc-toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--grey);
+  transition: background 0.2s;
+}
+.lc-toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 12px; height: 12px;
+  background: var(--grey-mid);
+  transition: all 0.2s;
+}
+.lc-toggle input:checked ~ .lc-toggle-track {
+  background: #1a3300;
+}
+.lc-toggle input:checked ~ .lc-toggle-thumb {
+  left: 22px;
+  background: var(--c64-light-green);
+  box-shadow: 0 0 6px var(--c64-light-green);
+}
+
+/* Dimmer */
+.dimmer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0 3px 12px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s, max-height 0.2s;
+}
+.dimmer-row.visible { opacity: 1; max-height: 26px; }
+.dimmer-label { font-size: 0.5rem; color: var(--grey-mid); width: 24px; }
+.lc-dimmer {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 3px;
+  background: var(--grey);
+  outline: none;
+  cursor: pointer;
+}
+.lc-dimmer::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  background: var(--c64-light-green);
+  box-shadow: 0 0 4px var(--c64-light-green);
+  cursor: pointer;
+}
+.lc-dimmer::-moz-range-thumb {
+  width: 12px; height: 12px;
+  background: var(--c64-light-green);
+  border: none;
+  box-shadow: 0 0 4px var(--c64-light-green);
+}
+.dimmer-pct { font-size: 0.5rem; color: var(--c64-light-green); width: 30px; text-align: right; }
+
+/* Load bar */
+.load-bar-wrap { margin-top: 6px; }
+.load-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.5rem; color: var(--grey-mid);
+  margin-bottom: 2px;
+}
+.load-bar {
+  height: 4px;
+  background: var(--grey);
+  overflow: hidden;
+}
+.load-bar-fill {
+  height: 100%;
+  background: var(--c64-light-green);
+  transition: width 0.8s ease;
+  box-shadow: 0 0 4px var(--c64-light-green);
+}
+
+/* ═══ STATUS STRIP ═══ */
+.status-strip {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.status-block {
+  flex: 1;
+  min-width: 100px;
+  background: var(--card-bg);
+  border: 2px solid var(--grey);
+  padding: 8px 10px;
+  border-left: 4px solid var(--c64-light-blue);
+}
+.status-block.orange { border-left-color: var(--c64-orange); }
+.status-block.purple { border-left-color: var(--c64-purple); }
+.status-block.teal   { border-left-color: var(--c64-cyan);   }
+.status-block label {
+  display: block;
+  font-size: 0.5rem;
+  color: var(--grey-mid);
+  margin-bottom: 3px;
+}
+.status-block .val {
+  font-size: 0.7rem;
+  color: var(--text);
+}
+.status-block.orange .val { color: var(--c64-orange); }
+.status-block.purple .val { color: var(--c64-purple); }
+.status-block.teal   .val { color: var(--c64-cyan);   }
+
+/* ═══ DATA TAB ═══ */
+.data-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #251a55;
+  font-size: 0.55rem;
+}
+.data-label { width: 70px; color: var(--grey-mid); }
+.data-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--grey);
+  overflow: hidden;
+}
+.data-bar-fill {
+  height: 100%;
+  transition: width 0.8s;
+}
+.data-bar-fill.low    { background: var(--c64-cyan);      box-shadow: 0 0 4px var(--c64-cyan);   }
+.data-bar-fill.mid    { background: var(--c64-yellow);    box-shadow: 0 0 4px var(--c64-yellow);  }
+.data-bar-fill.high   { background: var(--c64-light-red); box-shadow: 0 0 4px var(--c64-light-red); }
+.data-val { width: 70px; text-align: right; color: var(--text); font-size: 0.5rem; }
+.data-val.low  { color: var(--c64-cyan);   }
+.data-val.mid  { color: var(--c64-yellow);  }
+.data-val.high { color: var(--c64-light-red); }
+
+/* Solar strip */
+.solar-strip {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.solar-block {
+  flex: 1;
+  min-width: 100px;
+  background: var(--card-bg);
+  border: 2px solid var(--grey);
+  border-top: 3px solid var(--c64-yellow);
+  padding: 6px 10px;
+  text-align: center;
+}
+.solar-block label {
+  display: block;
+  font-size: 0.5rem;
+  color: var(--grey-mid);
+  margin-bottom: 3px;
+}
+.solar-block .val {
+  font-size: 0.65rem;
+  color: var(--c64-yellow);
+}
+
+/* Weather */
+.weather-row {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+.weather-card {
+  flex-shrink: 0;
+  min-width: 65px;
+  background: var(--card-bg);
+  border: 2px solid var(--grey);
+  padding: 6px 4px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.weather-card.now { border-color: var(--c64-orange); }
+.weather-card .wc-time { font-size: 0.5rem; color: var(--grey-mid); margin-bottom: 3px; }
+.weather-card .wc-icon { font-size: 1rem; margin: 2px 0; }
+.weather-card .wc-temp { font-size: 0.6rem; color: var(--c64-orange); }
+.weather-card .wc-detail { font-size: 0.5rem; color: var(--c64-cyan); margin-top: 2px; }
+.weather-card .wc-wind  { font-size: 0.5rem; color: var(--grey-mid); margin-top: 1px; }
+
+/* Nordpool 48h chart */
+.np48-chart {
+  position: relative;
+  height: 80px;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+.np48-bar-wrap {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+}
+.np48-bar {
+  width: 100%;
+  border-radius: 0;
+  transition: height 0.5s;
+  position: relative;
+}
+.np48-bar.current {
+  box-shadow: 0 0 8px var(--c64-orange);
+  border-top: 2px solid var(--c64-white);
+}
+.np48-midnight {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--grey-mid);
+  opacity: 0.6;
+  left: 0;
+}
+.np48-xaxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.5rem;
+  color: var(--grey-mid);
+  margin-top: 3px;
+  margin-bottom: 6px;
+}
+.np48-legend {
+  display: flex;
+  gap: 10px;
+  font-size: 0.5rem;
+  flex-wrap: wrap;
+}
+.np48-legend span { display: flex; align-items: center; gap: 3px; }
+
+/* Temp graph */
+.temp-graph-wrap {
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+.temp-bar {
+  flex: 1;
+  cursor: pointer;
+  transition: height 0.5s;
+}
+.temp-xaxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.5rem;
+  color: var(--grey-mid);
+  margin-bottom: 4px;
+}
+.temp-minmax {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.5rem;
+  color: var(--grey-mid);
+  margin-bottom: 12px;
+}
+
+/* Diagnostics */
+.diag-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #251a55;
+  font-size: 0.55rem;
+}
+.diag-row:last-child { border-bottom: none; }
+.diag-key { color: var(--grey-mid); }
+.diag-val { color: var(--text); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 50px; right: 16px;
+  background: #1a1040;
+  border: 2px solid var(--c64-light-green);
+  color: var(--c64-light-green);
+  padding: 8px 14px;
+  font-size: 0.55rem;
+  font-family: 'Press Start 2P', monospace;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.2s;
+  pointer-events: none;
+  z-index: 9999;
+  max-width: 280px;
+}
+.toast.show { opacity: 1; transform: none; }
+
+/* Washer badge */
+.washer-badge {
+  font-size: 0.5rem;
+  padding: 1px 8px;
+  border: 2px solid var(--grey-mid);
+  color: var(--grey-mid);
+  display: inline-block;
+}
+.washer-badge.running {
+  border-color: var(--c64-yellow);
+  color: var(--c64-yellow);
+  animation: blink-c64 0.9s step-end infinite;
+}
+
+/* ═══ MEDIA PAGE ═══ */
+.media-strip {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.media-stat-block {
+  flex: 1; min-width: 90px; background: var(--card-bg);
+  border: 2px solid var(--grey); border-left: 4px solid var(--c64-purple);
+  padding: 6px 10px;
+}
+.media-stat-block label {
+  display: block; font-size: 0.5rem;
+  color: var(--grey-mid); margin-bottom: 2px;
+}
+.media-stat-block .val { font-size: 0.65rem; color: var(--c64-purple); }
+
+.sessions-grid { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+
+.session-card {
+  display: flex; gap: 10px;
+  border: 2px solid var(--grey); background: var(--card-bg);
+  padding: 10px; flex: 1; min-width: 280px;
+  position: relative; transition: border-color 0.3s;
+  border-left: 4px solid var(--grey);
+}
+.session-card.playing { border-left-color: var(--c64-light-green); border-color: var(--c64-light-green); }
+.session-card.paused  { border-left-color: var(--c64-light-blue); opacity: 0.75; }
+
+.session-poster {
+  width: 80px; flex-shrink: 0; aspect-ratio: 2/3;
+  background: #1a1040; border: 2px solid var(--grey); overflow: hidden;
+}
+.session-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.session-poster-ph {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: var(--grey-mid);
+}
+
+.session-info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; overflow: hidden; }
+.session-show {
+  font-size: 0.5rem; color: var(--grey-mid);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.session-title {
+  font-size: 0.6rem; color: var(--c64-light-green); line-height: 1.4;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.session-badges { display: flex; flex-wrap: wrap; gap: 3px; }
+.sbadge {
+  font-size: 0.45rem; padding: 1px 4px;
+  background: var(--grey); color: var(--grey-mid);
+}
+.sbadge.hi     { background: #0a2a0a; color: var(--c64-cyan);   border: 1px solid var(--c64-cyan);   }
+.sbadge.amber  { background: #2a2000; color: var(--c64-yellow); border: 1px solid var(--c64-yellow); }
+.sbadge.orange { background: #2a1800; color: var(--c64-orange); border: 1px solid var(--c64-orange); }
+
+.session-summary {
+  font-size: 0.45rem; color: var(--grey-mid); line-height: 1.6; margin-top: 2px;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+.session-user {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.45rem; color: var(--grey-mid);
+}
+.session-avatar {
+  width: 16px; height: 16px;
+  border: 1px solid var(--grey-mid); overflow: hidden; flex-shrink: 0;
+}
+.session-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.session-progress-wrap { margin-top: auto; }
+.session-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.45rem; color: var(--grey-mid); margin-bottom: 2px;
+}
+.session-progress-bar { height: 4px; background: var(--grey); overflow: hidden; }
+.session-progress-fill {
+  height: 100%; background: var(--c64-light-green);
+  box-shadow: 0 0 4px var(--c64-light-green); transition: width 2s ease;
+}
+.session-progress-fill.paused { background: var(--c64-light-blue); box-shadow: 0 0 4px var(--c64-light-blue); }
+
+.no-streams {
+  width: 100%; text-align: center; padding: 30px;
+  font-size: 0.6rem; color: var(--grey-mid);
+  border: 2px solid var(--grey); border-left: 4px solid var(--c64-purple);
+}
+
+/* Media player cards */
+.mp-grid {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch;
+}
+.mp-card {
+  display: flex; gap: 10px;
+  border: 2px solid var(--grey); background: var(--card-bg);
+  padding: 10px; flex: 1; min-width: 240px; max-width: 380px;
+  position: relative; transition: border-color 0.3s;
+  border-left: 4px solid var(--grey);
+}
+.mp-card.playing { border-left-color: var(--c64-cyan); border-color: var(--c64-cyan); }
+.mp-card.paused  { border-left-color: var(--c64-light-blue); opacity: 0.75; }
+.mp-art {
+  width: 50px; height: 50px; flex-shrink: 0;
+  background: #1a1040; border: 2px solid var(--grey); overflow: hidden;
+}
+.mp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mp-art-ph {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: var(--grey-mid);
+}
+.mp-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow: hidden; }
+.mp-name {
+  font-size: 0.5rem; color: var(--grey-mid);
+  display: flex; align-items: center; gap: 4px;
+}
+.mp-type {
+  font-size: 0.45rem; padding: 0 4px;
+  background: var(--grey); color: var(--grey-mid);
+}
+.mp-card.playing .mp-type { background: #0a2a2a; color: var(--c64-cyan); border: 1px solid var(--c64-cyan); }
+.mp-title {
+  font-size: 0.6rem; color: var(--c64-light-green);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mp-artist {
+  font-size: 0.5rem; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mp-source {
+  font-size: 0.45rem; color: var(--grey-mid);
+}
+.mp-vol-wrap {
+  display: flex; align-items: center; gap: 4px; margin-top: 2px;
+}
+.mp-vol-label { font-size: 0.45rem; color: var(--grey-mid); }
+.mp-vol-bar {
+  flex: 1; height: 3px; background: var(--grey); overflow: hidden;
+}
+.mp-vol-fill {
+  height: 100%; background: var(--c64-cyan);
+  box-shadow: 0 0 4px var(--c64-cyan); transition: width 0.5s;
+}
+.mp-vol-pct { font-size: 0.45rem; color: var(--c64-cyan); width: 26px; text-align: right; }
+.mp-state-dot {
+  width: 6px; height: 6px; flex-shrink: 0;
+}
+.mp-card.playing .mp-state-dot {
+  background: var(--c64-cyan); box-shadow: 0 0 6px var(--c64-cyan);
+}
+.mp-card.paused .mp-state-dot {
+  background: var(--c64-light-blue); box-shadow: 0 0 4px var(--c64-light-blue);
+}
+.mp-progress-wrap { margin-top: 2px; }
+.mp-progress-bar {
+  height: 3px; background: var(--grey); overflow: hidden;
+}
+.mp-progress-fill {
+  height: 100%; background: var(--c64-light-green);
+  box-shadow: 0 0 4px var(--c64-light-green); transition: width 2s ease;
+}
+.mp-card.paused .mp-progress-fill {
+  background: var(--c64-light-blue); box-shadow: 0 0 4px var(--c64-light-blue);
+}
+.mp-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.4rem; color: var(--grey-mid); margin-top: 1px;
+}
+.mp-badge {
+  display: inline-block; font-size: 0.4rem; padding: 0 4px;
+  background: var(--grey); color: var(--grey-mid); margin-left: 3px;
+  vertical-align: middle;
+}
+.mp-badge.muted { background: #2a0000; color: var(--c64-light-red); border: 1px solid var(--c64-light-red); }
+.no-mp {
+  width: 100%; text-align: center; padding: 16px;
+  font-size: 0.55rem; color: var(--grey-mid);
+}
+
+/* ═══ ENERGY ═══ */
+.lc-energy-wrap { margin-bottom: 10px; }
+.lc-energy-header {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+}
+.lc-energy-stat {
+  flex: 1; min-width: 90px; background: var(--card-bg);
+  border: 2px solid var(--grey); border-left: 4px solid var(--c64-orange);
+  padding: 6px 10px;
+}
+.lc-energy-stat label {
+  display: block; font-size: 0.5rem;
+  color: var(--grey-mid); margin-bottom: 2px;
+}
+.lc-energy-stat .val { font-size: 0.65rem; color: var(--c64-orange); }
+.lc-energy-chart {
+  position: relative; height: 70px;
+  display: flex; align-items: flex-end; gap: 1px; background: var(--card-bg);
+  border: 2px solid var(--grey); padding: 3px;
+}
+.lc-energy-bar {
+  flex: 1; position: relative; height: 100%;
+  display: flex; align-items: flex-end; cursor: pointer;
+}
+.lc-energy-bar-price {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  opacity: 0.3; transition: height 1s ease;
+}
+.lc-energy-bar-power {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--c64-orange); opacity: 0.9;
+  box-shadow: 0 0 4px var(--c64-orange);
+  transition: height 1s ease;
+}
+.lc-energy-bar.current .lc-energy-bar-power {
+  background: var(--c64-cyan); box-shadow: 0 0 8px var(--c64-cyan);
+}
+.lc-energy-xaxis {
+  display: flex; justify-content: space-between;
+  font-size: 0.5rem; color: var(--grey-mid);
+  margin-top: 3px;
+}
+.lc-energy-legend {
+  display: flex; gap: 12px; font-size: 0.5rem;
+  margin-top: 4px; flex-wrap: wrap; color: var(--grey-mid);
+}
+
+/* ═══ BASIC SYSTEM LOG ═══ */
+.basic-log {
+  background: #000000;
+  border: 2px solid var(--c64-green);
+  padding: 8px;
+  height: 200px;
+  overflow-y: auto;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--c64-green);
+  line-height: 1.8;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c64-green) #000;
+}
+.basic-log::-webkit-scrollbar { width: 4px; }
+.basic-log::-webkit-scrollbar-track { background: #000; }
+.basic-log::-webkit-scrollbar-thumb { background: var(--c64-green); }
+
+/* ═══ WCAG FOCUS ═══ */
+:focus-visible {
+  outline: 2px solid var(--c64-yellow);
+  outline-offset: 2px;
+}
+.c64-tab:focus-visible {
+  outline: 2px solid var(--c64-yellow);
+  outline-offset: 2px;
+}
+.lc-toggle input:focus-visible ~ .lc-toggle-track {
+  outline: 2px solid var(--c64-yellow);
+  outline-offset: 2px;
+}
+.lc-dimmer:focus-visible {
+  outline: 2px solid var(--c64-yellow);
+  outline-offset: 4px;
+}
+
+/* ═══ REDUCED MOTION ═══ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  body::after { display: none; }
+}
+
+/* THEME SWITCHER */
+.theme-zone { position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998; cursor: pointer; }
+.theme-switcher {
+  position: fixed; bottom: 12px; left: 12px; z-index: 9999;
+  display: flex; gap: 6px; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.theme-switcher.visible { opacity: 1; pointer-events: auto; }
+.theme-switcher-btn {
+  width: 40px; height: 40px; border: 3px solid var(--border); border-radius: 0;
+  background: var(--bg); color: var(--text); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Press Start 2P', monospace; transition: background 0.2s;
+}
+.theme-switcher-btn:hover { background: var(--border); color: var(--bg); }
+.theme-switcher-btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.theme-menu {
+  display: none; position: absolute; bottom: 48px; left: 0;
+  background: var(--bg); border: 3px solid var(--border); padding: 4px 0;
+  min-width: 190px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.theme-menu.open { display: block; }
+.theme-menu a {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  color: var(--border); text-decoration: none; font-size: 0.5rem;
+  font-family: 'Press Start 2P', monospace; white-space: nowrap;
+}
+.theme-menu a:hover { background: var(--border); color: var(--bg); }
+.theme-menu a.active { color: var(--text); }
+.theme-menu a .tm-icon { width: 24px; text-align: center; font-size: 10px; }
+
+/* NIGHT PROTOCOL BUTTON */
+.night-protocol-btn {
+  display: block; margin: 0 0 10px 0; padding: 8px 16px;
+  background: transparent; border: 3px solid var(--border); border-radius: 0;
+  color: var(--text); font-family: 'Press Start 2P', monospace; font-size: 0.55rem;
+  letter-spacing: 1px; cursor: pointer; transition: background 0.2s, color 0.2s;
+}
+.night-protocol-btn:hover { background: var(--border); color: var(--bg); }
+.night-protocol-btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to Content</a>
+
+<div class="c64-frame" role="application" aria-label="Commodore 64 Home Automation System">
+
+  <!-- HEADER -->
+  <div class="c64-header">
+    <div class="title">**** COMMODORE 64 HOME SYSTEM ****</div>
+    <div class="sub">64K RAM SYSTEM  38911 BASIC BYTES FREE</div>
+    <div class="ready">READY.<span class="blink-cursor">&#9608;</span></div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="c64-status">
+    <span><span id="conn-dot" class="status-dot connecting"></span> <span id="conn-label">CONNECTING...</span></span>
+    <span style="opacity:0.4;">|</span>
+    <span id="clock-c64">--:--:--</span>
+    <span id="date-c64" style="opacity:0.7;">--- -- ----</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="c64-tabs" role="tablist" aria-label="Navigation tabs">
+    <button class="c64-tab active" role="tab" aria-selected="true" onclick="switchTab('systems')">ROOMS</button>
+    <button class="c64-tab" role="tab" aria-selected="false" onclick="switchTab('controls')">LIGHTS</button>
+    <button class="c64-tab" role="tab" aria-selected="false" onclick="switchTab('data')">DATA</button>
+    <button class="c64-tab" role="tab" aria-selected="false" onclick="switchTab('media')">MEDIA</button>
+    <button class="c64-tab" role="tab" aria-selected="false" onclick="switchTab('sensors')">SECURITY</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="c64-content" id="main-content" tabindex="-1">
+
+    <!-- SYSTEMS TAB -->
+    <div class="page active" id="page-systems">
+      <div class="status-strip">
+        <div class="status-block orange">
+          <label>Outside Temp</label>
+          <div class="val" id="stat-temp">-- °C</div>
+        </div>
+        <div class="status-block">
+          <label>Electricity Now</label>
+          <div class="val" id="stat-elec">-- SEK/kWh</div>
+        </div>
+        <div class="status-block purple">
+          <label>Active Lights</label>
+          <div class="val" id="stat-lights">--</div>
+        </div>
+        <div class="status-block teal">
+          <label>Washer</label>
+          <div class="val"><span id="stat-washer" class="washer-badge">IDLE</span></div>
+        </div>
+        <div class="status-block">
+          <label>Sun State</label>
+          <div class="val" id="stat-sun">--</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">ROOM STATUS</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="room-grid" id="rooms-systems"></div>
+    </div>
+
+    <!-- CONTROLS TAB -->
+    <div class="page" id="page-controls">
+      <div class="lc-section">
+        <div class="lc-section-pill">LIGHT CONTROLS</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">POKE &gt;D020,00</button>
+      <div class="room-grid" id="rooms-controls"></div>
+    </div>
+
+    <!-- DATA TAB -->
+    <div class="page" id="page-data">
+      <div class="lc-section">
+        <div class="lc-section-pill">SOLAR EVENTS</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="solar-strip">
+        <div class="solar-block">
+          <label>Next Sunrise</label>
+          <div class="val" id="d-sunrise">--:--</div>
+        </div>
+        <div class="solar-block">
+          <label>Next Sunset</label>
+          <div class="val" id="d-sunset">--:--</div>
+        </div>
+        <div class="solar-block">
+          <label>Daylight</label>
+          <div class="val" id="d-daylight">-- hrs</div>
+        </div>
+        <div class="solar-block">
+          <label>Sun Position</label>
+          <div class="val" id="d-sunstate">--</div>
+        </div>
+        <div class="solar-block">
+          <label>Elevation</label>
+          <div class="val" id="d-elevation">--°</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">WEATHER FORECAST 24H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="weather-row" id="d-weather">
+        <div style="color:var(--grey-mid);font-size:0.55rem;padding:8px;">AWAITING DATA...</div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">NORDPOOL PRICES 48H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="np48-chart" id="d-np48">
+        <div style="color:var(--grey-mid);font-size:0.55rem;align-self:center;">AWAITING DATA...</div>
+      </div>
+      <div class="np48-xaxis" id="d-np48-xaxis"></div>
+      <div class="np48-legend">
+        <span><span style="width:8px;height:8px;background:var(--c64-orange);display:inline-block;"></span> CURRENT</span>
+        <span><span style="width:8px;height:8px;background:var(--c64-cyan);display:inline-block;"></span> LOW</span>
+        <span><span style="width:8px;height:8px;background:var(--c64-yellow);display:inline-block;"></span> MED</span>
+        <span><span style="width:8px;height:8px;background:var(--c64-light-red);display:inline-block;"></span> HIGH</span>
+        <span id="d-np48-minmax" style="margin-left:auto;color:var(--grey-mid);"></span>
+      </div>
+
+      <div class="lc-section" style="margin-top:16px;">
+        <div class="lc-section-pill">PRICE SUMMARY</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Last Hour</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-last-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-last-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Now</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-now-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-now-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Next Hour</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-next-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-next-val">--</span>
+      </div>
+
+      <div class="lc-section" style="margin-top:16px;">
+        <div class="lc-section-pill">TEMPERATURE FORECAST 24H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="temp-graph-wrap" id="d-tempgraph">
+        <div style="color:var(--grey-mid);font-size:0.55rem;align-self:center;">AWAITING DATA...</div>
+      </div>
+      <div class="temp-xaxis"><span>NOW</span><span>+6H</span><span>+12H</span><span>+18H</span><span>+24H</span></div>
+      <div class="temp-minmax" id="d-tempminmax"></div>
+
+      <div class="lc-section" style="margin-top:16px;">
+        <div class="lc-section-pill">SYSTEM DIAGNOSTICS</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="diag-row"><span class="diag-key">DESIGNATION</span><span class="diag-val">C64 HOME UNIT V1.0</span></div>
+      <div class="diag-row"><span class="diag-key">LOCATION</span><span class="diag-val">SOLNA, SECTOR 7</span></div>
+      <div class="diag-row"><span class="diag-key">ENTITIES</span><span class="diag-val">9 LIGHTS · 16 SENSORS</span></div>
+      <div class="diag-row"><span class="diag-key">INTEGRATIONS</span><span class="diag-val">Z-WAVE · NORDPOOL · MET.NO · TMDB</span></div>
+      <div class="diag-row"><span class="diag-key">AUTOMATIONS</span><span class="diag-val">7 ACTIVE</span></div>
+      <div class="diag-row"><span class="diag-key">NFC TAGS</span><span class="diag-val">1 ACTIVE (SOFA)</span></div>
+      <div class="diag-row"><span class="diag-key">HA HOST</span><span class="diag-val">HOMEASSISTANT.LOCAL:8123</span></div>
+    </div>
+
+    <!-- MEDIA TAB -->
+    <div class="page" id="page-media">
+      <div class="lc-section">
+        <div class="lc-section-pill">PLEX TRANSMISSION STATUS</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="media-strip">
+        <div class="media-stat-block">
+          <label>Active Streams</label>
+          <div class="val" id="m-stream-count">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Direct Play</label>
+          <div class="val" id="m-direct-play">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Transcoding</label>
+          <div class="val" id="m-transcode">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Total Bandwidth</label>
+          <div class="val" id="m-bandwidth">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>LAN / WAN</label>
+          <div class="val" id="m-lan-wan">-- / --</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">NOW PLAYING</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div id="no-media-msg" class="no-streams">// NO SIGNAL //</div>
+      <div class="sessions-grid" id="sessions-grid"></div>
+      <div class="mp-grid" id="mp-grid"></div>
+    </div>
+
+    <!-- SENSORS / SECURITY TAB -->
+    <div class="page" id="page-sensors">
+      <div class="lc-section">
+        <div class="lc-section-pill">BASIC SYSTEM LOG</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="basic-log" id="basic-log" aria-label="System event log" role="log">
+        <div>10 SYSTEM BOOT SEQUENCE INITIATED</div>
+        <div>20 LOADING HOME AUTOMATION KERNEL...</div>
+        <div>30 READY.</div>
+      </div>
+
+      <div class="lc-section" style="margin-top:12px;">
+        <div class="lc-section-pill">ENERGY CONSUMPTION VS PRICE</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+
+      <div class="lc-energy-wrap">
+        <div class="lc-energy-header">
+          <div class="lc-energy-stat">
+            <label>Current Load</label>
+            <div class="val" id="lc-energy-total">-- W</div>
+          </div>
+          <div class="lc-energy-stat">
+            <label>Est. Cost/Hour</label>
+            <div class="val" id="lc-energy-cost">-- SEK/h</div>
+          </div>
+          <div class="lc-energy-stat">
+            <label>Price Now</label>
+            <div class="val" id="lc-energy-price">-- SEK/kWh</div>
+          </div>
+        </div>
+        <div class="lc-energy-chart" id="lc-energy-chart">
+          <div style="color:var(--grey-mid);font-size:0.55rem;align-self:center;">AWAITING DATA...</div>
+        </div>
+        <div class="lc-energy-xaxis" id="lc-energy-xaxis"></div>
+        <div class="lc-energy-legend">
+          <span><span style="display:inline-block;width:8px;height:8px;background:var(--c64-orange);opacity:0.9;margin-right:3px;"></span>POWER (W)</span>
+          <span><span style="display:inline-block;width:8px;height:8px;background:var(--c64-light-blue);opacity:0.35;margin-right:3px;"></span>PRICE</span>
+          <span style="margin-left:auto;" id="lc-energy-minmax"></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <div class="c64-footer">LOAD "*",8,1</div>
+
+</div><!-- /frame -->
+
+<!-- THEME SWITCHER -->
+<div class="theme-zone" onclick="showSwitcher()"></div>
+<div class="theme-switcher" id="theme-switcher">
+  <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme">C=</button>
+  <div class="theme-menu" id="theme-menu">
+    <a href="lcars-dashboard.html"><span class="tm-icon">&#9651;</span> LCARS</a>
+    <a href="pipboy-dashboard.html"><span class="tm-icon">&#9762;</span> PIP-BOY</a>
+    <a href="c64-dashboard.html" class="active"><span class="tm-icon">C=</span> C64</a>
+    <a href="matrix-dashboard.html"><span class="tm-icon">&#9679;</span> MATRIX</a>
+    <a href="weyland-dashboard.html"><span class="tm-icon">W-Y</span> WEYLAND</a>
+  </div>
+  <button class="theme-switcher-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#9974;</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="config.js"></script>
+<script>
+const THEME = {
+  title: '**** COMMODORE 64 HOME SYSTEM ****',
+  subtitle: '64K RAM SYSTEM  38911 BASIC BYTES FREE',
+  footer: 'LOAD "*",8,1',
+  tabs: ['ROOMS', 'LIGHTS', 'DATA', 'MEDIA', 'SECURITY'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  emptyMedia: '// NO SIGNAL //',
+  connOnline: 'ONLINE',
+  connOffline: 'OFFLINE',
+  connConnecting: 'CONNECTING...',
+  connToast: true,
+  footerOnline: 'LOAD "*",8,1',
+  footerConnecting: 'LOAD "*",8,1',
+  footerOffline: 'LOAD "*",8,1',
+  sensors: { temp: {icon:'T: ', unit:'C'}, hum: {icon:'H: ', unit:'%'}, lux: {icon:'L: ', unit:' LX'} },
+  dimmerColors: { fill: '--c64-light-green', bg: '--grey' },
+  clockEl: 'clock-c64',
+  dateEl: 'date-c64',
+  lightCountEls: ['stat-lights'],
+  nightToast: 'POKE >D020,00',
+  toastArrow: '>',
+
+  onToggleLight(entityId, on) {
+    addBasicLogEntry(`${on ? 'OFF' : 'ON'} ${entityId.split('.')[1].toUpperCase()}`);
+  },
+  onNightProtocol() {
+    addBasicLogEntry('POKE >D020,00 : REM ALL OFF');
+  },
+  onAuthOk() {
+    addBasicLogEntry('CONNECTED TO HA MAINFRAME');
+  },
+  onWsError() {
+    addBasicLogEntry('?CONNECTION ERROR');
+  },
+  onIngest(id, s) {
+    if (id.includes('temperature')) {
+      const v = parseFloat(s.state);
+      if (!isNaN(v)) addBasicLogEntry(`TEMP ${id.split('.')[1].substring(0,8).toUpperCase()} = ${v.toFixed(1)}C`);
+    }
+  }
+};
+
+const basicLog = [];
+let basicLineNum = 1000;
+
+function addBasicLogEntry(text) {
+  basicLog.push({ line: basicLineNum, text: text.toUpperCase() });
+  basicLineNum += 10;
+  if (basicLog.length > 100) basicLog.shift();
+  const el = document.getElementById('basic-log');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.textContent = `${basicLineNum - 10} ${text.toUpperCase()}`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

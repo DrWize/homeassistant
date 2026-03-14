@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>THE MATRIX // SYSTEM CONTROL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root {
+  --green: #00FF41;
+  --green-dim: #008F11;
+  --green-dark: #003B00;
+  --green-glow: rgba(0,255,65,0.3);
+  --bg: #0D0208;
+  --bg2: #0a0a0a;
+  --panel-bg: rgba(0,20,0,0.7);
+  --radius: 4px;
+  --bar-h: 48px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  height: 100%;
+  overflow: hidden;
+  cursor: default;
+  letter-spacing: 1px;
+}
+
+/* CANVAS RAIN */
+#rain-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* SCANLINES */
+.scanlines {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 4px
+  );
+}
+
+/* SKIP LINK */
+.skip-link {
+  position: absolute;
+  top: -40px; left: 0;
+  background: var(--green);
+  color: var(--bg);
+  padding: 8px 16px;
+  z-index: 99999;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.875rem;
+  letter-spacing: 1px;
+  transition: top 0.2s;
+  text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* MATRIX FRAME */
+.matrix-frame {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* HEADER */
+.matrix-header {
+  display: flex;
+  align-items: center;
+  height: var(--bar-h);
+  flex-shrink: 0;
+  background: rgba(0,20,0,0.85);
+  border-bottom: 1px solid var(--green-dark);
+  padding: 0 20px;
+  gap: 16px;
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+.matrix-title {
+  font-size: 1.3rem;
+  letter-spacing: 4px;
+  color: var(--green);
+  text-shadow: 0 0 10px rgba(0,255,65,0.7);
+}
+.matrix-header-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: var(--green-dim);
+}
+
+/* STATUS DOT */
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green-dark);
+  display: inline-block;
+  margin-right: 4px;
+}
+.status-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.connecting { background: var(--green-dim); animation: pulse-g 1s infinite; }
+.status-dot.offline { background: #ff0000; }
+@keyframes pulse-g { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+/* TABS */
+.matrix-tabs {
+  display: flex;
+  gap: 2px;
+  background: rgba(0,10,0,0.9);
+  border-bottom: 1px solid var(--green-dark);
+  flex-shrink: 0;
+  padding: 0 20px;
+}
+.matrix-tab {
+  background: transparent;
+  color: var(--green-dim);
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.matrix-tab:hover {
+  color: var(--green);
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+.matrix-tab.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+  text-shadow: 0 0 8px rgba(0,255,65,0.6);
+  background: rgba(0,255,65,0.05);
+}
+
+/* CONTENT */
+.matrix-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--green-dark) var(--bg);
+}
+.matrix-content::-webkit-scrollbar { width: 4px; }
+.matrix-content::-webkit-scrollbar-track { background: var(--bg); }
+.matrix-content::-webkit-scrollbar-thumb { background: var(--green-dark); border-radius: 2px; }
+
+/* FOOTER */
+.matrix-footer {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  flex-shrink: 0;
+  background: rgba(0,20,0,0.85);
+  border-top: 1px solid var(--green-dark);
+  padding: 0 20px;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: var(--green-dark);
+  gap: 20px;
+}
+
+/* PAGE visibility */
+.page { display: none; }
+.page.active { display: block; animation: fadein 0.2s ease; }
+@keyframes fadein { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:none; } }
+
+/* SECTION TITLES */
+.lc-section {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 14px;
+  margin-top: 20px;
+}
+.lc-section:first-child { margin-top: 0; }
+.lc-section-pill {
+  background: var(--green-dark);
+  color: var(--green);
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 4px 16px;
+  border-radius: 2px 0 0 2px;
+  white-space: nowrap;
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+.lc-section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--green-dark);
+}
+.lc-section-end {
+  width: 6px; height: 6px;
+  background: var(--green-dim);
+  margin-left: 6px;
+}
+
+/* ROOM GRID */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+}
+
+.room-card {
+  border: 1px solid var(--green-dark);
+  background: var(--panel-bg);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.room-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--green-dark);
+  transition: background 0.2s;
+}
+.room-card.lit { border-color: var(--green-dim); }
+.room-card.lit::before { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+.room-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px 8px 16px;
+  border-bottom: 1px solid var(--green-dark);
+}
+.room-name {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+  flex: 1;
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+.room-lit-badge {
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  color: var(--bg);
+  background: var(--green);
+  padding: 1px 8px;
+  border-radius: 2px;
+  display: none;
+}
+.room-card.lit .room-lit-badge { display: block; }
+
+.room-body { padding: 10px 12px 12px 16px; }
+
+/* Sensor chips */
+.sensor-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.sensor-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 2px;
+  background: rgba(0,20,0,0.5);
+  color: var(--green-dark);
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+.sensor-chip.active {
+  background: rgba(0,40,0,0.5);
+  color: var(--green);
+  border: 1px solid var(--green-dark);
+}
+.sensor-chip.active.temp  { color: var(--green); border-color: var(--green-dim); }
+.sensor-chip.active.hum   { color: var(--green-dim); border-color: var(--green-dark); }
+.sensor-chip.active.lux   { color: var(--green); border-color: var(--green); }
+.sensor-chip.active.power { color: var(--green); border-color: var(--green-dim); }
+
+/* Light rows */
+.light-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(0,59,0,0.3);
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.light-row:last-child { border-bottom: none; }
+.light-indicator {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green-dark);
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.light-row.on .light-indicator {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+.light-label {
+  flex: 1;
+  color: var(--green-dark);
+}
+.light-row.on .light-label { color: var(--green); }
+.light-state {
+  font-size: 0.65rem;
+  color: var(--green-dark);
+}
+.light-row.on .light-state { color: var(--green); }
+
+/* Toggle */
+.lc-toggle {
+  position: relative;
+  width: 40px; height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.lc-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.lc-toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--green-dark);
+  border-radius: 9px;
+  transition: background 0.2s;
+}
+.lc-toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--green-dim);
+  transition: all 0.2s;
+}
+.lc-toggle input:checked ~ .lc-toggle-track {
+  background: rgba(0,255,65,0.2);
+}
+.lc-toggle input:checked ~ .lc-toggle-thumb {
+  left: 24px;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+/* Dimmer */
+.dimmer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 4px 14px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s, max-height 0.2s;
+}
+.dimmer-row.visible { opacity: 1; max-height: 28px; }
+.dimmer-label { font-size: 0.65rem; color: var(--green-dark); width: 24px; }
+.lc-dimmer {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 3px;
+  background: var(--green-dark);
+  outline: none;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.lc-dimmer::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 4px var(--green);
+  cursor: pointer;
+}
+.lc-dimmer::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  border: none;
+  box-shadow: 0 0 4px var(--green);
+}
+.dimmer-pct { font-size: 0.65rem; color: var(--green); width: 30px; text-align: right; }
+
+/* Load bar */
+.load-bar-wrap { margin-top: 8px; }
+.load-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--green-dark);
+  margin-bottom: 3px; letter-spacing: 1px; text-transform: uppercase;
+}
+.load-bar {
+  height: 4px;
+  background: var(--green-dark);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.load-bar-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.8s ease;
+  box-shadow: 0 0 4px var(--green);
+}
+
+/* STATUS STRIP */
+.status-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.status-block {
+  flex: 1;
+  min-width: 120px;
+  background: var(--panel-bg);
+  border: 1px solid var(--green-dark);
+  padding: 10px 14px;
+  border-left: 3px solid var(--green-dim);
+}
+.status-block.orange { border-left-color: var(--green); }
+.status-block.purple { border-left-color: var(--green); }
+.status-block.teal   { border-left-color: var(--green-dim); }
+.status-block label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green-dark);
+  margin-bottom: 4px;
+}
+.status-block .val {
+  font-size: 1.1rem;
+  color: var(--green);
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+.status-block.orange .val { color: var(--green); }
+.status-block.purple .val { color: var(--green); }
+.status-block.teal   .val { color: var(--green-dim); }
+
+/* DATA ROW */
+.data-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0,59,0,0.3);
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.data-label { width: 80px; color: var(--green-dark); }
+.data-bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: rgba(0,20,0,0.5);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.data-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s;
+}
+.data-bar-fill.low    { background: var(--green-dim); box-shadow: 0 0 4px var(--green-dim); }
+.data-bar-fill.mid    { background: var(--green);     box-shadow: 0 0 4px var(--green);     }
+.data-bar-fill.high   { background: #00ff41;          box-shadow: 0 0 8px var(--green);     }
+.data-val { width: 80px; text-align: right; color: var(--green); font-size: 0.7rem; }
+.data-val.low  { color: var(--green-dim); }
+.data-val.mid  { color: var(--green);     }
+.data-val.high { color: var(--green);     }
+
+/* Solar strip */
+.solar-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.solar-block {
+  flex: 1;
+  min-width: 110px;
+  background: var(--panel-bg);
+  border: 1px solid var(--green-dark);
+  border-top: 2px solid var(--green-dim);
+  padding: 8px 14px;
+  text-align: center;
+}
+.solar-block label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green-dark);
+  margin-bottom: 4px;
+}
+.solar-block .val {
+  font-size: 1rem;
+  color: var(--green);
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+
+/* Weather forecast cards */
+.weather-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+.weather-card {
+  flex-shrink: 0;
+  min-width: 70px;
+  background: var(--panel-bg);
+  border: 1px solid var(--green-dark);
+  padding: 8px 6px;
+  text-align: center;
+  border-radius: 2px;
+  transition: border-color 0.2s;
+}
+.weather-card.now { border-color: var(--green); }
+.weather-card .wc-time { font-size: 0.65rem; color: var(--green-dark); letter-spacing: 1px; margin-bottom: 4px; }
+.weather-card .wc-icon { font-size: 1.1rem; margin: 2px 0; }
+.weather-card .wc-temp { font-size: 0.85rem; color: var(--green); text-shadow: 0 0 5px rgba(0,255,65,0.5); }
+.weather-card .wc-detail { font-size: 0.65rem; color: var(--green-dim); margin-top: 2px; }
+.weather-card .wc-wind  { font-size: 0.65rem; color: var(--green-dark); margin-top: 1px; }
+
+/* 48h nordpool chart */
+.np48-chart {
+  position: relative;
+  height: 90px;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+.np48-bar-wrap {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+}
+.np48-bar {
+  width: 100%;
+  border-radius: 1px 1px 0 0;
+  transition: height 0.5s;
+  position: relative;
+}
+.np48-bar.current {
+  box-shadow: 0 0 8px var(--green);
+  border-top: 2px solid var(--green);
+}
+.np48-midnight {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--green-dim);
+  opacity: 0.6;
+  left: 0;
+}
+.np48-xaxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--green-dark);
+  letter-spacing: 1px;
+  margin-top: 3px;
+  margin-bottom: 8px;
+}
+.np48-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+  color: var(--green-dim);
+}
+.np48-legend span { display: flex; align-items: center; gap: 4px; }
+
+/* Temp graph */
+.temp-graph-wrap {
+  height: 70px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.temp-bar {
+  flex: 1;
+  border-radius: 1px 1px 0 0;
+  cursor: pointer;
+  transition: height 0.5s;
+}
+.temp-xaxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--green-dark);
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+.temp-minmax {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--green-dark);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+/* Diagnostics */
+.diag-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(0,59,0,0.3);
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+}
+.diag-row:last-child { border-bottom: none; }
+.diag-key { color: var(--green-dark); text-transform: uppercase; }
+.diag-val { color: var(--green); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 50px; right: 20px;
+  background: rgba(0,20,0,0.95);
+  border: 1px solid var(--green);
+  border-left: 3px solid var(--green);
+  color: var(--green);
+  padding: 10px 18px;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  font-family: 'Share Tech Mono', monospace;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.25s;
+  pointer-events: none;
+  z-index: 9999;
+  text-transform: uppercase;
+  max-width: 300px;
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+.toast.show { opacity: 1; transform: none; }
+
+/* Washer badge */
+.washer-badge {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  padding: 1px 10px;
+  border-radius: 2px;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dark);
+  text-transform: uppercase;
+  display: inline-block;
+}
+.washer-badge.running {
+  border-color: var(--green);
+  color: var(--green);
+  animation: blink-g 0.9s step-end infinite;
+}
+@keyframes blink-g { 50% { opacity: 0.3; } }
+
+/* MEDIA PAGE */
+.media-strip {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.media-stat-block {
+  flex: 1; min-width: 100px; background: var(--panel-bg);
+  border: 1px solid var(--green-dark); border-left: 3px solid var(--green-dim);
+  padding: 8px 12px;
+}
+.media-stat-block label {
+  display: block; font-size: 0.65rem;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--green-dark); margin-bottom: 3px;
+}
+.media-stat-block .val { font-size: 1rem; color: var(--green); text-shadow: 0 0 5px rgba(0,255,65,0.5); }
+
+.sessions-grid { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+
+.session-card {
+  display: flex; gap: 14px;
+  border: 1px solid var(--green-dark); background: var(--panel-bg);
+  padding: 12px; flex: 1; min-width: 300px;
+  position: relative; transition: border-color 0.3s;
+  border-left: 3px solid var(--green-dark);
+}
+.session-card.playing { border-left-color: var(--green); border-color: var(--green-dark); }
+.session-card.paused  { border-left-color: var(--green-dim); opacity: 0.75; }
+
+.session-poster {
+  width: 90px; flex-shrink: 0; aspect-ratio: 2/3;
+  background: rgba(0,20,0,0.5); border: 1px solid var(--green-dark); overflow: hidden;
+}
+.session-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.session-poster-ph {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: var(--green-dark);
+}
+
+.session-info { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden; }
+.session-show {
+  font-size: 0.66rem; color: var(--green-dark); letter-spacing: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;
+}
+.session-title {
+  font-size: 1rem; color: var(--green); letter-spacing: 1px; line-height: 1.2;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+.session-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.sbadge {
+  font-size: 0.65rem; letter-spacing: 1px; padding: 1px 6px;
+  border-radius: 2px; background: rgba(0,20,0,0.5); color: var(--green-dark); text-transform: uppercase;
+}
+.sbadge.hi     { background: rgba(0,40,0,0.5); color: var(--green);     border: 1px solid var(--green-dark); }
+.sbadge.amber  { background: rgba(0,30,0,0.5); color: var(--green-dim); border: 1px solid var(--green-dim); }
+.sbadge.orange { background: rgba(0,40,0,0.5); color: var(--green);     border: 1px solid var(--green);     }
+
+.session-summary {
+  font-size: 0.65rem; color: var(--green-dark); line-height: 1.6; margin-top: 2px;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+.session-user {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.65rem; color: var(--green-dark);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.session-avatar {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1px solid var(--green-dark); overflow: hidden; flex-shrink: 0;
+}
+.session-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.session-progress-wrap { margin-top: auto; }
+.session-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--green-dark); letter-spacing: 1px; margin-bottom: 3px;
+}
+.session-progress-bar { height: 5px; background: rgba(0,20,0,0.5); border-radius: 2px; overflow: hidden; }
+.session-progress-fill {
+  height: 100%; background: var(--green); border-radius: 2px;
+  box-shadow: 0 0 4px var(--green); transition: width 2s ease;
+}
+.session-progress-fill.paused { background: var(--green-dim); box-shadow: 0 0 4px var(--green-dim); }
+
+.no-streams {
+  width: 100%; text-align: center; padding: 40px;
+  font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--green-dark); border: 1px solid var(--green-dark); border-left: 3px solid var(--green-dim);
+}
+
+/* MEDIA PLAYER CARDS */
+.mp-grid {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch;
+}
+.mp-card {
+  display: flex; gap: 14px;
+  border: 1px solid var(--green-dark); background: var(--panel-bg);
+  padding: 12px; flex: 1; min-width: 260px; max-width: 400px;
+  position: relative; transition: border-color 0.3s;
+  border-left: 3px solid var(--green-dark);
+}
+.mp-card.playing { border-left-color: var(--green); border-color: var(--green-dim); }
+.mp-card.paused  { border-left-color: var(--green-dim); opacity: 0.75; }
+.mp-art {
+  width: 60px; height: 60px; flex-shrink: 0;
+  background: rgba(0,20,0,0.5); border: 1px solid var(--green-dark); overflow: hidden;
+}
+.mp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mp-art-ph {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; color: var(--green-dark);
+}
+.mp-info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; overflow: hidden; }
+.mp-name {
+  font-size: 0.66rem; color: var(--green-dark); letter-spacing: 1px;
+  text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+}
+.mp-type {
+  font-size: 0.6rem; padding: 0 5px;
+  border-radius: 2px; background: rgba(0,20,0,0.5); color: var(--green-dark);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.mp-card.playing .mp-type { background: rgba(0,40,0,0.5); color: var(--green); border: 1px solid var(--green-dark); }
+.mp-title {
+  font-size: 1rem; color: var(--green); letter-spacing: 1px; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+}
+.mp-artist {
+  font-size: 0.7rem; color: var(--green-dim); letter-spacing: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mp-source {
+  font-size: 0.65rem; color: var(--green-dark); letter-spacing: 1px; text-transform: uppercase;
+}
+.mp-vol-wrap {
+  display: flex; align-items: center; gap: 6px; margin-top: 2px;
+}
+.mp-vol-label { font-size: 0.6rem; color: var(--green-dark); letter-spacing: 1px; }
+.mp-vol-bar {
+  flex: 1; height: 4px; background: rgba(0,20,0,0.5); border-radius: 2px; overflow: hidden;
+}
+.mp-vol-fill {
+  height: 100%; background: var(--green-dim); border-radius: 2px;
+  box-shadow: 0 0 4px var(--green-dim); transition: width 0.5s;
+}
+.mp-vol-pct { font-size: 0.6rem; color: var(--green-dim); width: 28px; text-align: right; }
+.mp-state-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.mp-card.playing .mp-state-dot {
+  background: var(--green); box-shadow: 0 0 6px var(--green);
+}
+.mp-card.paused .mp-state-dot {
+  background: var(--green-dim); box-shadow: 0 0 4px var(--green-dim);
+}
+.mp-progress-wrap { margin-top: 3px; }
+.mp-progress-bar {
+  height: 4px; background: rgba(0,20,0,0.5); border-radius: 2px; overflow: hidden;
+}
+.mp-progress-fill {
+  height: 100%; background: var(--green); border-radius: 2px;
+  box-shadow: 0 0 4px var(--green); transition: width 2s ease;
+}
+.mp-card.paused .mp-progress-fill {
+  background: var(--green-dim); box-shadow: 0 0 4px var(--green-dim);
+}
+.mp-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.58rem; color: var(--green-dark); letter-spacing: 1px; margin-top: 2px;
+}
+.mp-badge {
+  display: inline-block; font-size: 0.55rem; letter-spacing: 1px; padding: 0 5px;
+  border-radius: 2px; background: rgba(0,20,0,0.5); color: var(--green-dark); margin-left: 4px;
+  vertical-align: middle;
+}
+.mp-badge.muted { background: rgba(60,0,0,0.5); color: #ff0000; border: 1px solid #ff0000; }
+.no-mp {
+  width: 100%; text-align: center; padding: 20px;
+  font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--green-dark);
+}
+
+/* ENERGY */
+.lc-energy-wrap { margin-bottom: 14px; }
+.lc-energy-header {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.lc-energy-stat {
+  flex: 1; min-width: 100px; background: var(--panel-bg);
+  border: 1px solid var(--green-dark); border-left: 3px solid var(--green);
+  padding: 8px 12px;
+}
+.lc-energy-stat label {
+  display: block; font-size: 0.65rem;
+  letter-spacing: 2px; color: var(--green-dark); text-transform: uppercase; margin-bottom: 3px;
+}
+.lc-energy-stat .val { font-size: 1rem; color: var(--green); text-shadow: 0 0 5px rgba(0,255,65,0.5); }
+.lc-energy-chart {
+  position: relative; height: 80px;
+  display: flex; align-items: flex-end; gap: 1px; background: rgba(0,20,0,0.5);
+  border: 1px solid var(--green-dark); padding: 4px;
+}
+.lc-energy-bar {
+  flex: 1; position: relative; height: 100%;
+  display: flex; align-items: flex-end; cursor: pointer;
+}
+.lc-energy-bar-price {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  opacity: 0.3; transition: height 1s ease;
+}
+.lc-energy-bar-power {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--green); opacity: 0.9;
+  box-shadow: 0 0 4px var(--green);
+  transition: height 1s ease;
+}
+.lc-energy-bar.current .lc-energy-bar-power {
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+}
+.lc-energy-xaxis {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--green-dark); letter-spacing: 1px;
+  margin-top: 3px;
+}
+.lc-energy-legend {
+  display: flex; gap: 16px; font-size: 0.65rem; letter-spacing: 1px;
+  margin-top: 6px; flex-wrap: wrap; color: var(--green-dark);
+}
+
+/* WCAG FOCUS */
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0,255,65,0.25);
+}
+.matrix-tab:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.lc-toggle input:focus-visible ~ .lc-toggle-track {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.lc-dimmer:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 4px;
+}
+
+/* NIGHT MODE — dimmer, deeper green, more subdued */
+body.night-mode {
+  --green: #00cc33;
+  --green-dim: #005518;
+  --green-dark: #001a08;
+  --green-glow: rgba(0, 160, 40, 0.15);
+}
+body.night-mode .matrix-header { opacity: 0.8; }
+body.night-mode .matrix-panel { border-color: var(--green-dim); }
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+  #rain-canvas { display: none !important; }
+  .scanlines { display: none !important; }
+  * { animation: none !important; transition: none !important; }
+}
+
+/* THEME SWITCHER */
+.theme-zone { position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998; cursor: pointer; }
+.theme-switcher {
+  position: fixed; bottom: 12px; left: 12px; z-index: 9999;
+  display: flex; gap: 6px; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.theme-switcher.visible { opacity: 1; pointer-events: auto; }
+.theme-switcher-btn {
+  width: 40px; height: 40px; border: 2px solid var(--green); border-radius: 50%;
+  background: rgba(0,20,0,0.8); color: var(--green); font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.theme-switcher-btn:hover { background: var(--green); color: var(--bg); transform: scale(1.1); box-shadow: 0 0 12px var(--green-glow); }
+.theme-switcher-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+.theme-menu {
+  display: none; position: absolute; bottom: 48px; left: 0;
+  background: rgba(5,10,5,0.95); border: 2px solid var(--green-dim); border-radius: 4px;
+  padding: 6px 0; min-width: 180px; box-shadow: 0 4px 20px rgba(0,255,65,0.1);
+}
+.theme-menu.open { display: block; }
+.theme-menu a {
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+  color: var(--green-dim); text-decoration: none; font-size: 0.75rem; font-family: inherit;
+  letter-spacing: 1px; white-space: nowrap;
+}
+.theme-menu a:hover { background: rgba(0,255,65,0.08); color: var(--green); }
+.theme-menu a.active { color: var(--green); text-shadow: 0 0 6px var(--green-glow); }
+.theme-menu a .tm-icon { width: 22px; text-align: center; font-size: 14px; }
+
+/* NIGHT PROTOCOL BUTTON */
+.night-protocol-btn {
+  display: block; margin: 0 0 12px 0; padding: 10px 24px;
+  background: transparent; border: 1px solid var(--green-dim); border-radius: 2px;
+  color: var(--green); font-family: inherit; font-size: 0.75rem;
+  letter-spacing: 2px; cursor: pointer; transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.night-protocol-btn:hover { background: rgba(0,255,65,0.1); border-color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+.night-protocol-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+</style>
+</head>
+<body>
+
+<canvas id="rain-canvas"></canvas>
+<div class="scanlines"></div>
+
+<a href="#main-content" class="skip-link">Skip to Content</a>
+
+<div class="matrix-frame" role="application" aria-label="Matrix Home Automation System">
+
+  <!-- HEADER -->
+  <div class="matrix-header">
+    <span class="matrix-title">THE MATRIX</span>
+    <div class="matrix-header-status">
+      <span id="conn-dot" class="status-dot connecting"></span>
+      <span id="conn-label">TRACING...</span>
+      <span style="opacity:0.3;">|</span>
+      <span id="clock-matrix">--:--:--</span>
+      <span id="date-matrix" style="opacity:0.7;">--- -- ----</span>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="matrix-tabs" role="tablist">
+    <button class="matrix-tab active" onclick="switchTab('systems')" role="tab" aria-selected="true">NODES</button>
+    <button class="matrix-tab" onclick="switchTab('controls')" role="tab" aria-selected="false">ACCESS</button>
+    <button class="matrix-tab" onclick="switchTab('data')" role="tab" aria-selected="false">STREAM</button>
+    <button class="matrix-tab" onclick="switchTab('media')" role="tab" aria-selected="false">SIGNAL</button>
+    <button class="matrix-tab" onclick="switchTab('sensors')" role="tab" aria-selected="false">SENTINEL</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="matrix-content" id="main-content" tabindex="-1">
+
+    <!-- SYSTEMS TAB -->
+    <div class="page active" id="page-systems">
+      <div class="status-strip">
+        <div class="status-block orange">
+          <label>Outside Temp</label>
+          <div class="val" id="stat-temp">-- °C</div>
+        </div>
+        <div class="status-block">
+          <label>Electricity Now</label>
+          <div class="val" id="stat-elec">-- SEK/kWh</div>
+        </div>
+        <div class="status-block purple">
+          <label>Active Lights</label>
+          <div class="val" id="stat-lights">--</div>
+        </div>
+        <div class="status-block teal">
+          <label>Washer</label>
+          <div class="val"><span id="stat-washer" class="washer-badge">IDLE</span></div>
+        </div>
+        <div class="status-block">
+          <label>Sun State</label>
+          <div class="val" id="stat-sun">--</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Node Status</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="room-grid" id="rooms-systems"></div>
+    </div>
+
+    <!-- CONTROLS TAB -->
+    <div class="page" id="page-controls">
+      <div class="lc-section">
+        <div class="lc-section-pill">Access Controls</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">DISCONNECT NODES</button>
+      <div class="room-grid" id="rooms-controls"></div>
+    </div>
+
+    <!-- DATA TAB -->
+    <div class="page" id="page-data">
+      <div class="lc-section">
+        <div class="lc-section-pill">Solar Events</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="solar-strip">
+        <div class="solar-block">
+          <label>Next Sunrise</label>
+          <div class="val" id="d-sunrise">--:--</div>
+        </div>
+        <div class="solar-block">
+          <label>Next Sunset</label>
+          <div class="val" id="d-sunset">--:--</div>
+        </div>
+        <div class="solar-block">
+          <label>Daylight</label>
+          <div class="val" id="d-daylight">-- hrs</div>
+        </div>
+        <div class="solar-block">
+          <label>Sun Position</label>
+          <div class="val" id="d-sunstate">--</div>
+        </div>
+        <div class="solar-block">
+          <label>Elevation</label>
+          <div class="val" id="d-elevation">--°</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Weather Forecast 24H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="weather-row" id="d-weather">
+        <div style="color:var(--green-dark);font-size:0.75rem;padding:10px;">AWAITING DATA...</div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Nordpool Prices 48H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="np48-chart" id="d-np48">
+        <div style="color:var(--green-dark);font-size:0.75rem;align-self:center;">AWAITING DATA...</div>
+      </div>
+      <div class="np48-xaxis" id="d-np48-xaxis"></div>
+      <div class="np48-legend">
+        <span><span style="width:10px;height:10px;background:var(--green);border-radius:50%;display:inline-block;"></span> CURRENT</span>
+        <span><span style="width:10px;height:10px;background:var(--green-dim);border-radius:50%;display:inline-block;"></span> LOW</span>
+        <span><span style="width:10px;height:10px;background:var(--green);border-radius:50%;display:inline-block;"></span> MED</span>
+        <span><span style="width:10px;height:10px;background:var(--green);border-radius:50%;display:inline-block;"></span> HIGH</span>
+        <span id="d-np48-minmax" style="margin-left:auto;color:var(--green-dark);"></span>
+      </div>
+
+      <div class="lc-section" style="margin-top:20px;">
+        <div class="lc-section-pill">Price Summary</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Last Hour</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-last-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-last-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Now</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-now-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-now-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Next Hour</span>
+        <div class="data-bar-wrap"><div class="data-bar-fill" id="np-next-bar" style="width:0%"></div></div>
+        <span class="data-val" id="np-next-val">--</span>
+      </div>
+
+      <div class="lc-section" style="margin-top:20px;">
+        <div class="lc-section-pill">Temperature Forecast 24H</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="temp-graph-wrap" id="d-tempgraph">
+        <div style="color:var(--green-dark);font-size:0.75rem;align-self:center;">AWAITING DATA...</div>
+      </div>
+      <div class="temp-xaxis"><span>NOW</span><span>+6H</span><span>+12H</span><span>+18H</span><span>+24H</span></div>
+      <div class="temp-minmax" id="d-tempminmax"></div>
+
+      <div class="lc-section" style="margin-top:20px;">
+        <div class="lc-section-pill">System Diagnostics</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="diag-row"><span class="diag-key">Designation</span><span class="diag-val">ZION MAINFRAME v2.0</span></div>
+      <div class="diag-row"><span class="diag-key">Location</span><span class="diag-val">SOLNA, SECTOR 7</span></div>
+      <div class="diag-row"><span class="diag-key">Entities</span><span class="diag-val">9 LIGHTS · 16 SENSORS</span></div>
+      <div class="diag-row"><span class="diag-key">Integrations</span><span class="diag-val">Z-WAVE · NORDPOOL · MET.NO · TMDB</span></div>
+      <div class="diag-row"><span class="diag-key">Automations</span><span class="diag-val">7 ACTIVE</span></div>
+      <div class="diag-row"><span class="diag-key">NFC Tags</span><span class="diag-val">1 ACTIVE (SOFA)</span></div>
+      <div class="diag-row"><span class="diag-key">HA Host</span><span class="diag-val" id="diag-host">—</span></div>
+    </div>
+
+    <!-- MEDIA TAB -->
+    <div class="page" id="page-media">
+      <div class="lc-section">
+        <div class="lc-section-pill">Signal Transmission Status</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="media-strip">
+        <div class="media-stat-block">
+          <label>Active Streams</label>
+          <div class="val" id="m-stream-count">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Direct Play</label>
+          <div class="val" id="m-direct-play">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Transcoding</label>
+          <div class="val" id="m-transcode">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>Total Bandwidth</label>
+          <div class="val" id="m-bandwidth">--</div>
+        </div>
+        <div class="media-stat-block">
+          <label>LAN / WAN</label>
+          <div class="val" id="m-lan-wan">-- / --</div>
+        </div>
+      </div>
+
+      <div class="lc-section">
+        <div class="lc-section-pill">Now Playing</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div id="no-media-msg" class="no-streams">// NO SIGNAL DETECTED //</div>
+      <div class="sessions-grid" id="sessions-grid"></div>
+      <div class="mp-grid" id="mp-grid"></div>
+    </div>
+
+    <!-- SENSORS TAB -->
+    <div class="page" id="page-sensors">
+      <div class="lc-section">
+        <div class="lc-section-pill">System Monitor</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+
+      <div class="status-strip" id="sys-monitor-strip">
+        <div class="status-block orange">
+          <label>Total Power</label>
+          <div class="val" id="sys-total-power">-- W</div>
+        </div>
+        <div class="status-block">
+          <label>Outside Temp</label>
+          <div class="val" id="sys-temp">-- °C</div>
+        </div>
+        <div class="status-block purple">
+          <label>Sun State</label>
+          <div class="val" id="sys-sun">--</div>
+        </div>
+        <div class="status-block teal">
+          <label>Active Nodes</label>
+          <div class="val" id="sys-nodes">--</div>
+        </div>
+      </div>
+
+      <div class="lc-section" style="margin-top:8px;">
+        <div class="lc-section-pill">Energy Consumption vs Price</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+
+      <div class="lc-energy-wrap">
+        <div class="lc-energy-header">
+          <div class="lc-energy-stat">
+            <label>Current Load</label>
+            <div class="val" id="lc-energy-total">-- W</div>
+          </div>
+          <div class="lc-energy-stat">
+            <label>Est. Cost/Hour</label>
+            <div class="val" id="lc-energy-cost">-- SEK/h</div>
+          </div>
+          <div class="lc-energy-stat">
+            <label>Price Now</label>
+            <div class="val" id="lc-energy-price">-- SEK/kWh</div>
+          </div>
+        </div>
+        <div class="lc-energy-chart" id="lc-energy-chart">
+          <div style="color:var(--green-dark);font-size:0.75rem;align-self:center;">Awaiting data...</div>
+        </div>
+        <div class="lc-energy-xaxis" id="lc-energy-xaxis"></div>
+        <div class="lc-energy-legend">
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--green);opacity:0.9;margin-right:4px;"></span>Power (W)</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--green-dim);opacity:0.35;margin-right:4px;"></span>Price overlay</span>
+          <span style="margin-left:auto;" id="lc-energy-minmax"></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <div class="matrix-footer">
+    <span>ZION MAINFRAME v2.0</span>
+    <span style="opacity:0.3;">|</span>
+    <span id="footer-status">SYSTEM INITIALIZING</span>
+  </div>
+
+</div><!-- /frame -->
+
+<!-- THEME SWITCHER -->
+<div class="theme-zone" onclick="showSwitcher()"></div>
+<div class="theme-switcher" id="theme-switcher">
+  <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme">&#9679;</button>
+  <div class="theme-menu" id="theme-menu">
+    <a href="lcars-dashboard.html"><span class="tm-icon">&#9651;</span> LCARS</a>
+    <a href="pipboy-dashboard.html"><span class="tm-icon">&#9762;</span> PIP-BOY</a>
+    <a href="c64-dashboard.html"><span class="tm-icon">C=</span> C64</a>
+    <a href="matrix-dashboard.html" class="active"><span class="tm-icon">&#9679;</span> MATRIX</a>
+    <a href="weyland-dashboard.html"><span class="tm-icon">W-Y</span> WEYLAND</a>
+  </div>
+  <button class="theme-switcher-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#9974;</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="config.js"></script>
+<script>
+// ═══════════════════════════════════════════════════
+// THEME CONFIG
+// ═══════════════════════════════════════════════════
+const THEME = {
+  title: 'THE MATRIX',
+  subtitle: 'SYSTEM CONTROL INTERFACE',
+  footer: 'ZION MAINFRAME v2.0',
+  tabs: ['NODES', 'ACCESS', 'STREAM', 'SIGNAL', 'SENTINEL'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  emptyMedia: '// NO SIGNAL DETECTED //',
+  connOnline: 'SIGNAL LOCKED',
+  connOffline: 'SIGNAL LOST',
+  connConnecting: 'TRACING...',
+  connToast: 'MATRIX UPLINK ESTABLISHED',
+  footerOnline: 'ALL SYSTEMS NOMINAL',
+  footerConnecting: 'ESTABLISHING UPLINK...',
+  footerOffline: 'UPLINK FAILURE — RETRYING',
+
+  sensors: { temp: {icon:'T: ', unit:' C'}, hum: {icon:'H: ', unit:'%'}, lux: {icon:'L: ', unit:' lx'} },
+  dimmerColors: { fill: '--green', bg: '--green-dark' },
+  clockEl: 'clock-matrix',
+  dateEl: 'date-matrix',
+  lightCountEls: ['stat-lights'],
+  nightToast: 'NODES DISCONNECTED',
+  toastArrow: '>',
+
+  onIngest(id, s) {
+    if (id === 'sun.sun') updateRainSpeed();
+  },
+  onInit() {
+    initRain();
+    drawRain();
+  }
+};
+
+// ═══════════════════════════════════════════════════
+// DIGITAL RAIN (Matrix-specific)
+// ═══════════════════════════════════════════════════
+const rainCanvas = document.getElementById('rain-canvas');
+const rainCtx = rainCanvas.getContext('2d');
+let rainColumns = [];
+let rainSpeed = 1;
+let rainTimerId = null;
+const RAIN_INTERVAL_MS = 150;
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function initRain() {
+  rainCanvas.width = window.innerWidth;
+  rainCanvas.height = window.innerHeight;
+  const cols = Math.floor(rainCanvas.width / 20);
+  rainColumns = Array(cols).fill(0).map(() => Math.random() * rainCanvas.height);
+  window.addEventListener('resize', initRain);
+}
+
+const RAIN_CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
+
+function drawRain() {
+  if (prefersReducedMotion) return;
+  rainCtx.fillStyle = 'rgba(13, 2, 8, 0.06)';
+  rainCtx.fillRect(0, 0, rainCanvas.width, rainCanvas.height);
+  rainCtx.fillStyle = '#00FF41';
+  rainCtx.font = '14px monospace';
+  const colW = 20;
+  for (let i = 0, len = rainColumns.length; i < len; i++) {
+    const y = rainColumns[i];
+    const char = RAIN_CHARS[(Math.random() * RAIN_CHARS.length) | 0];
+    rainCtx.globalAlpha = 0.25 + Math.random() * 0.25;
+    rainCtx.fillText(char, i * colW, y);
+    if (y > rainCanvas.height && Math.random() > 0.975) {
+      rainColumns[i] = 0;
+    } else {
+      rainColumns[i] = y + 14 * rainSpeed;
+    }
+  }
+  rainCtx.globalAlpha = 1;
+  rainTimerId = setTimeout(drawRain, RAIN_INTERVAL_MS);
+}
+
+function updateRainSpeed() {
+  const totalWatts = LC_POWER_SENSORS.reduce((s, id) => s + (liveData.power[id] ?? 0), 0);
+  const baseFactor = Math.max(0.3, Math.min(2, totalWatts / 100));
+  const nightFactor = liveData.sun.state === 'below_horizon' ? 0.5 : 1.0;
+  rainSpeed = baseFactor * nightFactor;
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

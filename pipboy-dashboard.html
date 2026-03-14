@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>PIP-BOY 3000 // HOME SYSTEM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
+
+  :root {
+    --green: #4afa6a;
+    --green-dim: #2d9e45;
+    --green-mid: #2db84a;
+    --green-glow: rgba(74, 250, 106, 0.35);
+    --green-faint: rgba(74, 250, 106, 0.07);
+    --bg: #030d05;
+    --bg2: #050f07;
+    --amber: #f5c842;
+    --red: #e05050;
+    --scanline-h: 3px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    height: 100%;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  /* CRT screen overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent calc(var(--scanline-h) - 1px),
+      rgba(0,0,0,0.18) var(--scanline-h)
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Vignette */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.82) 100%);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  .crt-flicker {
+    animation: flicker 8s infinite;
+  }
+  @keyframes flicker {
+    0%,100%   { opacity: 1; }
+    92%       { opacity: 1; }
+    92.5%     { opacity: 0.85; }
+    93%       { opacity: 1; }
+    96%       { opacity: 1; }
+    96.3%     { opacity: 0.9; }
+    96.6%     { opacity: 1; }
+  }
+
+  /* ── WRAPPER ── */
+  .pip {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 18px 24px 12px;
+    gap: 12px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--green-mid);
+    padding-bottom: 10px;
+    text-shadow: 0 0 12px var(--green);
+  }
+  .header-logo {
+    font-family: 'VT323', monospace;
+    font-size: 2.6rem;
+    letter-spacing: 4px;
+    line-height: 1;
+    text-shadow: 0 0 20px var(--green), 0 0 40px var(--green-glow);
+  }
+  .header-logo span { color: var(--amber); text-shadow: 0 0 16px var(--amber); }
+  .header-meta {
+    text-align: right;
+    font-size: 0.72rem;
+    line-height: 1.7;
+    color: var(--green-mid);
+  }
+  .header-meta .live { color: var(--green); animation: blink 1.4s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ── CONNECTION STATUS DOT (shared.js) ── */
+  #conn-dot { display: inline; }
+  #conn-dot.online  { color: var(--green); }
+  #conn-dot.online::before  { content: '● '; }
+  #conn-dot.connecting { color: var(--amber); }
+  #conn-dot.connecting::before { content: '◌ '; }
+  #conn-dot.offline { color: var(--red); }
+  #conn-dot.offline::before { content: '✕ '; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+  }
+  .tab {
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    padding: 4px 22px;
+    border: 1px solid var(--green-dim);
+    background: transparent;
+    color: var(--green-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .tab:hover { color: var(--green); border-color: var(--green-mid); background: var(--green-faint); }
+  .tab.active {
+    color: var(--bg);
+    background: var(--green-mid);
+    border-color: var(--green);
+    text-shadow: none;
+    box-shadow: 0 0 10px var(--green-glow);
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--green-dim) var(--bg);
+  }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-track { background: var(--bg); }
+  .content::-webkit-scrollbar-thumb { background: var(--green-dim); }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fadein 0.3s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* ── SECTION HEADER ── */
+  .section-title {
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: var(--green-mid);
+    border-bottom: 1px solid var(--green-dim);
+    padding-bottom: 4px;
+    margin-bottom: 14px;
+    margin-top: 20px;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  /* ── ROOM GRID ── */
+  .room-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .room-card {
+    border: 1px solid var(--green-dim);
+    background: var(--green-faint);
+    position: relative;
+    transition: all 0.2s;
+  }
+  .room-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px; bottom: -1px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .room-card:hover::before {
+    border-color: var(--green);
+    box-shadow: 0 0 14px var(--green-glow), inset 0 0 14px var(--green-faint);
+  }
+  .room-card.lit {
+    background: rgba(74,250,106,0.09);
+    border-color: var(--green-mid);
+  }
+  .room-card.lit::before {
+    border-color: var(--green);
+    box-shadow: 0 0 18px var(--green-glow), inset 0 0 10px rgba(74,250,106,0.05);
+  }
+
+  /* ── shared.js room structure: room-header, room-body ── */
+  .room-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 6px;
+  }
+  .room-body {
+    padding: 0 16px 14px;
+  }
+
+  .room-name {
+    font-family: 'VT323', monospace;
+    font-size: 1.35rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px var(--green-glow);
+  }
+
+  .room-lit-badge {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 1px 6px;
+    border: 1px solid var(--green);
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green-glow);
+    display: none;
+  }
+  .room-card.lit .room-lit-badge { display: inline-block; }
+
+  /* ── SENSOR ROW (shared.js uses sensor-row) ── */
+  .sensor-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .sensor-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border: 1px solid var(--green-dim);
+    color: var(--green-dim);
+    background: transparent;
+    transition: all 0.3s;
+  }
+  .sensor-chip.active {
+    color: var(--amber);
+    border-color: var(--amber);
+    text-shadow: 0 0 6px var(--amber);
+    background: rgba(245,200,66,0.05);
+  }
+  .sensor-icon { font-style: normal; font-size: 0.7rem; }
+
+  /* Light rows */
+  .light-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    gap: 8px;
+    margin-bottom: 7px;
+  }
+  .light-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--green-mid);
+  }
+  .light-row.on .light-label { color: var(--green); }
+
+  /* Light indicator (shared.js uses light-indicator) */
+  .light-indicator {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    flex-shrink: 0;
+  }
+  .light-row.on .light-indicator {
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { box-shadow: 0 0 4px var(--green); }
+    50%      { box-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow); }
+  }
+
+  /* Light state label (shared.js) */
+  .light-state {
+    font-size: 0.65rem;
+    color: var(--green-dim);
+  }
+  .light-row.on .light-state { color: var(--green); }
+
+  /* Toggle switch (shared.js uses lc-toggle) */
+  .lc-toggle {
+    position: relative;
+    width: 36px;
+    height: 16px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .lc-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .lc-toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--bg2);
+    border: 1px solid var(--green-dim);
+    transition: all 0.2s;
+  }
+  .lc-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    background: var(--green-dim);
+    transition: all 0.2s;
+  }
+  .lc-toggle input:checked ~ .lc-toggle-track {
+    background: rgba(74,250,106,0.15);
+    border-color: var(--green);
+    box-shadow: 0 0 8px var(--green-glow);
+  }
+  .lc-toggle input:checked ~ .lc-toggle-thumb {
+    left: 22px;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  /* ── DIMMER (shared.js uses dimmer-row + lc-dimmer) ── */
+  .dimmer-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 5px;
+    padding-left: 14px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.25s, max-height 0.25s;
+  }
+  .dimmer-row.visible {
+    opacity: 1;
+    max-height: 30px;
+  }
+  .dimmer-label {
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+    width: 28px;
+    flex-shrink: 0;
+  }
+  .lc-dimmer {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 4px;
+    background: var(--green-dim);
+    outline: none;
+    cursor: pointer;
+    position: relative;
+  }
+  .lc-dimmer::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--green);
+    cursor: pointer;
+    box-shadow: 0 0 6px var(--green);
+  }
+  .lc-dimmer::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: var(--green);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 6px var(--green);
+  }
+  .dimmer-pct {
+    font-size: 0.65rem;
+    color: var(--green-mid);
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── LOAD BAR (shared.js uses load-bar-wrap / load-bar / load-bar-fill / load-bar-label) ── */
+  .load-bar-wrap { margin-top: 10px; }
+  .load-bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: var(--green-mid);
+    margin-bottom: 3px; letter-spacing: 1px;
+  }
+  .load-bar {
+    height: 6px;
+    background: var(--green-dim);
+    position: relative;
+    overflow: hidden;
+  }
+  .load-bar-fill {
+    height: 100%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green-glow);
+    transition: width 1s ease;
+    position: relative;
+  }
+  .load-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0; width: 3px;
+    background: #fff;
+    opacity: 0.6;
+    animation: bar-shine 2s ease-in-out infinite;
+  }
+  @keyframes bar-shine { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* ── WEATHER ROW ── */
+  .weather-strip {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border: 1px solid var(--green-dim);
+    background: var(--green-faint);
+    margin-bottom: 16px;
+  }
+  .w-item { font-size: 0.72rem; letter-spacing: 1px; }
+  .w-item label { color: var(--green-mid); display: block; font-size: 0.65rem; margin-bottom: 2px; }
+  .w-item .w-val {
+    color: var(--amber);
+    font-size: 1.05rem;
+    text-shadow: 0 0 8px var(--amber);
+  }
+
+  /* ── WEATHER FORECAST CARDS (shared.js classes) ── */
+  .weather-card {
+    flex: 1; min-width: 60px; text-align: center;
+    border: 1px solid var(--green-dim);
+    padding: 6px 4px; background: transparent;
+  }
+  .weather-card.now {
+    border-color: var(--green-mid);
+    background: rgba(74,250,106,0.06);
+  }
+  .wc-time { font-size: 0.65rem; color: var(--green-mid); letter-spacing: 1px; }
+  .wc-icon { font-size: 1rem; margin: 4px 0; }
+  .wc-temp { font-size: 0.75rem; color: var(--amber); text-shadow: 0 0 6px var(--amber); }
+  .wc-detail { font-size: 0.65rem; color: #6af; margin-top: 2px; }
+  .wc-wind { font-size: 0.65rem; color: var(--green-dim); margin-top: 1px; }
+
+  /* Container for weather forecast cards */
+  #d-weather {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;
+  }
+
+  /* ── NORDPOOL 48H GRAPH (shared.js classes) ── */
+  #d-np48 {
+    display: flex; align-items: flex-end; height: 80px; gap: 1px; position: relative;
+  }
+  .np48-bar-wrap {
+    flex: 1; position: relative; cursor: pointer; height: 100%; display: flex; align-items: flex-end;
+  }
+  .np48-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    transition: height 0.5s;
+  }
+  .np48-bar.current {
+    border-top: 2px solid var(--green);
+  }
+  .np48-midnight {
+    position: absolute; bottom: 0; left: 0; width: 1px; height: 100%;
+    background: var(--green-dim); opacity: 0.5;
+  }
+  #d-np48-xaxis {
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px; margin-top: 4px;
+  }
+  #d-np48-minmax {
+    font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px; margin-top: 8px;
+  }
+
+  /* ── NORDPOOL BARS (shared.js uses data-bar-fill / data-val) ── */
+  .np-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.72rem; letter-spacing: 1px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(74,250,106,0.07);
+  }
+  .np-label { width: 60px; color: var(--green-mid); }
+  .np-bar-wrap { flex: 1; height: 8px; background: var(--green-dim); position: relative; overflow: hidden; }
+  .data-bar-fill, .np-bar-fill { height: 100%; transition: width 1s; }
+  .data-bar-fill.high, .np-bar-fill.high { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .data-bar-fill.mid, .np-bar-fill.mid   { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .data-bar-fill.low, .np-bar-fill.low   { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+  .data-val, .np-val { width: 60px; text-align: right; color: var(--green); }
+  .data-val.high, .np-val.high { color: var(--red); }
+  .data-val.mid, .np-val.mid   { color: var(--amber); }
+
+  /* ── TEMPERATURE GRAPH (shared.js classes) ── */
+  #d-tempgraph {
+    display: flex; align-items: flex-end; height: 60px; gap: 2px; padding-bottom: 4px;
+  }
+  .temp-bar {
+    flex: 1; cursor: pointer; transition: height 1s;
+  }
+  #d-tempminmax {
+    font-size: 0.65rem; color: var(--green-mid); letter-spacing: 1px; margin-top: 6px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--green-dim);
+    padding-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+  }
+
+  /* ── VAULT BOY SCHEMATIC (ASCII) ── */
+  .ascii-art {
+    font-family: 'VT323', monospace;
+    font-size: 0.85rem;
+    line-height: 1.25;
+    color: var(--green-dim);
+    white-space: pre;
+    text-align: center;
+    padding: 10px;
+    text-shadow: 0 0 6px var(--green-glow);
+  }
+
+  /* Notification toast */
+  .toast {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    background: var(--bg2);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 10px 18px;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px var(--green-glow);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 10000;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .toast.show { opacity: 1; transform: none; }
+
+  /* Washer indicator */
+  .washer-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    border: 1px solid;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .washer-badge.running {
+    border-color: var(--amber);
+    color: var(--amber);
+    text-shadow: 0 0 8px var(--amber);
+    animation: blink 0.8s step-end infinite;
+  }
+  .washer-badge.idle {
+    border-color: var(--green-dim);
+    color: var(--green-dim);
+  }
+
+  /* ── MEDIA PAGE ── */
+  .media-header-strip {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    padding: 10px 14px; border: 1px solid var(--green-dim);
+    background: var(--green-faint); margin-bottom: 14px;
+  }
+  .sessions-grid { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+  .session-card {
+    display: flex; gap: 14px; border: 1px solid var(--green-dim);
+    background: var(--green-faint); padding: 12px;
+    flex: 1; min-width: 300px; position: relative; transition: border-color 0.3s;
+  }
+  .session-card.active { border-color: var(--green-mid); }
+  .session-card.paused { opacity: 0.7; }
+  .session-poster {
+    width: 90px; flex-shrink: 0; aspect-ratio: 2/3;
+    background: var(--bg2); border: 1px solid var(--green-dim); overflow: hidden;
+  }
+  .session-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .session-poster-ph {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-family: 'VT323', monospace; font-size: 2rem; color: var(--green-dim);
+  }
+  .session-info { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden; }
+  .session-show {
+    font-size: 0.68rem; color: var(--green-mid); letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;
+  }
+  .session-title {
+    font-family: 'VT323', monospace; font-size: 1.05rem; color: var(--green);
+    letter-spacing: 1px; line-height: 1.2; text-shadow: 0 0 8px var(--green-glow);
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .session-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sbadge {
+    font-size: 0.65rem; letter-spacing: 1px; padding: 1px 5px;
+    border: 1px solid var(--green-dim); color: var(--green-dim); text-transform: uppercase;
+  }
+  .sbadge.hi { border-color: var(--green-mid); color: var(--green-mid); }
+  .sbadge.amber { border-color: var(--amber); color: var(--amber); }
+  .session-progress-wrap { margin-top: auto; }
+  .session-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: var(--green-mid); letter-spacing: 1px; margin-bottom: 3px;
+  }
+  .session-progress-bar { height: 5px; background: var(--green-dim); overflow: hidden; }
+  .session-progress-fill {
+    height: 100%; background: var(--green);
+    box-shadow: 0 0 6px var(--green-glow); transition: width 2s ease;
+  }
+  .session-user {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.65rem; color: var(--green-mid); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .session-avatar {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1px solid var(--green-dim); overflow: hidden; flex-shrink: 0;
+  }
+  .session-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .no-streams {
+    font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--green-dim);
+    letter-spacing: 3px; text-align: center; padding: 40px;
+    border: 1px solid var(--green-dim); width: 100%;
+    animation: blink 2s step-end infinite;
+  }
+
+  /* ── MEDIA PLAYER CARDS (Sonos / Apple TV) ── */
+  .mp-grid {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch;
+  }
+  .mp-card {
+    display: flex; gap: 12px; border: 1px solid var(--green-dim);
+    background: var(--green-faint); padding: 12px;
+    flex: 1; min-width: 260px; max-width: 400px;
+    position: relative; transition: all 0.3s;
+  }
+  .mp-card.playing {
+    border-color: var(--green-mid);
+    background: rgba(74,250,106,0.09);
+    box-shadow: 0 0 12px var(--green-glow);
+  }
+  .mp-card.paused { opacity: 0.7; }
+  .mp-art {
+    width: 60px; height: 60px; flex-shrink: 0;
+    background: var(--bg2); border: 1px solid var(--green-dim); overflow: hidden;
+  }
+  .mp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mp-art-ph {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-family: 'VT323', monospace; font-size: 1.4rem; color: var(--green-dim);
+  }
+  .mp-info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; overflow: hidden; }
+  .mp-name {
+    font-size: 0.65rem; color: var(--green-mid); letter-spacing: 1px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .mp-name .mp-type {
+    font-size: 0.6rem; padding: 0 4px; border: 1px solid var(--green-dim); color: var(--green-dim);
+  }
+  .mp-card.playing .mp-name .mp-type { border-color: var(--green-mid); color: var(--green-mid); }
+  .mp-title {
+    font-family: 'VT323', monospace; font-size: 1rem; color: var(--green);
+    letter-spacing: 1px; text-shadow: 0 0 8px var(--green-glow);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mp-artist {
+    font-size: 0.68rem; color: var(--green-mid); letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mp-source {
+    font-size: 0.6rem; color: var(--green-dim); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .mp-vol-wrap {
+    display: flex; align-items: center; gap: 6px; margin-top: 2px;
+  }
+  .mp-vol-label { font-size: 0.6rem; color: var(--green-dim); letter-spacing: 1px; }
+  .mp-vol-bar {
+    flex: 1; height: 4px; background: var(--green-dim); overflow: hidden;
+  }
+  .mp-vol-fill {
+    height: 100%; background: var(--green);
+    box-shadow: 0 0 4px var(--green-glow); transition: width 0.5s;
+  }
+  .mp-vol-pct { font-size: 0.6rem; color: var(--green-mid); width: 28px; text-align: right; }
+  .mp-state-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .mp-card.playing .mp-state-dot {
+    background: var(--green); box-shadow: 0 0 6px var(--green);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  .mp-card.paused .mp-state-dot {
+    background: var(--amber); box-shadow: 0 0 4px var(--amber);
+  }
+  .mp-progress-wrap { margin-top: 3px; }
+  .mp-progress-bar {
+    height: 4px; background: var(--green-dim); overflow: hidden;
+  }
+  .mp-progress-fill {
+    height: 100%; background: var(--green);
+    box-shadow: 0 0 4px var(--green-glow); transition: width 2s ease;
+  }
+  .mp-card.paused .mp-progress-fill {
+    background: var(--amber); box-shadow: 0 0 4px var(--amber);
+  }
+  .mp-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.58rem; color: var(--green-dim); letter-spacing: 1px; margin-top: 2px;
+  }
+  .mp-badge {
+    display: inline-block; font-size: 0.55rem; letter-spacing: 1px; padding: 0 4px;
+    border: 1px solid var(--green-dim); color: var(--green-dim); margin-left: 4px;
+    vertical-align: middle;
+  }
+  .mp-badge.muted { border-color: var(--red); color: var(--red); }
+  .no-mp {
+    font-family: 'VT323', monospace; font-size: 0.9rem; color: var(--green-dim);
+    letter-spacing: 2px; text-align: center; padding: 16px; width: 100%;
+  }
+  .summary-text {
+    font-size: 0.65rem; color: var(--green-mid); letter-spacing: 0.5px; line-height: 1.6; margin-top: 4px;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  }
+
+  /* ── WCAG 2.2 FOCUS STYLES ── */
+  :focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(74,250,106,0.25);
+  }
+  .tab:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+  .lc-toggle input:focus-visible ~ .lc-toggle-track {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+  }
+  .lc-dimmer:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 4px;
+  }
+  button:focus-visible { cursor: pointer; }
+
+  button, .lc-toggle, .tab { cursor: pointer; }
+
+
+  /* ── GEIGER COUNTER ── */
+  .geiger-wrap {
+    display: flex; gap: 18px; align-items: center;
+    padding: 12px 16px; border: 1px solid var(--green-dim);
+    background: var(--green-faint); margin-bottom: 14px;
+  }
+  .geiger-display {
+    display: flex; flex-direction: column; gap: 4px; flex: 1;
+  }
+  .geiger-title {
+    font-family: 'VT323', monospace; font-size: 1rem; letter-spacing: 3px;
+    color: var(--green-mid);
+  }
+  .geiger-rad {
+    font-family: 'VT323', monospace; font-size: 2rem; line-height: 1;
+    text-shadow: 0 0 12px currentColor; transition: color 0.5s;
+  }
+  .geiger-rad.safe   { color: var(--green); }
+  .geiger-rad.low    { color: #aaff44; }
+  .geiger-rad.mid    { color: var(--amber); }
+  .geiger-rad.high   { color: #ff6600; }
+  .geiger-rad.danger { color: var(--red); animation: blink 0.4s step-end infinite; }
+  .geiger-bar-wrap {
+    flex: 1; height: 10px; background: var(--bg2);
+    border: 1px solid var(--green-dim); overflow: hidden; position: relative;
+  }
+  .geiger-bar-fill {
+    height: 100%; transition: width 1.5s ease, background 1s;
+    box-shadow: 0 0 8px currentColor;
+  }
+  .geiger-sublabel {
+    font-size: 0.65rem; color: var(--green-mid); letter-spacing: 1px; margin-top: 3px;
+  }
+  .geiger-ticker {
+    font-family: 'VT323', monospace; font-size: 0.85rem; letter-spacing: 2px;
+    color: var(--green-dim); height: 1.2em; overflow: hidden; white-space: nowrap;
+    min-width: 100px; text-align: right;
+  }
+
+  /* ── THREAT LEVEL ── */
+  .threat-wrap {
+    display: flex; gap: 14px; align-items: stretch;
+    padding: 12px 16px; border: 1px solid var(--green-dim);
+    background: var(--green-faint); margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .threat-main {
+    display: flex; flex-direction: column; gap: 6px; min-width: 180px;
+  }
+  .threat-title {
+    font-family: 'VT323', monospace; font-size: 1rem; letter-spacing: 3px; color: var(--green-mid);
+  }
+  .threat-level {
+    font-family: 'VT323', monospace; font-size: 2rem; line-height: 1;
+    letter-spacing: 2px; text-shadow: 0 0 16px currentColor; transition: color 0.5s;
+  }
+  .threat-level.green  { color: var(--green); }
+  .threat-level.yellow { color: var(--amber); }
+  .threat-level.orange { color: #ff6600; }
+  .threat-level.red    { color: var(--red); animation: blink 0.6s step-end infinite; }
+  .threat-sensors {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .threat-chip {
+    font-size: 0.65rem; letter-spacing: 1px; padding: 2px 8px;
+    border: 1px solid var(--green-dim); color: var(--green-dim); text-transform: uppercase;
+  }
+  .threat-chip.triggered {
+    border-color: var(--red); color: var(--red);
+    text-shadow: 0 0 6px var(--red); animation: pulse-dot 1s ease-in-out infinite;
+  }
+  .threat-chip.warn {
+    border-color: var(--amber); color: var(--amber);
+  }
+
+  /* ── ENERGY GRAPH (shared.js uses lc-energy-*) ── */
+  .energy-wrap { margin-bottom: 14px; }
+  #lc-energy-chart {
+    position: relative; height: 80px;
+    display: flex; align-items: flex-end; gap: 1px;
+  }
+  .lc-energy-bar {
+    flex: 1; position: relative; height: 100%; display: flex; align-items: flex-end;
+    cursor: pointer;
+  }
+  .lc-energy-bar-power {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--green); opacity: 0.85;
+    box-shadow: 0 0 4px var(--green-glow);
+    transition: height 1s ease;
+  }
+  .lc-energy-bar-price {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    opacity: 0.35; transition: height 1s ease;
+  }
+  .lc-energy-bar.current .lc-energy-bar-power {
+    background: var(--amber); box-shadow: 0 0 8px var(--amber);
+  }
+  #lc-energy-xaxis {
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px;
+    margin-top: 3px;
+  }
+  .energy-legend {
+    display: flex; gap: 16px; font-size: 0.65rem; letter-spacing: 1px; margin-top: 6px; flex-wrap: wrap;
+  }
+  .energy-total {
+    font-family: 'VT323', monospace; font-size: 1.4rem; color: var(--green);
+    text-shadow: 0 0 8px var(--green-glow); letter-spacing: 2px;
+  }
+  .energy-cost {
+    font-size: 0.65rem; color: var(--amber); letter-spacing: 1px; margin-top: 2px;
+  }
+
+  /* ── POWER CHIP ── */
+  .sensor-chip.active.power { color: var(--amber); border-color: var(--amber); }
+
+  /* ── DAY/NIGHT AWARENESS ── */
+  body.night-mode .crt-flicker {
+    animation: flicker 5s infinite;
+  }
+  @keyframes flicker-night {
+    0%,100%   { opacity: 1; }
+    88%       { opacity: 1; }
+    88.5%     { opacity: 0.78; }
+    89%       { opacity: 1; }
+    92%       { opacity: 1; }
+    92.3%     { opacity: 0.82; }
+    92.6%     { opacity: 1; }
+    96%       { opacity: 1; }
+    96.3%     { opacity: 0.85; }
+    96.6%     { opacity: 1; }
+  }
+  body.night-mode { --scanline-h: 2px; }
+  body.night-mode::after {
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.88) 100%);
+  }
+
+  /* ── REDUCED MOTION ── */
+  @media (prefers-reduced-motion: reduce) {
+    .crt-flicker { animation: none !important; }
+    body::before { background: none !important; }
+    * { transition-duration: 0s !important; animation-duration: 0s !important; }
+  }
+
+  /* ── HIGH CONTRAST ── */
+  @media (prefers-contrast: more) {
+    .room-card { border-width: 2px; }
+    .sensor-chip { border-width: 2px; }
+    .tab { border-width: 2px; }
+  }
+
+/* THEME SWITCHER */
+.theme-zone { position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998; cursor: pointer; }
+.theme-switcher {
+  position: fixed; bottom: 12px; left: 12px; z-index: 9999;
+  display: flex; gap: 6px; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.theme-switcher.visible { opacity: 1; pointer-events: auto; }
+.theme-switcher-btn {
+  width: 40px; height: 40px; border: 2px solid var(--green); border-radius: 50%;
+  background: var(--bg); color: var(--green); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.2s; font-family: inherit;
+}
+.theme-switcher-btn:hover { background: var(--green); color: var(--bg); transform: scale(1.1); }
+.theme-switcher-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+.theme-menu {
+  display: none; position: absolute; bottom: 48px; left: 0;
+  background: #0a0f0a; border: 2px solid var(--green); border-radius: 4px;
+  padding: 6px 0; min-width: 180px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.theme-menu.open { display: block; }
+.theme-menu a {
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+  color: var(--green-dim); text-decoration: none; font-size: 0.75rem; font-family: inherit;
+  letter-spacing: 1px; white-space: nowrap;
+}
+.theme-menu a:hover { background: rgba(0,255,65,0.1); color: var(--green); }
+.theme-menu a.active { color: var(--green); font-weight: bold; }
+.theme-menu a .tm-icon { width: 22px; text-align: center; font-size: 14px; }
+
+/* NIGHT PROTOCOL BUTTON */
+.night-protocol-btn {
+  display: block; margin: 0 0 12px 0; padding: 10px 24px;
+  background: transparent; border: 1px solid var(--green); border-radius: 0;
+  color: var(--green); font-family: inherit; font-size: 0.7rem;
+  letter-spacing: 2px; cursor: pointer; transition: background 0.2s, color 0.2s;
+}
+.night-protocol-btn:hover { background: var(--green); color: var(--bg); }
+.night-protocol-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+</style>
+</head>
+<body class="crt-flicker">
+<a href="#main-content" class="skip-link" style="position:absolute;top:-40px;left:0;background:var(--green);color:var(--bg);padding:8px 16px;z-index:99999;font-family:'Share Tech Mono',monospace;font-size:0.875rem;letter-spacing:1px;transition:top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">SKIP TO MAIN CONTENT</a>
+
+<div class="pip" role="application" aria-label="Pip-Boy 3000 Home Management System">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="header-logo">PIP-<span>BOY</span> 3000</div>
+      <div style="font-size:0.65rem;letter-spacing:2px;color:var(--green-mid);margin-top:2px;">HOME MANAGEMENT SYSTEM // VAULT-TEC CORP</div>
+    </div>
+    <div class="header-meta">
+      <div class="live" aria-live="polite"><span id="conn-dot" class="status-dot connecting"></span> <span id="conn-label">CONNECTING...</span></div>
+      <div id="clock">--:--:--</div>
+      <div id="date-display">-- --- ----</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="page-stat" tabindex="0" onclick="switchTab('stat')">STAT</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-items" tabindex="-1" onclick="switchTab('items')">ITEMS</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-data" tabindex="-1" onclick="switchTab('data')">DATA</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-media" tabindex="-1" onclick="switchTab('media')">MEDIA</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-vault" tabindex="-1" onclick="switchTab('vault')">VAULT</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="main-content" tabindex="-1">
+
+    <!-- ═══════════════ STAT TAB ═══════════════ -->
+    <div class="page active" id="page-stat">
+      <div class="section-title">// ENVIRONMENTAL STATUS</div>
+
+      <div class="weather-strip">
+        <div class="w-item">
+          <label>OUTSIDE TEMP</label>
+          <span class="w-val" id="stat-temp">-- °C</span>
+        </div>
+        <div class="w-item">
+          <label>ELECTRICITY NOW</label>
+          <span class="w-val" id="stat-elec">-- SEK</span>
+        </div>
+        <div class="w-item">
+          <label>WASHER</label>
+          <span id="stat-washer" class="washer-badge idle">IDLE</span>
+        </div>
+        <div class="w-item">
+          <label>ACTIVE LIGHTS</label>
+          <span class="w-val" id="active-lights-count">--</span>
+        </div>
+      </div>
+
+      <div class="section-title">// ROOM STATUS</div>
+      <div class="room-grid" id="rooms-stat">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- ═══════════════ ITEMS TAB ═══════════════ -->
+    <div class="page" id="page-items">
+      <div class="section-title">// LIGHT CONTROL PANEL</div>
+      <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">VAULT CURFEW</button>
+      <div class="room-grid" id="rooms-items">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- ═══════════════ DATA TAB ═══════════════ -->
+    <div class="page" id="page-data">
+
+      <div class="section-title">// SOLAR EVENTS</div>
+      <div class="weather-strip" style="gap:32px;">
+        <div class="w-item">
+          <label>NEXT SUNRISE</label>
+          <span class="w-val" id="d-sunrise">--:--</span>
+        </div>
+        <div class="w-item">
+          <label>NEXT SUNSET</label>
+          <span class="w-val" id="d-sunset">--:--</span>
+        </div>
+        <div class="w-item">
+          <label>DAYLIGHT</label>
+          <span class="w-val" id="d-daylight">-- HRS</span>
+        </div>
+        <div class="w-item">
+          <label>SUN STATE</label>
+          <span class="w-val" id="d-sunstate">--</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:18px;">// WEATHER FORECAST (24H)</div>
+      <div id="d-weather" style="padding:4px 0 8px;">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="section-title" style="margin-top:18px;">// NORDPOOL PRICES (48H)</div>
+      <div style="padding:6px 0;">
+        <div id="d-np48"></div>
+        <div id="d-np48-xaxis"></div>
+        <div id="d-np48-minmax"></div>
+      </div>
+      <div id="np-chart" style="margin-top:14px;">
+        <div class="np-row">
+          <span class="np-label">LAST HR</span>
+          <div class="np-bar-wrap"><div class="data-bar-fill" id="np-last-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-last-val">--</span>
+        </div>
+        <div class="np-row">
+          <span class="np-label">NOW</span>
+          <div class="np-bar-wrap"><div class="data-bar-fill" id="np-now-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-now-val">--</span>
+        </div>
+        <div class="np-row">
+          <span class="np-label">NEXT HR</span>
+          <div class="np-bar-wrap"><div class="data-bar-fill" id="np-next-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-next-val">--</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:24px;">// TEMPERATURE GRAPH (NEXT 24H)</div>
+      <div style="padding:6px 0;">
+        <div id="d-tempgraph"></div>
+        <div style="display:flex;justify-content:space-between;font-size: 0.65rem;color:var(--green-dim);letter-spacing:1px;margin-top:4px;">
+          <span>NOW</span><span>+6H</span><span>+12H</span><span>+18H</span><span>+24H</span>
+        </div>
+        <div id="d-tempminmax"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:24px;">// SYSTEM DIAGNOSTICS</div>
+      <div style="font-size:0.72rem;letter-spacing:1px;line-height:2;">
+        <div style="color:var(--green-mid);">ENTITY COUNT <span style="float:right;color:var(--green);">10 LIGHTS + 16 SENSORS</span></div>
+        <div style="color:var(--green-mid);">INTEGRATIONS <span style="float:right;color:var(--green);">Z-WAVE / NORDPOOL / MET.NO / TMDB</span></div>
+        <div style="color:var(--green-mid);">NFC TAGS <span style="float:right;color:var(--green);">1 ACTIVE (SOFA)</span></div>
+        <div style="color:var(--green-mid);">AUTOMATIONS <span style="float:right;color:var(--green);">7 ACTIVE</span></div>
+        <div style="color:var(--green-mid);">SCRIPTS <span style="float:right;color:var(--green-dim);">NONE LOADED</span></div>
+      </div>
+
+      <div class="ascii-art" style="margin-top:20px;">
+     ___________________________
+    |  VAULT-TEC CORPORATION    |
+    |  HOME AUTOMATION UNIT     |
+    |  :::::::::::::::::::::::  |
+    |  SERIAL: HA-3000-SE       |
+    |  LOC: SOLNA, SECTOR 7     |
+    |  STATUS: [ OPERATIONAL ]  |
+    |___________________________|
+      </div>
+    </div>
+
+
+    <!-- ═══════════════ MEDIA TAB ═══════════════ -->
+    <div class="page" id="page-media">
+      <div class="section-title">// PLEX TRANSMISSION STATUS</div>
+
+      <div class="media-header-strip">
+        <div class="w-item">
+          <label>ACTIVE STREAMS</label>
+          <span class="w-val" id="m-stream-count">--</span>
+        </div>
+        <div class="w-item">
+          <label>DIRECT PLAY</label>
+          <span class="w-val" id="m-direct-play">--</span>
+        </div>
+        <div class="w-item">
+          <label>TRANSCODING</label>
+          <span class="w-val" id="m-transcode">--</span>
+        </div>
+        <div class="w-item">
+          <label>TOTAL BANDWIDTH</label>
+          <span class="w-val" id="m-bandwidth">-- kbps</span>
+        </div>
+        <div class="w-item">
+          <label>LAN / WAN</label>
+          <span class="w-val" id="m-lan-wan">-- / --</span>
+        </div>
+      </div>
+
+      <div class="section-title">// NOW PLAYING</div>
+      <div id="no-media-msg" class="no-streams">// NO ACTIVE TRANSMISSIONS //</div>
+      <div class="sessions-grid" id="sessions-grid"></div>
+      <div class="mp-grid" id="mp-grid"></div>
+    </div>
+
+
+    <!-- ═══════════════ VAULT TAB ═══════════════ -->
+    <div class="page" id="page-vault">
+
+      <div class="section-title">// GEIGER COUNTER — RADIATION MONITOR</div>
+      <div class="geiger-wrap">
+        <div class="geiger-display">
+          <div class="geiger-title">RAD LEVEL</div>
+          <div class="geiger-rad safe" id="geiger-rad">0.00 μSv/h</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+            <div class="geiger-bar-wrap" style="flex:1;">
+              <div class="geiger-bar-fill safe" id="geiger-bar" style="width:0%;color:var(--green);"></div>
+            </div>
+          </div>
+          <div class="geiger-sublabel" id="geiger-source">SOURCE: BALCONY LUX SENSOR (PROXY)</div>
+          <div class="geiger-sublabel" id="geiger-lux">AMBIENT LUX: --</div>
+        </div>
+        <div class="geiger-ticker" id="geiger-ticker" aria-live="polite" aria-label="Geiger counter ticker"></div>
+      </div>
+
+      <div class="section-title">// THREAT ASSESSMENT</div>
+      <div class="threat-wrap">
+        <div class="threat-main">
+          <div class="threat-title">THREAT LEVEL</div>
+          <div class="threat-level green" id="threat-level">● SECURE</div>
+          <div class="geiger-sublabel" id="threat-reason">ALL SENSORS NOMINAL</div>
+        </div>
+        <div class="threat-sensors" id="threat-sensors">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <div class="section-title">// ENERGY CONSUMPTION VS PRICE</div>
+      <div class="energy-wrap">
+        <div style="display:flex;gap:16px;align-items:baseline;margin-bottom:8px;">
+          <div>
+            <div style="font-size:0.65rem;color:var(--green-mid);letter-spacing:1px;">CURRENT LOAD</div>
+            <div class="energy-total" id="lc-energy-total">-- W</div>
+          </div>
+          <div>
+            <div style="font-size:0.65rem;color:var(--green-mid);letter-spacing:1px;">EST. COST NOW</div>
+            <div class="energy-cost" id="lc-energy-cost">-- SEK/h</div>
+          </div>
+          <div>
+            <div style="font-size:0.65rem;color:var(--green-mid);letter-spacing:1px;">PRICE NOW</div>
+            <div class="energy-cost" id="lc-energy-price">-- SEK/kWh</div>
+          </div>
+        </div>
+        <div id="lc-energy-chart">
+          <div style="color:var(--green-dim);font-size:0.75rem;align-self:center;">AWAITING DATA...</div>
+        </div>
+        <div id="lc-energy-xaxis"></div>
+        <div class="energy-legend">
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--green);margin-right:4px;"></span>POWER (W)</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--amber);opacity:0.5;margin-right:4px;"></span>PRICE OVERLAY</span>
+          <span style="margin-left:auto;color:var(--green-dim);font-size:0.65rem;" id="lc-energy-minmax"></span>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span id="footer-status">V1.0.0 // ROBCO INDUSTRIES UNIFIED OPERATING SYSTEM</span>
+    <span>COPYRIGHT 2077 ROBCO IND.</span>
+  </div>
+
+</div><!-- /pip -->
+
+<!-- THEME SWITCHER -->
+<div class="theme-zone" onclick="showSwitcher()"></div>
+<div class="theme-switcher" id="theme-switcher">
+  <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme">&#9762;</button>
+  <div class="theme-menu" id="theme-menu">
+    <a href="lcars-dashboard.html"><span class="tm-icon">&#9651;</span> LCARS</a>
+    <a href="pipboy-dashboard.html" class="active"><span class="tm-icon">&#9762;</span> PIP-BOY</a>
+    <a href="c64-dashboard.html"><span class="tm-icon">C=</span> C64</a>
+    <a href="matrix-dashboard.html"><span class="tm-icon">&#9679;</span> MATRIX</a>
+    <a href="weyland-dashboard.html"><span class="tm-icon">W-Y</span> WEYLAND</a>
+  </div>
+  <button class="theme-switcher-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#9974;</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="config.js"></script>
+<script>
+const THEME = {
+  title: 'PIP-BOY 3000',
+  subtitle: 'HOME MANAGEMENT SYSTEM // VAULT-TEC CORP',
+  footer: 'VAULT-TEC CORPORATION // HOME AUTOMATION UNIT',
+  tabs: ['STAT', 'ITEMS', 'DATA', 'MEDIA', 'VAULT'],
+  tabIds: ['stat', 'items', 'data', 'media', 'vault'],
+  emptyMedia: '// NO ACTIVE TRANSMISSIONS //',
+  connOnline: 'SYSTEM ONLINE',
+  connOffline: 'OFFLINE',
+  connConnecting: 'CONNECTING...',
+  connToast: 'CONNECTED TO VAULT SYSTEMS',
+  footerOnline: 'STATUS: [ OPERATIONAL ]',
+  footerConnecting: 'ESTABLISHING LINK...',
+  footerOffline: 'LINK FAILURE — RETRYING',
+
+  sensors: { temp: {icon:'🌡 ', unit:'°'}, hum: {icon:'💧 ', unit:'%'}, lux: {icon:'☀ ', unit:' lx'} },
+  dimmerColors: { fill: '--green', bg: '--green-dim' },
+  clockEl: 'clock',
+  dateEl: 'date-display',
+  lightCountEls: ['active-lights-count'],
+  nightToast: 'VAULT CURFEW ENGAGED',
+  toastArrow: '>',
+
+  onInit() {
+    renderGeiger();
+    renderThreat();
+  },
+  onStatesLoaded() {
+    renderGeiger();
+    renderThreat();
+  },
+  onIngest(id, s) {
+    if (id.includes('motion') || id.includes('door')) {
+      renderThreat();
+    }
+  },
+  onStateChanged(id, s) {
+    if (id.includes('power')) renderGeiger();
+  },
+  intervals: [
+    [() => renderThreat(), 5000],
+    [() => renderGeiger(), 3000]
+  ]
+};
+
+// ── PIPBOY-SPECIFIC: Geiger Counter ──
+let geigerInterval = null;
+let geigerTickPhase = 0;
+
+function luxToRad(lux) {
+  // Map 0–100000 lux to 0–5 μSv/h (creative proxy, not real physics)
+  if (lux === null) return 0;
+  return Math.min(5, (lux / 100000) * 5);
+}
+
+function renderGeiger() {
+  const lux = liveData.outsideLux;
+  const rad = luxToRad(lux);
+  const radEl   = document.getElementById('geiger-rad');
+  const barEl   = document.getElementById('geiger-bar');
+  const luxEl   = document.getElementById('geiger-lux');
+  if (!radEl) return;
+
+  const pct = (rad / 5) * 100;
+  let levelClass, levelLabel;
+  if (rad < 0.1)      { levelClass = 'safe';   levelLabel = 'SAFE';   }
+  else if (rad < 0.5) { levelClass = 'low';    levelLabel = 'LOW';    }
+  else if (rad < 1.5) { levelClass = 'mid';    levelLabel = 'MODERATE'; }
+  else if (rad < 3.0) { levelClass = 'high';   levelLabel = 'HIGH';   }
+  else                { levelClass = 'danger'; levelLabel = 'DANGER'; }
+
+  const colors = { safe:'var(--green)', low:'#aaff44', mid:'var(--amber)', high:'#ff6600', danger:'var(--red)' };
+  radEl.textContent = rad.toFixed(3) + ' μSv/h';
+  radEl.className = 'geiger-rad ' + levelClass;
+  barEl.style.width = pct.toFixed(1) + '%';
+  barEl.style.color = colors[levelClass];
+  barEl.style.background = colors[levelClass];
+  if (luxEl) luxEl.textContent = 'AMBIENT LUX: ' + (lux !== null ? lux.toFixed(0) : '--');
+
+  // Door open at night bumps reading
+  const hour = new Date().getHours();
+  if (liveData.balconyDoorOpen && (hour < 6 || hour > 22)) {
+    radEl.textContent = (rad + 0.8).toFixed(3) + ' μSv/h';
+  }
+
+  // Ticker animation speed proportional to radiation
+  const clickRate = Math.max(200, 3000 - (rad / 5) * 2800);
+  if (geigerInterval) clearInterval(geigerInterval);
+  geigerInterval = setInterval(() => {
+    const tickEl = document.getElementById('geiger-ticker');
+    if (!tickEl) return;
+    const chars = ['· · ·', '·  · ·', ' · ·  ·', '·   ·', '· ·  '];
+    geigerTickPhase = (geigerTickPhase + 1) % chars.length;
+    tickEl.textContent = chars[geigerTickPhase];
+  }, clickRate);
+}
+
+// ── PIPBOY-SPECIFIC: Threat Level ──
+function renderThreat() {
+  const door    = liveData.balconyDoorOpen;
+  const motions = [liveData.motionKitchen, liveData.motionHall, liveData.motionBalcony, liveData.motionEntrance];
+  const anyMotion = motions.some(Boolean);
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour > 22;
+
+  let level, label, reason;
+  if (door && anyMotion) {
+    level = 'red'; label = '⚠ BREACH'; reason = 'DOOR OPEN + MOTION DETECTED';
+  } else if (door && isNight) {
+    level = 'orange'; label = '▲ ELEVATED'; reason = 'BALCONY DOOR OPEN AT NIGHT';
+  } else if (door) {
+    level = 'yellow'; label = '◆ CAUTION'; reason = 'BALCONY DOOR OPEN';
+  } else if (anyMotion) {
+    level = 'yellow'; label = '◆ CAUTION'; reason = 'MOTION DETECTED';
+  } else {
+    level = 'green'; label = '● SECURE'; reason = 'ALL SENSORS NOMINAL';
+  }
+
+  const levelEl  = document.getElementById('threat-level');
+  const reasonEl = document.getElementById('threat-reason');
+  const sensorsEl = document.getElementById('threat-sensors');
+  if (!levelEl) return;
+
+  levelEl.textContent = label;
+  levelEl.className = 'threat-level ' + level;
+  if (reasonEl) reasonEl.textContent = reason;
+
+  if (sensorsEl) {
+    const chips = [
+      { label: 'BALCONY DOOR', active: door, warn: false },
+      { label: 'KITCHEN MOTION', active: liveData.motionKitchen, warn: false },
+      { label: 'HALL MOTION', active: liveData.motionHall, warn: false },
+      { label: 'BALCONY MOTION', active: liveData.motionBalcony, warn: false },
+      { label: 'ENTRANCE', active: liveData.motionEntrance, warn: false },
+    ];
+    sensorsEl.innerHTML = chips.map(c =>
+      `<span class="threat-chip ${c.active ? 'triggered' : ''}">${c.label}: ${c.active ? 'ACTIVE' : 'CLEAR'}</span>`
+    ).join('');
+  }
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>
