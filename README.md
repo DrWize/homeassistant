@@ -241,6 +241,46 @@ These Home Assistant entities must exist for full functionality:
 - `sensor.washer_power` — Real-time power draw (W)
 - `sensor.washer_energy` — Lifetime energy (kWh, used for monthly statistics)
 - `sensor.washer_water_consumption` — Lifetime water (L, used for monthly statistics)
+- `sensor.washer_cycle_count` — Wash cycle counter (requires counter helper + automation, see below)
+
+**Washer cycle counting (optional, for exact per-month counts):**
+
+Add to `configuration.yaml`:
+
+```yaml
+counter:
+  washer_cycles:
+    name: Washer Cycles
+    initial: 0
+    step: 1
+```
+
+Add this template sensor inside your existing `template:` → `sensor:` block:
+
+```yaml
+      - name: "Washer Cycle Count"
+        unique_id: washer_cycle_count
+        state: "{{ states('counter.washer_cycles') | int(0) }}"
+        state_class: total_increasing
+        unit_of_measurement: "cycles"
+```
+
+Add this automation (via UI or `automations.yaml`):
+
+```yaml
+- alias: "Count washer cycles"
+  trigger:
+    - platform: state
+      entity_id: sensor.washer_job_state
+      to: "wash"
+  condition:
+    - condition: template
+      value_template: "{{ trigger.from_state.state != 'wash' }}"
+  action:
+    - service: counter.increment
+      target:
+        entity_id: counter.washer_cycles
+```
 
 **Power (per-room):**
 - `sensor.*_power` — Smart plug power sensors

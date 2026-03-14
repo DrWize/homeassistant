@@ -96,7 +96,7 @@ const ALL_SENSOR_IDS = new Set([
 // Washer entities (handled separately in ingestState, not as numeric sensors)
 const WASHER_ENTITIES = [
   'sensor.washer_job_state','sensor.washer_machine_state','sensor.washer_completion_time',
-  'sensor.washer_power','sensor.washer_energy','sensor.washer_water_consumption',
+  'sensor.washer_power','sensor.washer_energy','sensor.washer_water_consumption','sensor.washer_cycle_count',
   'select.washer_water_temperature','select.washer_spin_level','number.washer_rinse_cycles',
 ];
 
@@ -115,7 +115,7 @@ let liveData = {
   outsideTemp: null, elecNow: null, elecLast: null, elecNext: null,
   washerRunning: false, washerJobState: 'none', washerMachineState: 'stop',
   washerCompletionTime: null, washerTemp: null, washerSpin: null, washerRinses: null,
-  washerPower: null, washerEnergyTotal: null, washerWaterTotal: null,
+  washerPower: null, washerEnergyTotal: null, washerWaterTotal: null, washerCyclesTotal: null,
   washerStats: { monthly: [], yearTotals: {} },
   tempNext24h: [],
   lights: {}, brightness: {}, sensors: {},
@@ -875,7 +875,8 @@ function renderWasher() {
     years.forEach(year => {
       const yearMonths = stats.monthly.filter(m => m.year === parseInt(year)).reverse();
       const yt = stats.yearTotals[year];
-      monthlyHtml += `<div class="washer-year-header">${year} TOTAL: ${yt.energy.toFixed(1)} kWh · ${(yt.water / 1000).toFixed(1)} m³</div>`;
+      const cycleStr = yt.cycles ? ` · ${yt.cycles} cycles` : '';
+      monthlyHtml += `<div class="washer-year-header">${year} TOTAL: ${yt.energy.toFixed(1)} kWh · ${(yt.water / 1000).toFixed(1)} m³${cycleStr}</div>`;
       monthlyHtml += '<div class="washer-month-grid">';
       // Find max energy for bar scaling
       const maxE = Math.max(...yearMonths.map(m => m.energy), 1);
@@ -886,6 +887,7 @@ function renderWasher() {
           <div class="washer-month-bar-wrap">
             <div class="washer-month-bar" style="width:${barPct}%"></div>
           </div>
+          <span class="washer-month-val">${m.cycles != null ? m.cycles + 'x' : ''}</span>
           <span class="washer-month-val">${m.energy.toFixed(1)} kWh</span>
           <span class="washer-month-val">${m.water.toFixed(0)} L</span>
         </div>`;
@@ -900,7 +902,8 @@ function renderWasher() {
   if (liveData.washerEnergyTotal != null || liveData.washerWaterTotal != null) {
     const e = liveData.washerEnergyTotal != null ? `${liveData.washerEnergyTotal.toFixed(1)} kWh` : '--';
     const w = liveData.washerWaterTotal != null ? `${(liveData.washerWaterTotal / 1000).toFixed(1)} m³` : '--';
-    lifetimeHtml = `<div class="washer-lifetime">${lifetimeLabel}: ${e} · ${w}</div>`;
+    const c = liveData.washerCyclesTotal != null ? ` · ${liveData.washerCyclesTotal} cycles` : '';
+    lifetimeHtml = `<div class="washer-lifetime">${lifetimeLabel}: ${e} · ${w}${c}</div>`;
   }
 
   panel.innerHTML = `
@@ -951,7 +954,7 @@ function haConnect() {
       ws.send(JSON.stringify({
         id: msgId++, type: 'recorder/statistics_during_period',
         start_time: new Date(Date.now() - 730 * 86400000).toISOString(),
-        statistic_ids: ['sensor.washer_energy', 'sensor.washer_water_consumption'],
+        statistic_ids: ['sensor.washer_energy', 'sensor.washer_water_consumption', 'sensor.washer_cycle_count'],
         period: 'month',
       }));
 
@@ -971,7 +974,8 @@ function haConnect() {
         // Parse monthly statistics for washer energy & water
         const energyStats = msg.result['sensor.washer_energy'] || [];
         const waterStats  = msg.result['sensor.washer_water_consumption'] || [];
-        // Build monthly data: { month: 'Jan 2025', energy: kWh, water: L }
+        const cycleStats  = msg.result['sensor.washer_cycle_count'] || [];
+        // Build monthly data: { month: 'Jan 2025', energy: kWh, water: L, cycles: N }
         const monthly = [];
         const yearTotals = {};
         energyStats.forEach((e, i) => {
@@ -981,10 +985,13 @@ function haConnect() {
           const energy = (e.change != null) ? e.change : (e.max - e.min);
           const w = waterStats[i];
           const water = w ? ((w.change != null) ? w.change : (w.max - w.min)) : 0;
-          monthly.push({ month: monthLabel, year, energy: Math.max(0, energy), water: Math.max(0, water) });
-          if (!yearTotals[year]) yearTotals[year] = { energy: 0, water: 0 };
+          const c = cycleStats[i];
+          const cycles = c ? Math.round((c.change != null) ? c.change : (c.max - c.min)) : null;
+          monthly.push({ month: monthLabel, year, energy: Math.max(0, energy), water: Math.max(0, water), cycles });
+          if (!yearTotals[year]) yearTotals[year] = { energy: 0, water: 0, cycles: 0 };
           yearTotals[year].energy += Math.max(0, energy);
           yearTotals[year].water  += Math.max(0, water);
+          yearTotals[year].cycles += (cycles || 0);
         });
         liveData.washerStats = { monthly, yearTotals };
         renderWasher();
@@ -1187,6 +1194,9 @@ function ingestState(s) {
   }
   if (id === 'sensor.washer_water_consumption') {
     liveData.washerWaterTotal = parseFloat(s.state) || null;
+  }
+  if (id === 'sensor.washer_cycle_count') {
+    liveData.washerCyclesTotal = parseInt(s.state) || null;
   }
   if (id === 'sensor.outside_temp_next_24h_hourly') {
     const temps = s.attributes?.temps;
