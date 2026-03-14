@@ -12,7 +12,27 @@ Five themed HTML dashboards for Home Assistant, sharing a common JavaScript core
 | **Matrix** | `matrix-dashboard.html` | The Matrix digital rain |
 | **Weyland-Yutani** | `weyland-dashboard.html` | Alien franchise MU/TH/UR 6000 |
 
-Each theme has unique visual extras:
+### LCARS — Star Trek
+![LCARS Dashboard](screenshots/lcars-systems.png)
+![LCARS Tabs Demo](screenshots/lcars-demo.gif)
+
+### Pip-Boy 3000 — Fallout
+![Pip-Boy Dashboard](screenshots/pipboy-systems.png)
+![Pip-Boy Tabs Demo](screenshots/pipboy-demo.gif)
+
+### Commodore 64
+![C64 Dashboard](screenshots/c64-systems.png)
+![C64 Tabs Demo](screenshots/c64-demo.gif)
+
+### Matrix
+![Matrix Dashboard](screenshots/matrix-systems.png)
+![Matrix Tabs Demo](screenshots/matrix-demo.gif)
+
+### Weyland-Yutani — Alien
+![Weyland Dashboard](screenshots/weyland-systems.png)
+![Weyland Tabs Demo](screenshots/weyland-demo.gif)
+
+### Theme-Specific Extras
 - **LCARS**: Animated radar sweep on the Sensors tab with randomized blip contacts
 - **Pip-Boy**: Geiger counter that ticks based on ambient lux, plus a threat assessment panel
 - **C64**: BASIC-style system log on the Security tab that logs events as numbered BASIC lines
