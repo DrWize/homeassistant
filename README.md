@@ -154,7 +154,7 @@ Theme-specific functions can reference `shared.js` globals (`liveData`, `rooms`,
 | **Controls/Lights** | Light toggle switches with dimmer sliders for supported lights, plus "all lights off" button |
 | **Data** | Weather forecast, Nordpool electricity price charts (48h + bar chart), temperature history graph |
 | **Media** | Plex session details (active streams, bandwidth, transcoding), Sonos/Apple TV now playing with album art and progress bars |
-| **Sensors** | Energy consumption vs. price, per-room sensor details, plus theme-specific unique panels |
+| **Sensors** | Energy consumption vs. price, washer panel (live status + monthly stats), plus theme-specific unique panels |
 
 ### Room Configuration
 
@@ -231,8 +231,16 @@ These Home Assistant entities must exist for full functionality:
 **Plex:**
 - `sensor.plex_*` — Plex media server sensors
 
-**Washer:**
-- `sensor.washerdryer_washer_job_state` — Washer state
+**Washer (Samsung SmartThings):**
+- `sensor.washer_job_state` — Current cycle phase (wash, rinse, spin, finish, none)
+- `sensor.washer_machine_state` — Machine state (run, stop, pause)
+- `sensor.washer_completion_time` — ETA timestamp
+- `select.washer_water_temperature` — Selected wash temperature
+- `select.washer_spin_level` — Selected spin speed (RPM)
+- `number.washer_rinse_cycles` — Number of rinse cycles
+- `sensor.washer_power` — Real-time power draw (W)
+- `sensor.washer_energy` — Lifetime energy (kWh, used for monthly statistics)
+- `sensor.washer_water_consumption` — Lifetime water (L, used for monthly statistics)
 
 **Power (per-room):**
 - `sensor.*_power` — Smart plug power sensors
@@ -274,6 +282,31 @@ Each dashboard has a themed button on the Controls/Lights tab that turns off all
 | C64 | POKE >D020,00 |
 | Matrix | DISCONNECT NODES |
 | Weyland | CREW HIBERNATION |
+
+### Washer Panel
+
+The Sensors tab includes a washer status panel powered by Samsung SmartThings entities. It shows:
+
+- **Live status**: current cycle phase with progress indicator (e.g. WASH → RINSE → SPIN)
+- **ETA countdown**: time remaining and estimated completion time
+- **Cycle settings**: temperature, spin speed, rinse count, power draw
+- **Monthly statistics**: energy (kWh) and water (L) bar charts per month, grouped by year
+- **Yearly totals**: cumulative energy and water per year
+- **Lifetime totals**: all-time energy and water consumption
+
+Monthly and yearly stats use HA's `recorder/statistics_during_period` API, which keeps long-term data indefinitely.
+
+Each theme uses its own labels:
+
+| Theme | Panel Title | Phase Names |
+|-------|------------|-------------|
+| LCARS | TEXTILE RECYCLER | SCAN → WASH → RINSE → SPIN → COMPLETE |
+| Pip-Boy | DECON UNIT | DETECT → WASH → RINSE → SPIN → CLEAR |
+| C64 | WASHER 1541-W | LOAD → WASH → RINSE → SPIN → READY. |
+| Matrix | CLEANSER | SENSE → PURIFY → FLUSH → EXTRACT → EXIT |
+| Weyland | DECON BAY 3 | WEIGH → DECON → RINSE → EXTRACT → SECURED |
+
+Customize labels via `THEME.washer` in each dashboard's inline script.
 
 ### Theme Switcher & Fullscreen
 
@@ -364,6 +397,7 @@ All state is tracked in a `liveData` object that maps entity IDs to their curren
 | `renderNordpool48h()` | Renders 48-hour electricity price chart |
 | `renderTempGraph()` | Renders temperature history sparkline |
 | `renderLcEnergy()` | Renders energy consumption vs price |
+| `renderWasher()` | Renders washer panel: live status, phase progress, monthly stats |
 | `toggleLight(id, on)` | Toggles a light and calls HA service |
 | `dimLight(id, value)` | Sets brightness and calls HA service |
 | `nightProtocol()` | Turns off all lights except Balcony |
