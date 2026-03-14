@@ -883,6 +883,33 @@ body.night-mode::before {
   margin-top: 4px; flex-wrap: wrap; color: var(--grey-mid);
 }
 
+/* ── WASHER PANEL ── */
+#washer-panel { background: var(--c64-dark-blue); border: 2px solid var(--c64-light-blue); padding: 10px 12px; margin-top: 8px; }
+.washer-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.washer-icon { font-size: 1rem; }
+.washer-title { font-size: 0.55rem; letter-spacing: 2px; color: var(--c64-light-blue); font-weight: bold; }
+.washer-status { margin-left: auto; font-size: 0.5rem; letter-spacing: 2px; padding: 2px 8px; }
+.washer-status.running { background: var(--c64-green); color: var(--c64-dark-blue); }
+.washer-status.complete { background: var(--c64-light-blue); color: var(--c64-dark-blue); }
+.washer-status.idle { color: var(--grey-mid); }
+.washer-phases { display: flex; align-items: center; gap: 3px; margin: 6px 0; font-size: 0.45rem; letter-spacing: 1px; }
+.washer-phase { padding: 2px 6px; color: var(--grey-mid); }
+.washer-phase.active { background: var(--c64-light-blue); color: var(--c64-dark-blue); font-weight: bold; }
+.washer-phase.done { color: var(--c64-green); }
+.washer-phase-sep { color: var(--grey-dark); }
+.washer-phase-sep.done { color: var(--c64-green); }
+.washer-eta { font-size: 0.5rem; color: var(--c64-orange); letter-spacing: 1px; display: block; margin: 4px 0; }
+.washer-settings { font-size: 0.45rem; color: var(--grey-mid); letter-spacing: 1px; margin: 4px 0; }
+.washer-stats { margin-top: 8px; }
+.washer-year-header { font-size: 0.45rem; letter-spacing: 2px; color: var(--c64-light-blue); margin: 8px 0 4px; border-bottom: 1px solid var(--c64-light-blue); padding-bottom: 3px; }
+.washer-month-grid { display: flex; flex-direction: column; gap: 2px; }
+.washer-month-row { display: flex; align-items: center; gap: 6px; font-size: 0.45rem; letter-spacing: 1px; }
+.washer-month-label { width: 28px; color: var(--grey-mid); }
+.washer-month-bar-wrap { flex: 1; height: 6px; background: var(--c64-dark-blue); border: 1px solid var(--c64-light-blue); overflow: hidden; }
+.washer-month-bar { height: 100%; background: var(--c64-light-blue); transition: width 0.3s; }
+.washer-month-val { width: 60px; text-align: right; color: var(--grey-mid); }
+.washer-lifetime { font-size: 0.45rem; letter-spacing: 2px; color: var(--grey-mid); margin-top: 8px; text-align: center; border-top: 1px solid var(--c64-light-blue); padding-top: 4px; }
+
 /* ═══ BASIC SYSTEM LOG ═══ */
 .basic-log {
   background: #000000;
@@ -1233,6 +1260,9 @@ body.night-mode::before {
           <span style="margin-left:auto;" id="lc-energy-minmax"></span>
         </div>
       </div>
+
+      <div class="section-heading" style="margin-top:8px;">PERIPHERAL: DATASETTE W</div>
+      <div id="washer-panel"></div>
     </div>
 
   </div><!-- /content -->
@@ -1281,6 +1311,12 @@ const THEME = {
   lightCountEls: ['stat-lights'],
   nightToast: 'POKE >D020,00',
   toastArrow: '>',
+  washer: {
+    title: 'WASHER 1541-W', icon: '▓',
+    phaseLabels: { weight_sensing:'LOAD', wash:'WASH', rinse:'RINSE', spin:'SPIN', finish:'READY.' },
+    statusLabels: { idle:'READY.', running:'RUN', paused:'BREAK', complete:'DONE.' },
+    lifetimeLabel: 'TOTAL BLOCKS', etaLabel: 'to READY',
+  },
 
   onToggleLight(entityId, on) {
     addBasicLogEntry(`${on ? 'OFF' : 'ON'} ${entityId.split('.')[1].toUpperCase()}`);

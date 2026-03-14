@@ -888,6 +888,33 @@
     font-size: 0.65rem; color: var(--amber); letter-spacing: 1px; margin-top: 2px;
   }
 
+  /* ── WASHER PANEL ── */
+  #washer-panel { background: rgba(0,0,0,0.4); border: 1px solid var(--green-dim); padding: 14px 16px; margin-top: 10px; }
+  .washer-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .washer-icon { font-size: 1.2rem; }
+  .washer-title { font-size: 0.85rem; letter-spacing: 2px; color: var(--green); font-weight: bold; font-family: 'VT323', monospace; }
+  .washer-status { margin-left: auto; font-size: 0.75rem; letter-spacing: 2px; padding: 2px 10px; font-family: 'VT323', monospace; }
+  .washer-status.running { background: var(--green); color: #000; }
+  .washer-status.complete { background: var(--amber); color: #000; }
+  .washer-status.idle { color: var(--green-dim); }
+  .washer-phases { display: flex; align-items: center; gap: 4px; margin: 8px 0; font-size: 0.7rem; letter-spacing: 1px; font-family: 'VT323', monospace; }
+  .washer-phase { padding: 2px 8px; color: var(--green-dim); }
+  .washer-phase.active { background: var(--green); color: #000; font-weight: bold; }
+  .washer-phase.done { color: var(--green); }
+  .washer-phase-sep { color: var(--green-dim); opacity: 0.3; }
+  .washer-phase-sep.done { color: var(--green); opacity: 1; }
+  .washer-eta { font-size: 0.75rem; color: var(--amber); letter-spacing: 1px; display: block; margin: 6px 0; font-family: 'VT323', monospace; }
+  .washer-settings { font-size: 0.7rem; color: var(--green-dim); letter-spacing: 1px; margin: 6px 0; font-family: 'VT323', monospace; }
+  .washer-stats { margin-top: 12px; }
+  .washer-year-header { font-size: 0.7rem; letter-spacing: 2px; color: var(--green); margin: 10px 0 6px; border-bottom: 1px solid var(--green-dim); padding-bottom: 4px; font-family: 'VT323', monospace; }
+  .washer-month-grid { display: flex; flex-direction: column; gap: 3px; }
+  .washer-month-row { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; letter-spacing: 1px; font-family: 'VT323', monospace; }
+  .washer-month-label { width: 30px; color: var(--green-dim); }
+  .washer-month-bar-wrap { flex: 1; height: 8px; background: rgba(0,255,65,0.1); border-radius: 3px; overflow: hidden; }
+  .washer-month-bar { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.3s; }
+  .washer-month-val { width: 65px; text-align: right; color: var(--green-dim); }
+  .washer-lifetime { font-size: 0.65rem; letter-spacing: 2px; color: var(--green-dim); margin-top: 10px; text-align: center; border-top: 1px solid var(--green-dim); padding-top: 6px; font-family: 'VT323', monospace; }
+
   /* ── POWER CHIP ── */
   .sensor-chip.active.power { color: var(--amber); border-color: var(--amber); }
 
@@ -1211,6 +1238,9 @@
         </div>
       </div>
 
+      <div class="section-title" style="margin-top:10px;">// DECONTAMINATION UNIT</div>
+      <div id="washer-panel"></div>
+
     </div>
 
   </div><!-- /content -->
@@ -1263,6 +1293,12 @@ const THEME = {
   lightCountEls: ['active-lights-count'],
   nightToast: 'VAULT CURFEW ENGAGED',
   toastArrow: '>',
+  washer: {
+    title: 'DECON UNIT', icon: '☢',
+    phaseLabels: { weight_sensing:'DETECT', wash:'WASH', rinse:'RINSE', spin:'SPIN', finish:'CLEAR' },
+    statusLabels: { idle:'OFFLINE', running:'ACTIVE', paused:'HELD', complete:'ALL CLEAR' },
+    lifetimeLabel: 'TOTAL USAGE', etaLabel: 'until clear',
+  },
 
   onInit() {
     renderGeiger();

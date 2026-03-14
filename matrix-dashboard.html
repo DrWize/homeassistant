@@ -922,6 +922,33 @@ html, body {
   margin-top: 6px; flex-wrap: wrap; color: var(--green-dark);
 }
 
+/* ── WASHER PANEL ── */
+#washer-panel { background: rgba(0,0,0,0.6); border: 1px solid var(--green-dark); border-radius: 4px; padding: 14px 16px; margin-top: 10px; }
+.washer-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.washer-icon { font-size: 1.2rem; }
+.washer-title { font-size: 0.85rem; letter-spacing: 2px; color: var(--green); font-weight: bold; }
+.washer-status { margin-left: auto; font-size: 0.75rem; letter-spacing: 2px; padding: 2px 10px; border-radius: 4px; }
+.washer-status.running { background: var(--green); color: #000; }
+.washer-status.complete { background: var(--green-dark); color: #000; }
+.washer-status.idle { color: var(--green-dark); }
+.washer-phases { display: flex; align-items: center; gap: 4px; margin: 8px 0; font-size: 0.7rem; letter-spacing: 1px; }
+.washer-phase { padding: 2px 8px; border-radius: 3px; color: var(--green-dark); }
+.washer-phase.active { background: var(--green); color: #000; font-weight: bold; }
+.washer-phase.done { color: var(--green); }
+.washer-phase-sep { color: #1a3a1a; }
+.washer-phase-sep.done { color: var(--green); }
+.washer-eta { font-size: 0.75rem; color: var(--green); letter-spacing: 1px; display: block; margin: 6px 0; }
+.washer-settings { font-size: 0.7rem; color: var(--green-dark); letter-spacing: 1px; margin: 6px 0; }
+.washer-stats { margin-top: 12px; }
+.washer-year-header { font-size: 0.7rem; letter-spacing: 2px; color: var(--green); margin: 10px 0 6px; border-bottom: 1px solid #1a3a1a; padding-bottom: 4px; }
+.washer-month-grid { display: flex; flex-direction: column; gap: 3px; }
+.washer-month-row { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; letter-spacing: 1px; }
+.washer-month-label { width: 30px; color: var(--green-dark); }
+.washer-month-bar-wrap { flex: 1; height: 8px; background: #1a3a1a; border-radius: 3px; overflow: hidden; }
+.washer-month-bar { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.3s; }
+.washer-month-val { width: 65px; text-align: right; color: var(--green-dark); }
+.washer-lifetime { font-size: 0.65rem; letter-spacing: 2px; color: var(--green-dark); margin-top: 10px; text-align: center; border-top: 1px solid #1a3a1a; padding-top: 6px; }
+
 /* WCAG FOCUS */
 :focus-visible {
   outline: 2px solid var(--green);
@@ -1277,6 +1304,11 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
           <span style="margin-left:auto;" id="lc-energy-minmax"></span>
         </div>
       </div>
+
+      <div class="lc-section" style="margin-top:8px;">
+        <div class="lc-section-pill">Purification Cycle</div>
+      </div>
+      <div id="washer-panel"></div>
     </div>
 
   </div><!-- /content -->
@@ -1333,6 +1365,12 @@ const THEME = {
   lightCountEls: ['stat-lights'],
   nightToast: 'NODES DISCONNECTED',
   toastArrow: '>',
+  washer: {
+    title: 'CLEANSER', icon: '◉',
+    phaseLabels: { weight_sensing:'SENSE', wash:'PURIFY', rinse:'FLUSH', spin:'EXTRACT', finish:'EXIT' },
+    statusLabels: { idle:'DORMANT', running:'ACTIVE', paused:'FROZEN', complete:'PURIFIED' },
+    lifetimeLabel: 'TOTAL CYCLES', etaLabel: 'to exit',
+  },
 
   onIngest(id, s) {
     if (id === 'sun.sun') updateRainSpeed();
