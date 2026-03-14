@@ -854,7 +854,7 @@ function haConnect() {
         }));
       }
       if (id.includes('nordpool'))       { renderNordpoolBars(); renderNordpool48h(); }
-      if (['sensor.outside_temperature_met_no','binary_sensor.washer_running',
+      if (['sensor.outside_temperature_met_no','sensor.washer_job_state',
            'sensor.nordpool_current_price_15m','sensor.nordpool_last_this_next_hour'].includes(id)) {
         renderEnviro();
       }
@@ -997,8 +997,8 @@ function ingestState(s) {
     renderMediaPlayers();
   }
 
-  if (id === 'binary_sensor.washer_running') {
-    liveData.washerRunning = s.state === 'on';
+  if (id === 'sensor.washer_job_state') {
+    liveData.washerRunning = s.state !== 'none' && s.state !== 'finish';
   }
   if (id === 'sensor.outside_temp_next_24h_hourly') {
     const temps = s.attributes?.temps;
