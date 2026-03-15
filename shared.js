@@ -154,6 +154,8 @@ let switcherTimer = null;
 // ═══════════════════════════════════════════════════
 // RENDER: ROOMS
 // ═══════════════════════════════════════════════════
+/** Render room cards with sensor readings, light switches, and dimmer sliders.
+ *  Runs on both the Systems and Controls tabs (builds cards for each). */
 function renderRooms() {
   const si = THEME.sensors || { temp: {icon:'🌡 ',unit:'°C'}, hum: {icon:'💧 ',unit:'%'}, lux: {icon:'☀ ',unit:' lx'}, power: {icon:'⚡ ',unit:' W'} };
   const dc = THEME.dimmerColors || { fill: '--orange', bg: '--grey' };
@@ -260,6 +262,11 @@ function renderRooms() {
 // ═══════════════════════════════════════════════════
 // TOGGLE / DIM
 // ═══════════════════════════════════════════════════
+/**
+ * Toggle a light on/off — updates local state immediately, then sends HA service call.
+ * @param {string} entityId - e.g. 'light.living_room_window'
+ * @param {boolean} on - true to turn on, false to turn off
+ */
 function toggleLight(entityId, on) {
   liveData.lights[entityId] = on;
   const safeId = entityId.replace('.', '_');
@@ -283,6 +290,11 @@ function nightProtocol() {
   showToast(THEME.nightToast || 'ALL LIGHTS OFF');
 }
 
+/**
+ * Set light brightness — updates local state and slider UI, then sends HA service call.
+ * @param {string} entityId - e.g. 'light.living_room_window'
+ * @param {number|string} value - brightness 0-255 (HA native range)
+ */
 function dimLight(entityId, value) {
   const bri = parseInt(value);
   liveData.brightness[entityId] = bri;
@@ -795,6 +807,17 @@ function renderLcEnergy() {
 // ═══════════════════════════════════════════════════
 // HA WEBSOCKET
 // ═══════════════════════════════════════════════════
+/**
+ * Connect to Home Assistant via WebSocket.
+ * Handles the full lifecycle: auth handshake → initial state fetch → real-time updates.
+ * Auto-reconnects after 5 seconds on disconnect.
+ *
+ * Message flow:
+ *   1. HA sends 'auth_required' → we reply with access token
+ *   2. HA sends 'auth_ok'       → we request all states + subscribe to changes + fetch forecasts
+ *   3. HA sends 'result'        → initial state dump (array) or service call responses
+ *   4. HA sends 'event'         → real-time state_changed events (one entity at a time)
+ */
 function haConnect() {
   setConnStatus('connecting');
   ws = new WebSocket(HA_WS);
@@ -804,9 +827,11 @@ function haConnect() {
   ws.onmessage = evt => {
     const msg = JSON.parse(evt.data);
 
+    // Step 1: HA asks for authentication
     if (msg.type === 'auth_required') {
       ws.send(JSON.stringify({ type: 'auth', access_token: HA_TOKEN }));
 
+    // Step 2: Auth succeeded — fetch initial data and subscribe to updates
     } else if (msg.type === 'auth_ok') {
       wsReady = true;
       setConnStatus('online');
@@ -814,6 +839,7 @@ function haConnect() {
       if (THEME.onAuthOk) THEME.onAuthOk();
       ws.send(JSON.stringify({ id: msgId++, type: 'get_states' }));
       ws.send(JSON.stringify({ id: msgId++, type: 'subscribe_events', event_type: 'state_changed' }));
+      // Fetch hourly weather forecast (returns as a 'result' message)
       weatherForecastMsgId = msgId;
       ws.send(JSON.stringify({
         id: msgId++, type: 'call_service',
@@ -821,7 +847,7 @@ function haConnect() {
         service_data: { entity_id: 'weather.forecast_home_2', type: 'hourly' },
         return_response: true
       }));
-      // Request washer statistics if enabled
+      // Request washer monthly statistics if enabled
       if (FEATURES.washer && typeof washerRequestStats === 'function') {
         washerRequestStats(
           data => ws.send(JSON.stringify(data)),
@@ -829,12 +855,15 @@ function haConnect() {
         );
       }
 
+    // Auth failed — bad token
     } else if (msg.type === 'auth_invalid') {
       setConnStatus('offline');
       showToast('AUTH FAILURE — CHECK TOKEN');
       if (THEME.onAuthFail) THEME.onAuthFail();
 
+    // Result messages: responses to get_states, service calls, and statistics requests
     } else if (msg.type === 'result' && msg.result) {
+      // get_states returns an array of all entity states — ingest them all and render everything
       if (Array.isArray(msg.result)) {
         msg.result.forEach(s => ingestState(s));
         renderRooms(); renderEnviro(); renderNordpoolBars();
@@ -843,8 +872,10 @@ function haConnect() {
         if (FEATURES.washer && typeof renderWasher === 'function') renderWasher();
         updateDayNight();
         if (THEME.onStatesLoaded) THEME.onStatesLoaded();
+      // Washer statistics result (monthly energy/water/cycles)
       } else if (FEATURES.washer && typeof washerHandleResult === 'function' && washerHandleResult(msg)) {
         // handled by washer module
+      // Weather forecast result
       } else if (msg.id === weatherForecastMsgId && msg.result?.response) {
         const fc = msg.result.response?.['weather.forecast_home_2']?.forecast;
         if (Array.isArray(fc)) {
@@ -853,15 +884,18 @@ function haConnect() {
         }
       }
 
+    // Real-time state change — a single entity updated
     } else if (msg.type === 'event' && msg.event?.event_type === 'state_changed') {
       const s = msg.event.data?.new_state;
       if (!s) return;
       ingestState(s);
       const id = s.entity_id;
+      // Re-render affected UI sections based on which entity changed
       if (id.startsWith('light.') || ALL_SENSOR_IDS.has(id)) renderRooms();
-      if (id in liveData.power) renderRooms(); // BUG FIX: power changes update room cards
+      if (id in liveData.power) renderRooms(); // Power sensor changes must also update room cards
       if (id === 'sun.sun')              { renderSun(); updateDayNight(); }
       if (id === 'weather.forecast_home_2') {
+        // Weather entity changed — re-fetch the hourly forecast
         weatherForecastMsgId = msgId;
         ws.send(JSON.stringify({
           id: msgId++, type: 'call_service',
@@ -888,27 +922,37 @@ function haConnect() {
     wsReady = false;
     setConnStatus('offline');
     clearTimeout(reconnectTimer);
-    reconnectTimer = setTimeout(haConnect, 5000);
+    reconnectTimer = setTimeout(haConnect, 5000); // Auto-reconnect after 5s
   };
 }
 
 // ═══════════════════════════════════════════════════
 // INGEST STATE
 // ═══════════════════════════════════════════════════
+/**
+ * Map a Home Assistant state object into the local `liveData` store.
+ * Called once per entity on initial load, and again on each real-time state_changed event.
+ * Each entity type updates its own section of liveData and may trigger re-renders.
+ *
+ * @param {Object} s - HA state object with { entity_id, state, attributes }
+ */
 function ingestState(s) {
   const id = s.entity_id;
 
+  // ── Lights: track on/off and brightness (0-255) ──
   if (id.startsWith('light.') && LIGHT_ENTITIES.includes(id)) {
     liveData.lights[id] = s.state === 'on';
     const bri = s.attributes?.brightness;
     liveData.brightness[id] = (bri != null) ? bri : (liveData.brightness[id] ?? 255);
   }
 
+  // ── Room sensors: temperature, humidity, lux ──
   if (ALL_SENSOR_IDS.has(id)) {
     const v = parseFloat(s.state);
     liveData.sensors[id] = isNaN(v) ? null : v;
   }
 
+  // ── Sun: rise/set times, elevation, above/below horizon ──
   if (id === 'sun.sun') {
     liveData.sun.nextRising  = s.attributes?.next_rising  ?? null;
     liveData.sun.nextSetting = s.attributes?.next_setting ?? null;
@@ -916,18 +960,22 @@ function ingestState(s) {
     liveData.sun.state       = s.state ?? null;
   }
 
+  // ── Environment: outside temp + electricity prices ──
   if (id === 'sensor.outside_temperature_met_no') {
     liveData.outsideTemp = isNaN(parseFloat(s.state)) ? null : parseFloat(s.state);
   }
   if (id === 'sensor.nordpool_current_price_15m') {
     liveData.elecNow = parseFloat(s.state) || null;
   }
+  // Nordpool composite sensor — tries multiple attribute names because different
+  // Nordpool integration versions expose prices under different keys
   if (id === 'sensor.nordpool_last_this_next_hour') {
     const stateVal = parseFloat(s.state);
     if (!isNaN(stateVal)) liveData.elecNow = stateVal;
     const attrs = s.attributes || {};
     const last = parseFloat(attrs.last_hour ?? attrs.last ?? attrs.price_last_hour ?? attrs.previous_hour ?? NaN);
     const next = parseFloat(attrs.next_hour ?? attrs.next ?? attrs.price_next_hour ?? NaN);
+    // Fallback: parse prices from the state string itself (e.g. "Last: 0.52 Next: 0.61")
     const rawLast = String(s.state || '').match(/Last[:\s]+([-\d.]+)/i);
     const rawNext = String(s.state || '').match(/Next[:\s]+([-\d.]+)/i);
     if (!isNaN(last))  liveData.elecLast = last;
@@ -936,6 +984,7 @@ function ingestState(s) {
     else if (rawNext)  liveData.elecNext = parseFloat(rawNext[1]);
   }
 
+  // ── Plex: active sessions from Tautulli sensors ──
   if (id.startsWith('sensor.plex_session_') && id.endsWith('_tautulli')) {
     const sessionNum = id.replace('sensor.plex_session_','').replace('_tautulli','');
     if (s.state === 'playing' || s.state === 'paused') {
@@ -977,6 +1026,7 @@ function ingestState(s) {
   if (id === 'sensor.tautulli_lan_bandwidth')             { liveData.lanBandwidth = parseFloat(s.state) || 0; }
   if (id === 'sensor.tautulli_wan_bandwidth')             { liveData.wanBandwidth = parseFloat(s.state) || 0; renderMedia(); }
 
+  // ── Power sensors: per-room wattage, tracked for energy chart history ──
   if (id in liveData.power) {
     const v = parseFloat(s.state);
     liveData.power[id] = isNaN(v) ? null : v;
@@ -987,6 +1037,7 @@ function ingestState(s) {
     liveData.outsideLux = isNaN(parseFloat(s.state)) ? null : parseFloat(s.state);
   }
 
+  // ── Media players: Sonos, Apple TV, etc. ──
   if (MEDIA_PLAYER_IDS.has(id)) {
     const meta = MEDIA_PLAYER_ENTITIES.find(e => e.id === id);
     if (s.state === 'playing' || s.state === 'paused') {
@@ -1041,6 +1092,12 @@ function ingestState(s) {
 // ═══════════════════════════════════════════════════
 // HA SERVICE CALL
 // ═══════════════════════════════════════════════════
+/**
+ * Send a service call to Home Assistant.
+ * @param {string} domain - e.g. 'light', 'switch', 'weather'
+ * @param {string} service - e.g. 'turn_on', 'turn_off', 'get_forecasts'
+ * @param {Object} data - service_data payload (e.g. { entity_id: '...' })
+ */
 function haCall(domain, service, data) {
   if (!ws || !wsReady) { showToast('NOT CONNECTED'); return; }
   ws.send(JSON.stringify({

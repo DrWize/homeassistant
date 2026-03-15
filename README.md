@@ -1,5 +1,7 @@
 # Home Assistant Themed Dashboards
 
+> **TL;DR** — 5 themed dashboards (LCARS, Pip-Boy, C64, Matrix, Weyland) that connect to Home Assistant via WebSocket. One shared JS core (`shared.js`) handles state, rendering, and light controls. Each theme is a single HTML file with inline CSS and a `THEME` object for customization. Drop files in `/config/www/`, add `config.js` with your HA token, and open as a Panel iframe. Optional `washer.js` module adds appliance monitoring (toggle via `FEATURES.washer`).
+
 Five themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
 ## Themes
@@ -510,6 +512,21 @@ All state is tracked in a `liveData` object that maps entity IDs to their curren
 | `updateDayNight()` | Toggles night-mode CSS class based on sun state |
 | `setConnStatus(s)` | Updates connection status display |
 | `showToast(msg)` | Shows temporary notification |
+
+### THEME Hooks
+
+Each dashboard defines a `THEME` object in an inline `<script>` before `shared.js` loads. Beyond styling properties, the THEME object supports callback hooks that `shared.js` calls at key lifecycle points:
+
+| Hook | When it fires | Use case |
+|------|--------------|----------|
+| `onAuthOk()` | WebSocket authenticated successfully | Start theme animations, show connection UI |
+| `onAuthFail()` | Authentication failed (bad token) | Show theme-specific error state |
+| `onStatesLoaded()` | All initial entity states received and rendered | Initialize theme features that depend on data |
+| `onStateChanged(id, s)` | A single entity state changed (real-time) | Update theme-specific panels (e.g. Matrix rain speed, Pip-Boy Geiger counter) |
+| `onIngest(id, s)` | Called inside `ingestState()` for every entity | Store theme-specific data from entities |
+| `onToggleLight(id, on)` | A light was toggled | Theme-specific toggle effects |
+| `onNightProtocol()` | "All lights off" was triggered | Theme-specific night mode |
+| `onWsError()` | WebSocket error occurred | Theme-specific error display |
 
 ### Performance Notes
 

@@ -1,5 +1,9 @@
 // ====== washer.js — Washer module for Home Assistant dashboards ======
 // Requires: shared.js loaded first (for THEME)
+//
+// Self-contained module: owns its own state (washerState), ingestion, rendering,
+// and WS statistics requests. Controlled by FEATURES.washer flag in shared.js.
+// All functions are called from shared.js via feature-guarded checks.
 
 // ═══════════════════════════════════════════════════
 // WASHER ENTITIES
@@ -14,25 +18,30 @@ const WASHER_ENTITIES = [
 // WASHER STATE
 // ═══════════════════════════════════════════════════
 const washerState = {
-  isActive: false,
-  jobState: 'none',
-  machineState: 'stop',
-  completionTime: null,
-  temp: null,
-  spin: null,
-  rinses: null,
-  power: null,
-  energyTotal: null,
-  waterTotal: null,
-  cyclesTotal: null,
-  stats: { monthly: [], yearTotals: {} },
+  isActive: false,        // true when a wash cycle is running
+  jobState: 'none',       // current phase: none | weight_sensing | wash | rinse | spin | finish
+  machineState: 'stop',   // machine state: stop | run | pause
+  completionTime: null,   // ISO timestamp of estimated completion
+  temp: null,             // selected water temperature (°C)
+  spin: null,             // selected spin speed (RPM)
+  rinses: null,           // number of rinse cycles
+  power: null,            // current power draw (W)
+  energyTotal: null,      // lifetime energy (kWh) — from HA long-term statistics
+  waterTotal: null,       // lifetime water (L) — from HA long-term statistics
+  cyclesTotal: null,      // lifetime wash count — from HA long-term statistics
+  stats: { monthly: [], yearTotals: {} },  // parsed monthly breakdown (last ~2 years)
 };
 
-let washerStatsMsgId = null;
+let washerStatsMsgId = null;  // tracks which WS message ID is our statistics request
 
 // ═══════════════════════════════════════════════════
 // WASHER INGEST
 // ═══════════════════════════════════════════════════
+/**
+ * Update washerState from a HA state object. Called by shared.js ingestState().
+ * @param {string} id - entity_id
+ * @param {Object} s - HA state object { state, attributes }
+ */
 function washerIngest(id, s) {
   if (id === 'sensor.washer_job_state') {
     washerState.jobState = s.state || 'none';
@@ -73,6 +82,14 @@ function washerIngest(id, s) {
 // ═══════════════════════════════════════════════════
 // WASHER STATS PARSING
 // ═══════════════════════════════════════════════════
+/**
+ * Parse monthly statistics from HA's recorder/statistics_during_period response.
+ * Each statistic entry has either a `change` field (preferred) or `max`/`min` fields
+ * as fallback — different HA versions expose them differently.
+ * Negative values are clamped to 0 (can occur during sensor resets).
+ *
+ * @param {Object} result - keyed by statistic_id, each value is an array of monthly entries
+ */
 function washerParseStats(result) {
   const energyStats = result['sensor.washer_energy'] || [];
   const waterStats  = result['sensor.washer_water_consumption'] || [];
@@ -83,6 +100,7 @@ function washerParseStats(result) {
     const d = new Date(e.start);
     const year = d.getFullYear();
     const monthLabel = d.toLocaleString('en', { month: 'short' });
+    // Prefer 'change' (net delta); fall back to max-min for older HA versions
     const energy = (e.change != null) ? e.change : (e.max - e.min);
     const w = waterStats[i];
     const water = w ? ((w.change != null) ? w.change : (w.max - w.min)) : 0;
@@ -101,16 +119,23 @@ function washerParseStats(result) {
 // ═══════════════════════════════════════════════════
 // WASHER WS REQUESTS
 // ═══════════════════════════════════════════════════
+/**
+ * Request monthly washer statistics from HA (last ~2 years).
+ * Uses callbacks so this module doesn't need direct access to the WebSocket.
+ * @param {Function} wsSend - sends a JSON object over the WS (shared.js provides this)
+ * @param {Function} getMsgId - returns the next message ID (shared.js provides this)
+ */
 function washerRequestStats(wsSend, getMsgId) {
   washerStatsMsgId = getMsgId();
   wsSend({
     id: washerStatsMsgId, type: 'recorder/statistics_during_period',
-    start_time: new Date(Date.now() - 730 * 86400000).toISOString(),
+    start_time: new Date(Date.now() - 730 * 86400000).toISOString(),  // ~2 years back
     statistic_ids: ['sensor.washer_energy', 'sensor.washer_water_consumption', 'sensor.washer_cycle_count'],
     period: 'month',
   });
 }
 
+/** Check if a WS result message is our statistics response. Returns true if handled. */
 function washerHandleResult(msg) {
   if (msg.id === washerStatsMsgId && msg.result) {
     washerParseStats(msg.result);
@@ -122,6 +147,7 @@ function washerHandleResult(msg) {
 // ═══════════════════════════════════════════════════
 // RENDER: WASHER ENVIRO BADGE
 // ═══════════════════════════════════════════════════
+/** Update the small washer status badge in the enviro bar and LCARS sidebar button. */
 function renderWasherBadge() {
   const w = washerState.isActive;
   const wb = document.getElementById('stat-washer');
@@ -143,6 +169,12 @@ const WASHER_PHASES = ['weight_sensing','wash','rinse','spin','finish'];
 const WASHER_PHASE_LABELS_DEFAULT = { weight_sensing:'WEIGH', wash:'WASH', rinse:'RINSE', spin:'SPIN', finish:'DONE' };
 const WASHER_STATUS_DEFAULT = { idle:'IDLE', running:'RUNNING', paused:'PAUSED', complete:'COMPLETE' };
 
+/**
+ * Render the full washer panel on the Sensors tab.
+ * Sections: status header, phase progress bar, ETA countdown,
+ * current cycle settings, monthly stats table, lifetime totals.
+ * Labels are customizable via THEME.washer (see README).
+ */
 function renderWasher() {
   const panel = document.getElementById('washer-panel');
   if (!panel) return;
