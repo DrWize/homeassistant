@@ -1468,6 +1468,10 @@ const THEME = {
 
   onIngest(id, s) {
     if (id === 'sun.sun') updateRainSpeed();
+    renderMonitor();
+  },
+  onStatesLoaded() {
+    renderMonitor();
   },
   onInit() {
     initRain();
@@ -1516,6 +1520,26 @@ function drawRain() {
   }
   rainCtx.globalAlpha = 1;
   rainTimerId = setTimeout(drawRain, RAIN_INTERVAL_MS);
+}
+
+function renderMonitor() {
+  const totalW = LC_POWER_SENSORS.reduce((s, id) => s + (liveData.power[id] ?? 0), 0);
+  const el1 = document.getElementById('sys-total-power');
+  if (el1) el1.textContent = totalW > 0 ? totalW.toFixed(1) + ' W' : '-- W';
+
+  const el2 = document.getElementById('sys-temp');
+  if (el2) el2.textContent = liveData.outsideTemp !== null ? liveData.outsideTemp.toFixed(1) + ' °C' : '-- °C';
+
+  const el3 = document.getElementById('sys-sun');
+  if (el3) {
+    const s = liveData.sun.state;
+    el3.textContent = s === 'above_horizon' ? 'ABOVE' : s === 'below_horizon' ? 'BELOW' : '--';
+  }
+
+  const el4 = document.getElementById('sys-nodes');
+  const allIds = Array.from(ALL_SENSOR_IDS);
+  const online = allIds.filter(sid => liveData.sensors[sid] !== null && liveData.sensors[sid] !== undefined).length;
+  if (el4) el4.textContent = online + '/' + allIds.length;
 }
 
 function updateRainSpeed() {
