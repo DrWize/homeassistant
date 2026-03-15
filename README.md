@@ -1,6 +1,6 @@
 # Home Assistant Themed Dashboards
 
-> **TL;DR** — 5 themed dashboards (LCARS, Pip-Boy, C64, Matrix, Weyland) that connect to Home Assistant via WebSocket. One shared JS core (`shared.js`) handles state, rendering, and light controls. Each theme is a single HTML file with inline CSS and a `THEME` object for customization. Drop files in `/config/www/`, add `config.js` with your HA token, and open as a Panel iframe. Optional `washer.js` module adds appliance monitoring (toggle via `FEATURES.washer`).
+> **Get running in 2 minutes**: `cp config.js.example config.js` → paste your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) → copy everything to `/config/www/` → open `http://your-ha:8123/local/lcars-dashboard.html`. Switch themes from the lower-left corner menu.
 
 Five themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
