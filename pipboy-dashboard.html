@@ -26,6 +26,7 @@
     --teal: #4afa6a;
     --blue: #2db84a;
     --white: #eeffee;
+    --grey: #1a4d2e;
     --grey-mid: #2d9e45;
     --scanline-h: 3px;
   }
@@ -1103,7 +1104,11 @@
         </div>
         <div class="w-item">
           <label>ACTIVE LIGHTS</label>
-          <span class="w-val" id="active-lights-count">--</span>
+          <span class="w-val" id="stat-lights">--</span>
+        </div>
+        <div class="w-item">
+          <label>SUN STATE</label>
+          <span class="w-val" id="stat-sun">--</span>
         </div>
       </div>
 
@@ -1176,6 +1181,10 @@
           <label>SUN STATE</label>
           <span class="w-val" id="d-sunstate">--</span>
         </div>
+        <div class="w-item">
+          <label>ELEVATION</label>
+          <span class="w-val" id="d-elevation">--°</span>
+        </div>
       </div>
 
       <div class="section-title" style="margin-top:18px;">// WEATHER FORECAST (24H)</div>
@@ -1222,6 +1231,7 @@
         <div style="color:var(--green-mid);">INTEGRATIONS <span style="float:right;color:var(--green);">Z-WAVE / NORDPOOL / MET.NO / TMDB</span></div>
         <div style="color:var(--green-mid);">NFC TAGS <span style="float:right;color:var(--green);">1 ACTIVE (SOFA)</span></div>
         <div style="color:var(--green-mid);">AUTOMATIONS <span style="float:right;color:var(--green);">7 ACTIVE</span></div>
+        <div style="color:var(--green-mid);">HA HOST <span style="float:right;color:var(--green);" id="diag-host">—</span></div>
         <div style="color:var(--green-mid);">SCRIPTS <span style="float:right;color:var(--green-dim);">NONE LOADED</span></div>
       </div>
 
@@ -1379,7 +1389,7 @@ const THEME = {
   dimmerColors: { fill: '--green', bg: '--green-dim' },
   clockEl: 'clock',
   dateEl: 'date-display',
-  lightCountEls: ['active-lights-count'],
+  lightCountEls: ['stat-lights'],
   nightToast: 'VAULT CURFEW ENGAGED',
   toastArrow: '>',
   washer: {

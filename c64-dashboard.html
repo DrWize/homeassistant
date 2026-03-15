@@ -43,6 +43,7 @@
   --purple: var(--c64-purple);
   --tan: var(--c64-light-grey);
   --white: var(--c64-white);
+  --green: var(--c64-green);
   --grey: #554499;
   --grey-mid: #9988CC;
 }
@@ -1262,7 +1263,7 @@ body.night-mode::before {
       <div class="diag-row"><span class="diag-key">INTEGRATIONS</span><span class="diag-val">Z-WAVE · NORDPOOL · MET.NO · TMDB</span></div>
       <div class="diag-row"><span class="diag-key">AUTOMATIONS</span><span class="diag-val">7 ACTIVE</span></div>
       <div class="diag-row"><span class="diag-key">NFC TAGS</span><span class="diag-val">1 ACTIVE (SOFA)</span></div>
-      <div class="diag-row"><span class="diag-key">HA HOST</span><span class="diag-val">HOMEASSISTANT.LOCAL:8123</span></div>
+      <div class="diag-row"><span class="diag-key">HA HOST</span><span class="diag-val" id="diag-host">HOMEASSISTANT.LOCAL:8123</span></div>
     </div>
 
     <!-- MEDIA TAB -->
@@ -1359,7 +1360,7 @@ body.night-mode::before {
   </div><!-- /content -->
 
   <!-- FOOTER -->
-  <div class="c64-footer">LOAD "*",8,1</div>
+  <div class="c64-footer">LOAD "*",8,1 <span style="opacity:0.5;">·</span> <span id="footer-status">SYSTEM INITIALIZING</span></div>
 
 </div><!-- /frame -->
 
