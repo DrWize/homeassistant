@@ -1336,14 +1336,8 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 <!-- THEME SWITCHER -->
 <div class="theme-zone" onclick="showSwitcher()"></div>
 <div class="theme-switcher" id="theme-switcher">
-  <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme">&#9679;</button>
-  <div class="theme-menu" id="theme-menu">
-    <a href="lcars-dashboard.html"><span class="tm-icon">&#9651;</span> LCARS</a>
-    <a href="pipboy-dashboard.html"><span class="tm-icon">&#9762;</span> PIP-BOY</a>
-    <a href="c64-dashboard.html"><span class="tm-icon">C=</span> C64</a>
-    <a href="matrix-dashboard.html" class="active"><span class="tm-icon">&#9679;</span> MATRIX</a>
-    <a href="weyland-dashboard.html"><span class="tm-icon">W-Y</span> WEYLAND</a>
-  </div>
+  <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme"></button>
+  <div class="theme-menu" id="theme-menu"></div>
   <button class="theme-switcher-btn" id="daynight-btn" onclick="toggleDayNight()" aria-label="Toggle day/night mode" title="Toggle day/night mode">☼ AUTO</button>
   <button class="theme-switcher-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#9974;</button>
 </div>

@@ -432,12 +432,40 @@ Press the **lower-left corner** of any dashboard to reveal a hidden menu:
 
 The controls auto-hide after 20 seconds of inactivity.
 
+### Fullscreen & Kiosk Mode
+
+The built-in fullscreen button uses the browser Fullscreen API, which works well on desktop but has limitations on tablets and wall-mounted displays:
+
+- **Android tablets**: Chrome exits fullscreen on page navigation (switching themes) and after screen timeout/wake. The status bar and navigation bar reappear.
+- **iPads**: Safari doesn't support the Fullscreen API at all. The button does nothing.
+- **Wall panels**: A browser crash or reboot leaves you at the home screen instead of the dashboard.
+
+**Recommended: [Fully Kiosk Browser](https://www.fully-kiosk.com/)** (Android, ~$7 one-time)
+
+Fully Kiosk solves all of these problems. It locks the device into a true fullscreen kiosk mode with no status bar, no navigation bar, and auto-restart on crash. Recommended settings:
+
+| Setting | Value | Why |
+|---------|-------|-----|
+| Start URL | `http://your-ha:8123/local/lcars-dashboard.html` | Opens your preferred theme on boot |
+| Enable Fullscreen | On | Hides Android status bar and nav bar |
+| Enable Kiosk Mode | On | Prevents users from leaving the app |
+| Keep Screen On | On | Prevents screen timeout (or set a schedule) |
+| Screensaver | Dimmed screen or black | Reduces burn-in on always-on displays |
+| Motion Detection | On (optional) | Wakes screen when someone walks by |
+| Restart on Crash | On | Auto-recovers from browser crashes |
+| Restart on Idle | Off (or set hours) | Optional nightly restart for memory cleanup |
+| JavaScript Errors | Ignore | Prevents error popups from blocking the UI |
+
+> **Tip**: Fully Kiosk also exposes a REST API you can integrate with Home Assistant to remotely control screen brightness, reload pages, or wake the display via automations.
+
 ### PWA / Add to Home Screen
 
 All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 1. Open the dashboard in Chrome
 2. Menu → "Add to Home Screen"
 3. The dashboard launches without browser chrome
+
+> **Note**: PWA mode on Android still shows the status bar. For a truly immersive panel experience, use Fully Kiosk Browser instead (see above).
 
 ### Accessibility (WCAG 2.2 AA)
 

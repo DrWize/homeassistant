@@ -17,6 +17,18 @@ const FEATURES = {
 };
 
 // ═══════════════════════════════════════════════════
+// AVAILABLE THEMES
+// ═══════════════════════════════════════════════════
+const THEMES = [
+  { file: 'lcars-dashboard.html',   icon: '\u25B3', label: 'LCARS' },
+  { file: 'pipboy-dashboard.html',  icon: '\u2622', label: 'PIP-BOY' },
+  { file: 'c64-dashboard.html',     icon: 'C=',     label: 'C64' },
+  { file: 'matrix-dashboard.html',  icon: '\u25CF', label: 'MATRIX' },
+  { file: 'weyland-dashboard.html', icon: 'W-Y',    label: 'WEYLAND' },
+  { file: 'diablo-dashboard.html',  icon: '\u2620', label: 'DIABLO' },
+];
+
+// ═══════════════════════════════════════════════════
 // ENTITY CONFIGURATION
 // ═══════════════════════════════════════════════════
 const rooms = [
@@ -1151,6 +1163,19 @@ function hideSwitcher() {
   if (mn) mn.classList.remove('open');
 }
 
+function buildThemeMenu() {
+  const menu = document.getElementById('theme-menu');
+  if (!menu) return;
+  const current = location.pathname.split('/').pop();
+  menu.innerHTML = THEMES.map(t =>
+    `<a href="${t.file}"${t.file === current ? ' class="active"' : ''}><span class="tm-icon">${t.icon}</span> ${t.label}</a>`
+  ).join('\n');
+  // Update the switcher button icon to match current theme
+  const btn = menu.parentElement?.querySelector('.theme-switcher-btn');
+  const cur = THEMES.find(t => t.file === current);
+  if (btn && cur) btn.textContent = cur.icon;
+}
+
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
@@ -1222,6 +1247,9 @@ function hideSwitcher() {
     document.addEventListener('keydown', goFS, { once: true });
     document.addEventListener('touchstart', goFS, { once: true });
   }
+
+  // Build theme menu from THEMES array
+  buildThemeMenu();
 
   // Theme menu — intercept links for fullscreen persistence
   const themeMenu = document.getElementById('theme-menu');
