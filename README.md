@@ -2,7 +2,7 @@
 
 > **Get running in 2 minutes**: `cp config.js.example config.js` → paste your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) → copy everything to `/config/www/` → open `http://your-ha:8123/local/lcars-dashboard.html`. Press the lower-left corner to open the theme switcher and fullscreen toggle.
 
-Five themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
+Six themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
 ## Themes
 
@@ -13,6 +13,7 @@ Five themed HTML dashboards for Home Assistant, sharing a common JavaScript core
 | **Commodore 64** | `c64-dashboard.html` | Commodore 64 home computer |
 | **Matrix** | `matrix-dashboard.html` | The Matrix digital rain |
 | **Weyland-Yutani** | `weyland-dashboard.html` | Alien franchise MU/TH/UR 6000 |
+| **Diablo IV** | `diablo-dashboard.html` | Diablo IV Sanctuary / Horadric UI |
 
 ### LCARS — Star Trek
 ![LCARS Dashboard](screenshots/lcars-systems.png)
@@ -34,12 +35,16 @@ Five themed HTML dashboards for Home Assistant, sharing a common JavaScript core
 ![Weyland Dashboard](screenshots/weyland-systems.png)
 ![Weyland Tabs Demo](screenshots/weyland-demo.gif)
 
+### Diablo IV — Sanctuary
+![Diablo Dashboard](screenshots/diablo-systems.png)
+
 ### Theme-Specific Extras
 - **LCARS**: Animated radar sweep on the Sensors tab with randomized blip contacts
 - **Pip-Boy**: Geiger counter that ticks based on ambient lux, plus a threat assessment panel
 - **C64**: BASIC-style system log on the Security tab that logs events as numbered BASIC lines
 - **Matrix**: Digital rain canvas background that responds to total power usage and slows at night
 - **Weyland**: MOTHER AI status readout panel showing atmospheric, life support, and power diagnostics
+- **Diablo IV**: Worldstone terminal readout with Cinzel Decorative font and blood-red/gold color scheme
 
 ## Quick Start
 
@@ -70,7 +75,8 @@ Copy all `.html` files, `shared.js`, `washer.js`, and `config.js` to your Home A
 ├── pipboy-dashboard.html
 ├── c64-dashboard.html
 ├── matrix-dashboard.html
-└── weyland-dashboard.html
+├── weyland-dashboard.html
+└── diablo-dashboard.html
 ```
 
 ### 3. Access the dashboards
@@ -377,6 +383,7 @@ All dashboards respond to `sun.sun` state. When the sun is below the horizon:
 - **C64**: Semi-transparent dark overlay
 - **Matrix**: Green palette dims, rain speed halves
 - **Weyland**: Header shows "NIGHT WATCH" instead of "DAY CYCLE"
+- **Diablo IV**: Gold and crimson tones dim to muted bronze
 
 ### "All Lights Off" Button
 
@@ -389,6 +396,7 @@ Each dashboard has a themed button on the Controls/Lights tab that turns off all
 | C64 | POKE >D020,00 |
 | Matrix | DISCONNECT NODES |
 | Weyland | CREW HIBERNATION |
+| Diablo IV | ETERNAL DARKNESS |
 
 ### Washer Panel
 
@@ -412,13 +420,14 @@ Each theme uses its own labels:
 | C64 | WASHER 1541-W | LOAD → WASH → RINSE → SPIN → READY. |
 | Matrix | CLEANSER | SENSE → PURIFY → FLUSH → EXTRACT → EXIT |
 | Weyland | DECON BAY 3 | WEIGH → DECON → RINSE → EXTRACT → SECURED |
+| Diablo IV | PURIFICATION | SENSE → CLEANSE → PURGE → WRING → SANCTIFIED |
 
 Customize labels via `THEME.washer` in each dashboard's inline script.
 
 ### Theme Switcher & Fullscreen
 
 Press the **lower-left corner** of any dashboard to reveal a hidden menu:
-- **Theme switcher** — links to all 5 dashboards
+- **Theme switcher** — links to all 6 dashboards
 - **Fullscreen toggle** — uses the browser Fullscreen API
 
 The controls auto-hide after 20 seconds of inactivity.
@@ -474,6 +483,7 @@ All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 ├── c64-dashboard.html     ← Commodore 64 theme
 ├── matrix-dashboard.html  ← Matrix digital rain theme
 ├── weyland-dashboard.html ← Alien Weyland-Yutani theme
+├── diablo-dashboard.html  ← Diablo IV Sanctuary theme
 └── README.md              ← This file
 ```
 
