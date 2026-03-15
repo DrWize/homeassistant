@@ -1000,6 +1000,58 @@
 }
 .night-protocol-btn:hover { background: var(--green); color: var(--bg); }
 .night-protocol-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+
+  /* ── POWER PANEL ── */
+  .lc-power-panel { margin-top: 10px; }
+  .lc-power-hero {
+    display: flex; align-items: baseline; gap: 18px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .lc-power-hero-main {
+    font-size: 2.2rem; font-weight: 700; color: var(--amber); line-height: 1;
+  }
+  .lc-power-hero-stats { display: flex; gap: 18px; flex-wrap: wrap; }
+  .lc-power-hero-stat label {
+    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--grey-mid); display: block;
+  }
+  .lc-power-hero-stat .val { font-size: 0.9rem; font-weight: 600; color: var(--green); }
+  .lc-power-hero-stat .val.blue { color: var(--green-dim); }
+
+  .lc-device-table {
+    width: 100%; border-collapse: collapse; font-size: 0.75rem;
+  }
+  .lc-device-table th {
+    text-align: left; font-size: 0.6rem; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--grey-mid); padding: 4px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .lc-device-table th.right { text-align: right; }
+  .lc-device-table td { padding: 3px 8px; vertical-align: middle; }
+  .lc-device-table td.right { text-align: right; font-variant-numeric: tabular-nums; }
+  .lc-device-table tr:hover { background: rgba(255,255,255,0.04); }
+
+  .room-group-header td {
+    padding: 8px 8px 2px; font-size: 0.6rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--green-mid);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .room-group-header td.right { font-variant-numeric: tabular-nums; }
+  .room-total-w { color: var(--amber); font-weight: 700; font-size: 0.65rem; }
+  .room-total-kwh { color: var(--green-dim); font-weight: 600; font-size: 0.65rem; }
+
+  .watts-val { color: var(--amber); font-weight: 600; }
+  .watts-val.off { color: var(--grey-mid); font-weight: 400; }
+  .kwh-val { color: var(--green-dim); font-weight: 400; }
+
+  .power-bar-cell { width: 90px; }
+  .power-bar-bg {
+    width: 100%; height: 6px; background: rgba(255,255,255,0.08);
+    border-radius: 3px; overflow: hidden;
+  }
+  .power-bar-fill {
+    height: 100%; background: var(--amber); border-radius: 3px;
+    transition: width 0.4s;
+  }
 </style>
 </head>
 <body class="crt-flicker">
@@ -1059,6 +1111,39 @@
       <div class="room-grid" id="rooms-stat">
         <!-- populated by JS -->
       </div>
+
+      <div class="section-title">// POWER DISTRIBUTION</div>
+
+      <div class="lc-power-panel">
+        <div class="lc-power-hero">
+          <div class="lc-power-hero-main" id="power-hero-watts">-- W</div>
+          <div class="lc-power-hero-stats">
+            <div class="lc-power-hero-stat">
+              <label>Est. Cost/Hour</label>
+              <div class="val" id="power-hero-cost">-- SEK/h</div>
+            </div>
+            <div class="lc-power-hero-stat">
+              <label>All-Time Tracked</label>
+              <div class="val blue" id="power-hero-kwh">-- kWh</div>
+            </div>
+          </div>
+        </div>
+
+        <table class="lc-device-table">
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th class="right">Now</th>
+              <th style="width:90px"></th>
+              <th class="right">kWh</th>
+            </tr>
+          </thead>
+          <tbody id="power-panel-table">
+            <tr><td colspan="4" style="color:var(--grey-mid);font-size:0.75rem;padding:8px;">Awaiting data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
 
     <!-- ═══════════════ ITEMS TAB ═══════════════ -->

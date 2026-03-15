@@ -75,7 +75,7 @@ const rooms = [
   {
     id: 'bathroom', name: 'Bathroom',
     sensors: { temp: 'sensor.bathroomtemphum_air_temperature', humidity: 'sensor.bathroomtemphum_humidity', lux: null },
-    lights: [], powerSensors: []
+    lights: [], powerSensors: ['sensor.washer_power']
   },
   {
     id: 'hall', name: 'Hall',
@@ -120,12 +120,45 @@ const ALL_SENSOR_IDS = new Set([
 ]);
 
 
+// Map power sensor → cumulative kWh sensor for each device
+const LC_KWH_SENSORS = {
+  'sensor.kitchenwindow_power':                    'sensor.kitchenwindow_electric_consumption_kwh',
+  'sensor.livingroomwindow_power':                 'sensor.livingroomwindow_electric_consumption_kwh',
+  'sensor.guestbedroomwindow_power':               'sensor.guestbedroomwindow_electric_consumption_kwh',
+  'sensor.livingroomsofa_power':                   'sensor.livingroomsofa_electric_consumption_kwh',
+  'sensor.bedroomwinleft_power':                   'sensor.bedroomwinleft_electric_consumption_kwh',
+  'sensor.bedroomwinright_power_2':                'sensor.bedroomwinright_electric_consumption_kwh_2',
+  'sensor.balconyonoff_power':                     'sensor.balconyonoff_electric_consumption_kwh',
+  'sensor.guestbedroomroof_power':                 'sensor.guestbedroomroof_electric_consumption_kwh',
+  'sensor.bedroomroof_power':                      'sensor.bedroomroof_electric_consumption_kwh',
+  'sensor.livingroomwallplugtelevision_power':     'sensor.livingroomwallplugtelevision_electric_consumption_kwh',
+  'sensor.guestbedroomwallplugcomputer_power_2':   'sensor.guestbedroomwallplugcomputer_electric_consumption_kwh_2',
+  'sensor.washer_power':                           'sensor.washer_energy',
+};
+
+// Friendly labels for power sensors (used in power panel device table)
+const LC_POWER_LABELS = {
+  'sensor.kitchenwindow_power':                  'Window Light',
+  'sensor.livingroomwindow_power':               'Window Light',
+  'sensor.guestbedroomwindow_power':             'Window Light',
+  'sensor.livingroomsofa_power':                 'Sofa Light',
+  'sensor.bedroomwinleft_power':                 'Win Left',
+  'sensor.bedroomwinright_power_2':              'Win Right',
+  'sensor.balconyonoff_power':                   'Deco Lights',
+  'sensor.guestbedroomroof_power':               'Ceiling',
+  'sensor.bedroomroof_power':                    'Ceiling',
+  'sensor.livingroomwallplugtelevision_power':   'Television',
+  'sensor.guestbedroomwallplugcomputer_power_2': 'Computer',
+  'sensor.washer_power':                         'Washer',
+};
+
 const LC_POWER_SENSORS = [
   'sensor.kitchenwindow_power','sensor.livingroomwindow_power',
   'sensor.guestbedroomwindow_power','sensor.livingroomsofa_power',
   'sensor.bedroomwinleft_power','sensor.bedroomwinright_power_2',
   'sensor.balconyonoff_power','sensor.guestbedroomroof_power','sensor.bedroomroof_power',
   'sensor.livingroomwallplugtelevision_power','sensor.guestbedroomwallplugcomputer_power_2',
+  'sensor.washer_power',
 ];
 
 // ═══════════════════════════════════════════════════
@@ -151,8 +184,10 @@ let liveData = {
     'sensor.bedroomroof_power': null,
     'sensor.livingroomwallplugtelevision_power': null,
     'sensor.guestbedroomwallplugcomputer_power_2': null,
+    'sensor.washer_power': null,
   },
   powerHistory: [],
+  kwh: {},  // cumulative kWh per device, keyed by kWh entity_id
   outsideLux: null,
   mediaPlayers: {},
 };
@@ -839,6 +874,63 @@ function renderLcEnergy() {
 }
 
 // ═══════════════════════════════════════════════════
+// POWER PANEL (device table grouped by room)
+// ═══════════════════════════════════════════════════
+function renderPowerPanel() {
+  const el = document.getElementById('power-panel-table');
+  if (!el) return;
+
+  const totalWatts = lcTotalPower();
+  const maxW = Math.max(totalWatts, 1);
+
+  // Build per-room data
+  const roomData = rooms.filter(r => r.powerSensors && r.powerSensors.length > 0).map(room => {
+    const devices = room.powerSensors.map(sid => {
+      const kwhId = LC_KWH_SENSORS[sid];
+      return {
+        label: LC_POWER_LABELS[sid] || sid,
+        watts: liveData.power[sid] ?? 0,
+        kwh: kwhId ? (liveData.kwh[kwhId] ?? null) : null,
+      };
+    });
+    const roomW = devices.reduce((s, d) => s + d.watts, 0);
+    const roomKwh = devices.reduce((s, d) => s + (d.kwh ?? 0), 0);
+    return { name: room.name, watts: roomW, kwh: roomKwh, devices };
+  });
+
+  const totalKwh = roomData.reduce((s, r) => s + r.kwh, 0);
+
+  // Update hero stats
+  const heroW = document.getElementById('power-hero-watts');
+  const heroKwh = document.getElementById('power-hero-kwh');
+  const heroCost = document.getElementById('power-hero-cost');
+  if (heroW) heroW.textContent = totalWatts.toFixed(1) + ' W';
+  if (heroKwh) heroKwh.textContent = totalKwh.toFixed(1) + ' kWh';
+  const price = liveData.elecNow || 0;
+  if (heroCost) heroCost.textContent = ((totalWatts / 1000) * price).toFixed(3) + ' SEK/h';
+
+  // Build table HTML
+  let html = '';
+  roomData.forEach(room => {
+    html += `<tr class="room-group-header">
+      <td colspan="2">${room.name}</td>
+      <td class="right"><span class="room-total-w">${room.watts.toFixed(1)} W</span></td>
+      <td class="right"><span class="room-total-kwh">${room.kwh.toFixed(1)}</span></td>
+    </tr>`;
+    room.devices.forEach(d => {
+      const barPct = maxW > 0 ? (d.watts / maxW) * 100 : 0;
+      html += `<tr>
+        <td>${d.label}</td>
+        <td class="right"><span class="watts-val${d.watts > 0 ? '' : ' off'}">${d.watts.toFixed(1)} W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:${barPct.toFixed(1)}%"></div></div></td>
+        <td class="right"><span class="kwh-val">${d.kwh !== null ? d.kwh.toFixed(1) : '--'}</span></td>
+      </tr>`;
+    });
+  });
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
 // HA WEBSOCKET
 // ═══════════════════════════════════════════════════
 /**
@@ -902,7 +994,7 @@ function haConnect() {
         msg.result.forEach(s => ingestState(s));
         renderRooms(); renderEnviro(); renderNordpoolBars();
         renderSun(); renderNordpool48h(); renderTempGraph(); renderMedia();
-        renderLcEnergy(); renderMediaPlayers();
+        renderLcEnergy(); renderPowerPanel(); renderMediaPlayers();
         if (FEATURES.washer && typeof renderWasher === 'function') renderWasher();
         updateDayNight();
         if (THEME.onStatesLoaded) THEME.onStatesLoaded();
@@ -1066,6 +1158,14 @@ function ingestState(s) {
     liveData.power[id] = isNaN(v) ? null : v;
     lcUpdatePowerHistory();
     renderLcEnergy();
+    renderPowerPanel();
+  }
+  // ── kWh sensors: cumulative energy consumption ──
+  const kwhIds = new Set(Object.values(LC_KWH_SENSORS));
+  if (kwhIds.has(id)) {
+    const v = parseFloat(s.state);
+    if (!isNaN(v) && v < 100000) liveData.kwh[id] = v;
+    renderPowerPanel();
   }
   if (id === 'sensor.balconyluxtemp_illuminance') {
     liveData.outsideLux = isNaN(parseFloat(s.state)) ? null : parseFloat(s.state);
