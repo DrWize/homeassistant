@@ -52,16 +52,18 @@ Edit `config.js` with your Home Assistant details:
 ```js
 const HA_HOST  = 'homeassistant.local:8123';   // Your HA hostname:port
 const HA_TOKEN = 'YOUR_LONG_LIVED_ACCESS_TOKEN'; // Generate in HA → Profile → Long-Lived Access Tokens
+const DEV_MODE = true;                           // Cache busting (set false for production)
 ```
 
 ### 2. Copy files to Home Assistant
 
-Copy all `.html` files, `shared.js`, and `config.js` to your Home Assistant `www` folder:
+Copy all `.html` files, `shared.js`, `washer.js`, and `config.js` to your Home Assistant `www` folder:
 
 ```
 /config/www/
 ├── config.js              ← Your secrets (not shared)
 ├── shared.js              ← Common JS (all dashboards need this)
+├── washer.js              ← Washer module (optional, see Feature Flags)
 ├── lcars-dashboard.html
 ├── pipboy-dashboard.html
 ├── c64-dashboard.html
@@ -142,9 +144,52 @@ Each dashboard is an HTML file with inline CSS and a `THEME` config, plus `share
   // Theme-specific functions (e.g. renderLrs, initRain, renderMother)
 </script>
 <script src="shared.js"></script>     <!-- All shared logic -->
+<script src="washer.js"></script>     <!-- Washer module (loaded conditionally via FEATURES flag) -->
 ```
 
 Theme-specific functions can reference `shared.js` globals (`liveData`, `rooms`, etc.) because they are defined but not called until after `shared.js` loads.
+
+### Dev Mode
+
+`DEV_MODE` is set in `config.js`. When `true`, the page reloads with a cache-busting parameter (`?_cb=...`) so the browser always fetches fresh JS files. Set to `false` for production use — cached files load faster and reduce network requests.
+
+### Feature Flags
+
+Feature flags are defined at the top of `shared.js` in the `FEATURES` object:
+
+```js
+const FEATURES = {
+  washer: true,   // Set to false to disable washer functionality
+};
+```
+
+When `FEATURES.washer` is `false`, all washer-related WebSocket subscriptions, state ingestion, and rendering are skipped — even if `washer.js` is loaded. This makes it safe to leave the script tag in place and toggle the feature with a single flag.
+
+| Flag | Default | Effect |
+|------|---------|--------|
+| `washer` | `true` | Enables washer panel, status badge, entity subscriptions, and monthly statistics |
+
+#### How feature hiding works
+
+Dashboard HTML elements use a `data-feature` attribute to mark which feature they belong to:
+
+```html
+<div class="status-block teal" data-feature="washer">...</div>
+<div data-feature="washer">
+  <div class="section-title">...</div>
+  <div id="washer-panel"></div>
+</div>
+```
+
+At init time, `shared.js` hides all elements for disabled features with a single query:
+
+```js
+document.querySelectorAll(`[data-feature="${feature}"]`).forEach(el => {
+  el.style.display = 'none';
+});
+```
+
+This approach is theme-agnostic — each dashboard keeps its own wrapper classes and structure, the `data-feature` attribute is the only contract between HTML and the hiding logic. New features can reuse the same pattern by adding their own `data-feature` value.
 
 ### Tabs (5 per dashboard)
 
@@ -420,6 +465,7 @@ All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 ├── config.js              ← Your HA connection (gitignored)
 ├── config.js.example      ← Template for config.js
 ├── shared.js              ← Common JS: entities, state, render, WS, init
+├── washer.js              ← Washer module: state, rendering, stats (toggled via FEATURES.washer)
 ├── .gitignore             ← Excludes config.js
 ├── lcars-dashboard.html   ← Star Trek LCARS theme
 ├── pipboy-dashboard.html  ← Fallout Pip-Boy theme
@@ -457,7 +503,7 @@ All state is tracked in a `liveData` object that maps entity IDs to their curren
 | `renderNordpool48h()` | Renders 48-hour electricity price chart |
 | `renderTempGraph()` | Renders temperature history sparkline |
 | `renderLcEnergy()` | Renders energy consumption vs price |
-| `renderWasher()` | Renders washer panel: live status, phase progress, monthly stats |
+| `renderWasher()` | Renders washer panel: live status, phase progress, monthly stats *(in washer.js)* |
 | `toggleLight(id, on)` | Toggles a light and calls HA service |
 | `dimLight(id, value)` | Sets brightness and calls HA service |
 | `nightProtocol()` | Turns off all lights except Balcony |

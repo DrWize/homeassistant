@@ -3,6 +3,10 @@
 const HA_HOST  = 'homeassistant.local:8123';
 const HA_TOKEN = 'YOUR_LONG_LIVED_ACCESS_TOKEN_HERE';
 
+// Dev mode — forces browser cache refresh on every page load
+// Set to false for normal use (better performance, uses cached files)
+const DEV_MODE = true;
+
 // Derived — used by dashboards
 const HA_WS   = `ws://${HA_HOST}/api/websocket`;
 const HA_BASE = `http://${HA_HOST}`;

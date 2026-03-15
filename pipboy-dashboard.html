@@ -1038,7 +1038,7 @@
           <label>ELECTRICITY NOW</label>
           <span class="w-val" id="stat-elec">-- SEK</span>
         </div>
-        <div class="w-item">
+        <div class="w-item" data-feature="washer">
           <label>WASHER</label>
           <span id="stat-washer" class="washer-badge idle">IDLE</span>
         </div>
@@ -1238,8 +1238,10 @@
         </div>
       </div>
 
-      <div class="section-title" style="margin-top:10px;">// DECONTAMINATION UNIT</div>
-      <div id="washer-panel"></div>
+      <div data-feature="washer">
+        <div class="section-title" style="margin-top:10px;">// DECONTAMINATION UNIT</div>
+        <div id="washer-panel"></div>
+      </div>
 
     </div>
 
@@ -1419,5 +1421,6 @@ function renderThreat() {
 }
 </script>
 <script src="shared.js"></script>
+<script src="washer.js"></script>
 </body>
 </html>

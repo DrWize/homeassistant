@@ -1106,7 +1106,7 @@ body.night-mode .wy-header { opacity: 0.9; }
           <label>Active Luminaires</label>
           <div class="val" id="stat-lights">--</div>
         </div>
-        <div class="status-block teal">
+        <div class="status-block teal" data-feature="washer">
           <label>Decon Unit</label>
           <div class="val"><span id="stat-washer" class="washer-badge">IDLE</span></div>
         </div>
@@ -1330,12 +1330,14 @@ HULL INTEGRITY: 100%</div>
         </div>
       </div>
 
-      <div class="lc-section" style="margin-top:8px;">
-        <div class="lc-section-pill">Decontamination Module</div>
-        <div class="lc-section-line"></div>
-        <div class="lc-section-end"></div>
+      <div data-feature="washer">
+        <div class="lc-section" style="margin-top:8px;">
+          <div class="lc-section-pill">Decontamination Module</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div id="washer-panel"></div>
       </div>
-      <div id="washer-panel"></div>
 
     </div>
 
@@ -1445,5 +1447,6 @@ HULL INTEGRITY: ${integrityPct}%`;
 }
 </script>
 <script src="shared.js"></script>
+<script src="washer.js"></script>
 </body>
 </html>

@@ -1045,7 +1045,7 @@ body.night-mode::before {
           <label>Active Lights</label>
           <div class="val" id="stat-lights">--</div>
         </div>
-        <div class="status-block teal">
+        <div class="status-block teal" data-feature="washer">
           <label>Washer</label>
           <div class="val"><span id="stat-washer" class="washer-badge">IDLE</span></div>
         </div>
@@ -1261,8 +1261,10 @@ body.night-mode::before {
         </div>
       </div>
 
-      <div class="section-heading" style="margin-top:8px;">PERIPHERAL: DATASETTE W</div>
-      <div id="washer-panel"></div>
+      <div data-feature="washer">
+        <div class="section-heading" style="margin-top:8px;">PERIPHERAL: DATASETTE W</div>
+        <div id="washer-panel"></div>
+      </div>
     </div>
 
   </div><!-- /content -->
@@ -1354,5 +1356,6 @@ function addBasicLogEntry(text) {
 }
 </script>
 <script src="shared.js"></script>
+<script src="washer.js"></script>
 </body>
 </html>
