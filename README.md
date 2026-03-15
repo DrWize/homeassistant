@@ -203,11 +203,11 @@ This approach is theme-agnostic — each dashboard keeps its own wrapper classes
 
 | Tab | Content |
 |-----|---------|
-| **Systems/Rooms** | Room cards with temperature, humidity, lux, power usage (W), light on/off counts |
+| **Systems/Rooms** | Room cards with temperature, humidity, lux, power usage (W), light on/off counts, plus Power Distribution panel |
 | **Controls/Lights** | Light toggle switches with dimmer sliders for supported lights, plus "all lights off" button |
 | **Data** | Weather forecast, Nordpool electricity price charts (48h + bar chart), temperature history graph |
 | **Media** | Plex session details (active streams, bandwidth, transcoding), Sonos/Apple TV now playing with album art and progress bars |
-| **Sensors** | Energy consumption vs. price, washer panel (live status + monthly stats), plus theme-specific unique panels |
+| **Sensors** | Energy consumption vs. price chart, washer panel (live status + monthly stats), plus theme-specific unique panels |
 
 ### Room Configuration
 
@@ -367,7 +367,7 @@ A full restart is required (not just "Reload YAML") because counter entities are
 | Bedroom | Ceiling*, Win Left, Win Right | Temp, Humidity | 3 plugs |
 | Guest Room | Ceiling*, Window | Temp, Humidity | 3 plugs |
 | Balcony | Deco Lights | Temp, Lux | 1 plug |
-| Bathroom | — | Temp, Humidity | — |
+| Bathroom | — | Temp, Humidity | 1 plug (Washer) |
 | Hall | — | Temp, Lux | — |
 | Wardrobe | — | Temp, Humidity | — |
 
@@ -397,6 +397,17 @@ Each dashboard has a themed button on the Controls/Lights tab that turns off all
 | Matrix | DISCONNECT NODES |
 | Weyland | CREW HIBERNATION |
 | Diablo IV | ETERNAL DARKNESS |
+
+### Power Distribution Panel
+
+The Systems tab includes a Power Distribution panel showing real-time power consumption across all monitored devices. It displays:
+
+- **Total watts**: Live aggregate power draw across all rooms
+- **Estimated cost/hour**: Based on current Nordpool electricity price
+- **All-time tracked kWh**: Cumulative energy from all device kWh sensors
+- **Device table**: Grouped by room, showing per-device watts with power bars, room totals, and cumulative kWh
+
+Power data comes from Z-Wave smart plug sensors (`sensor.*_power` for live watts, `sensor.*_electric_consumption_kwh` for cumulative energy). The panel updates in real-time via WebSocket state changes.
 
 ### Washer Panel
 
@@ -543,6 +554,7 @@ All state is tracked in a `liveData` object that maps entity IDs to their curren
 | `renderNordpool48h()` | Renders 48-hour electricity price chart |
 | `renderTempGraph()` | Renders temperature history sparkline |
 | `renderLcEnergy()` | Renders energy consumption vs price |
+| `renderPowerPanel()` | Renders power distribution table grouped by room with live watts, bars, and kWh |
 | `renderWasher()` | Renders washer panel: live status, phase progress, monthly stats *(in washer.js)* |
 | `toggleLight(id, on)` | Toggles a light and calls HA service |
 | `dimLight(id, value)` | Sets brightness and calls HA service |
