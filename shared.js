@@ -529,9 +529,31 @@ function showToast(msg) {
 // ═══════════════════════════════════════════════════
 // CONNECTION STATUS
 // ═══════════════════════════════════════════════════
+/** Day/night mode override. 'auto' = follow sun.sun, 'night' = forced dark, 'day' = forced light */
+let dayNightMode = localStorage.getItem('ha_daynight') || 'auto';
+
 function updateDayNight() {
-  const night = liveData.sun.state === 'below_horizon';
+  let night;
+  if (dayNightMode === 'auto') {
+    night = liveData.sun.state === 'below_horizon';
+  } else {
+    night = dayNightMode === 'night';
+  }
   document.body.classList.toggle('night-mode', night);
+  // Update toggle button label if present
+  const btn = document.getElementById('daynight-btn');
+  if (btn) {
+    const labels = { auto: '☼ AUTO', night: '☽ DARK', day: '☀ LIGHT' };
+    btn.textContent = labels[dayNightMode];
+  }
+}
+
+/** Cycle day/night mode: auto → night → day → auto */
+function toggleDayNight() {
+  const cycle = { auto: 'night', night: 'day', day: 'auto' };
+  dayNightMode = cycle[dayNightMode] || 'auto';
+  localStorage.setItem('ha_daynight', dayNightMode);
+  updateDayNight();
 }
 
 function setConnStatus(status) {
@@ -1155,6 +1177,7 @@ function hideSwitcher() {
   renderSun();
   renderLcEnergy();
   renderMediaPlayers();
+  updateDayNight(); // apply stored day/night preference and set button label
 
   // Clock
   setInterval(updateClock, 1000);
