@@ -1,6 +1,6 @@
 # Home Assistant Themed Dashboards
 
-> **Get running in 2 minutes**: `cp config.js.example config.js` → paste your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) → copy everything to `/config/www/` → open `http://your-ha:8123/local/lcars-dashboard.html`. Switch themes from the lower-left corner menu.
+> **Get running in 2 minutes**: `cp config.js.example config.js` → paste your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) → copy everything to `/config/www/` → open `http://your-ha:8123/local/lcars-dashboard.html`. Press the lower-left corner to open the theme switcher and fullscreen toggle.
 
 Five themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
@@ -417,7 +417,7 @@ Customize labels via `THEME.washer` in each dashboard's inline script.
 
 ### Theme Switcher & Fullscreen
 
-Click the **lower-left corner** of any dashboard to reveal:
+Press the **lower-left corner** of any dashboard to reveal a hidden menu:
 - **Theme switcher** — links to all 5 dashboards
 - **Fullscreen toggle** — uses the browser Fullscreen API
 
