@@ -37,6 +37,7 @@ Six themed HTML dashboards for Home Assistant, sharing a common JavaScript core 
 
 ### Diablo IV — Sanctuary
 ![Diablo Dashboard](screenshots/diablo-systems.png)
+![Diablo Tabs Demo](screenshots/diablo-demo.gif)
 
 ### Theme-Specific Extras
 - **LCARS**: Animated radar sweep on the Sensors tab with randomized blip contacts
