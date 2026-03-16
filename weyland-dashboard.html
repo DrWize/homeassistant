@@ -79,6 +79,7 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
 }
 
 /* =======================================
@@ -180,11 +181,14 @@ html, body {
 ======================================= */
 .wy-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 16px 20px;
   scrollbar-width: thin;
   scrollbar-color: var(--grey-mid) var(--bg);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 .wy-content::-webkit-scrollbar { width: 4px; }
 .wy-content::-webkit-scrollbar-track { background: var(--bg); }

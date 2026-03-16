@@ -58,10 +58,12 @@ cp config.js.example config.js
 Edit `config.js` with your Home Assistant details:
 
 ```js
-const HA_HOST  = 'homeassistant.local:8123';   // Your HA hostname:port
+const HA_HOST  = '192.168.1.30:8123';            // Your HA IP:port (see mDNS note below)
 const HA_TOKEN = 'YOUR_LONG_LIVED_ACCESS_TOKEN'; // Generate in HA → Profile → Long-Lived Access Tokens
 const DEV_MODE = true;                           // Cache busting (set false for production)
 ```
+
+> **mDNS warning**: Use your Home Assistant's **IP address**, not `homeassistant.local`. Android devices (Chrome, Fully Kiosk Browser, WebView) cannot reliably resolve mDNS `.local` hostnames — the WebSocket connection will silently fail and dashboards will show "Awaiting data..." with no error. Find your HA IP with `ping homeassistant.local` on a desktop.
 
 ### 2. Copy files to Home Assistant
 
@@ -85,7 +87,7 @@ Copy all `.html` files, `shared.js`, `washer.js`, and `config.js` to your Home A
 Open any dashboard in your browser:
 
 ```
-http://homeassistant.local:8123/local/lcars-dashboard.html
+http://<your-ha-ip>:8123/local/lcars-dashboard.html
 ```
 
 ## Configuration
@@ -96,10 +98,10 @@ The only file you need to edit. Contains your connection settings:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `HA_HOST` | Home Assistant hostname and port | `homeassistant.local:8123` |
+| `HA_HOST` | Home Assistant IP and port (use IP, not `.local` — see [mDNS note](#1-create-your-config-file)) | `192.168.1.30:8123` |
 | `HA_TOKEN` | Long-lived access token | Generate in HA → Profile → Security → Long-Lived Access Tokens |
-| `HA_WS` | WebSocket URL (auto-derived) | `ws://homeassistant.local:8123/api/websocket` |
-| `HA_BASE` | HTTP base URL (auto-derived) | `http://homeassistant.local:8123` |
+| `HA_WS` | WebSocket URL (auto-derived) | `ws://192.168.1.30:8123/api/websocket` |
+| `HA_BASE` | HTTP base URL (auto-derived) | `http://192.168.1.30:8123` |
 
 > **Security**: `config.js` contains your access token and is listed in `.gitignore`. Never commit it. Share `config.js.example` instead.
 
@@ -458,7 +460,7 @@ Fully Kiosk solves all of these problems. It locks the device into a true fullsc
 
 | Setting | Value | Why |
 |---------|-------|-----|
-| Start URL | `http://your-ha:8123/local/lcars-dashboard.html` | Opens your preferred theme on boot |
+| Start URL | `http://<your-ha-ip>:8123/local/lcars-dashboard.html` | Opens your preferred theme on boot (use IP, not `.local`) |
 | Enable Fullscreen | On | Hides Android status bar and nav bar |
 | Enable Kiosk Mode | On | Prevents users from leaving the app |
 | Keep Screen On | On | Prevents screen timeout (or set a schedule) |

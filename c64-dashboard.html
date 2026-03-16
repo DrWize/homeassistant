@@ -106,6 +106,7 @@ body.night-mode::before {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   border: 3px solid var(--border);
 }
 
@@ -183,11 +184,14 @@ body.night-mode::before {
 /* Content */
 .c64-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 12px 14px;
   scrollbar-width: thin;
   scrollbar-color: var(--c64-light-blue) var(--bg);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 .c64-content::-webkit-scrollbar { width: 6px; }
 .c64-content::-webkit-scrollbar-track { background: var(--bg); }

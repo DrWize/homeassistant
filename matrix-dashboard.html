@@ -91,6 +91,7 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
 }
 
 /* HEADER */
@@ -170,11 +171,14 @@ html, body {
 /* CONTENT */
 .matrix-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 16px 20px;
   scrollbar-width: thin;
   scrollbar-color: var(--green-dark) var(--bg);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 .matrix-content::-webkit-scrollbar { width: 4px; }
 .matrix-content::-webkit-scrollbar-track { background: var(--bg); }

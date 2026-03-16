@@ -49,6 +49,7 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   padding: 0;
 }
 
@@ -146,6 +147,7 @@ html, body {
 .lcars-body {
   display: flex;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -216,6 +218,8 @@ html, body {
   padding: 16px 20px 16px 0;
   scrollbar-width: thin;
   scrollbar-color: var(--grey-mid) var(--bg);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 .lcars-content::-webkit-scrollbar { width: 4px; }
 .lcars-content::-webkit-scrollbar-track { background: var(--bg); }
