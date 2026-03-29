@@ -42,6 +42,7 @@ Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript cor
 
 ### Winamp 2.x
 ![Winamp Dashboard](screenshots/winamp-systems.png)
+![Winamp Tabs Demo](screenshots/winamp-demo.gif)
 
 ### Theme-Specific Extras
 - **LCARS**: Animated radar sweep on the Sensors tab with randomized blip contacts
