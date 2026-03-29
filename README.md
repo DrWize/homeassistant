@@ -777,6 +777,8 @@ Each dashboard defines a `THEME` object in an inline `<script>` before `shared.j
 
 ## Setup Wizard
 
+![Setup Wizard Demo](screenshots/setup-wizard-demo.gif)
+
 Don't want to edit `entities.js` by hand? Use the setup wizard:
 
 1. Open `tools/setup.html` in your browser (locally or via `http://your-ha:8123/local/tools/setup.html`)
