@@ -6,13 +6,14 @@
 // All functions are called from shared.js via feature-guarded checks.
 
 // ═══════════════════════════════════════════════════
-// WASHER ENTITIES
+// WASHER ENTITIES (derived from entities.js)
 // ═══════════════════════════════════════════════════
+const _wCfg = (typeof ENTITIES !== 'undefined' && ENTITIES.integrations?.washer) || {};
 const WASHER_ENTITIES = [
-  'sensor.washer_job_state','sensor.washer_machine_state','sensor.washer_completion_time',
-  'sensor.washer_power','sensor.washer_energy','sensor.washer_water_consumption','sensor.washer_cycle_count',
-  'select.washer_water_temperature','select.washer_spin_level','number.washer_rinse_cycles',
-];
+  _wCfg.jobState, _wCfg.machState, _wCfg.completion,
+  _wCfg.power, _wCfg.energy, _wCfg.water, _wCfg.cycles,
+  _wCfg.waterTemp, _wCfg.spinLevel, _wCfg.rinses,
+].filter(Boolean);
 
 // ═══════════════════════════════════════════════════
 // WASHER STATE
@@ -43,38 +44,38 @@ let washerStatsMsgId = null;  // tracks which WS message ID is our statistics re
  * @param {Object} s - HA state object { state, attributes }
  */
 function washerIngest(id, s) {
-  if (id === 'sensor.washer_job_state') {
+  if (_wCfg.jobState && id === _wCfg.jobState) {
     washerState.jobState = s.state || 'none';
     washerState.isActive = s.state !== 'none' && s.state !== 'finish';
     renderWasher();
   }
-  if (id === 'sensor.washer_machine_state') {
+  if (_wCfg.machState && id === _wCfg.machState) {
     washerState.machineState = s.state || 'stop';
     renderWasher();
   }
-  if (id === 'sensor.washer_completion_time') {
+  if (_wCfg.completion && id === _wCfg.completion) {
     washerState.completionTime = s.state || null;
     renderWasher();
   }
-  if (id === 'select.washer_water_temperature') {
+  if (_wCfg.waterTemp && id === _wCfg.waterTemp) {
     washerState.temp = s.state || null;
   }
-  if (id === 'select.washer_spin_level') {
+  if (_wCfg.spinLevel && id === _wCfg.spinLevel) {
     washerState.spin = s.state || null;
   }
-  if (id === 'number.washer_rinse_cycles') {
+  if (_wCfg.rinses && id === _wCfg.rinses) {
     washerState.rinses = s.state || null;
   }
-  if (id === 'sensor.washer_power') {
+  if (_wCfg.power && id === _wCfg.power) {
     washerState.power = parseFloat(s.state) || 0;
   }
-  if (id === 'sensor.washer_energy') {
+  if (_wCfg.energy && id === _wCfg.energy) {
     washerState.energyTotal = parseFloat(s.state) || null;
   }
-  if (id === 'sensor.washer_water_consumption') {
+  if (_wCfg.water && id === _wCfg.water) {
     washerState.waterTotal = parseFloat(s.state) || null;
   }
-  if (id === 'sensor.washer_cycle_count') {
+  if (_wCfg.cycles && id === _wCfg.cycles) {
     washerState.cyclesTotal = parseInt(s.state) || null;
   }
 }
@@ -91,9 +92,9 @@ function washerIngest(id, s) {
  * @param {Object} result - keyed by statistic_id, each value is an array of monthly entries
  */
 function washerParseStats(result) {
-  const energyStats = result['sensor.washer_energy'] || [];
-  const waterStats  = result['sensor.washer_water_consumption'] || [];
-  const cycleStats  = result['sensor.washer_cycle_count'] || [];
+  const energyStats = (_wCfg.energy && result[_wCfg.energy]) || [];
+  const waterStats  = (_wCfg.water  && result[_wCfg.water])  || [];
+  const cycleStats  = (_wCfg.cycles && result[_wCfg.cycles]) || [];
   const monthly = [];
   const yearTotals = {};
   energyStats.forEach((e, i) => {
@@ -130,7 +131,7 @@ function washerRequestStats(wsSend, getMsgId) {
   wsSend({
     id: washerStatsMsgId, type: 'recorder/statistics_during_period',
     start_time: new Date(Date.now() - 730 * 86400000).toISOString(),  // ~2 years back
-    statistic_ids: ['sensor.washer_energy', 'sensor.washer_water_consumption', 'sensor.washer_cycle_count'],
+    statistic_ids: [_wCfg.energy, _wCfg.water, _wCfg.cycles].filter(Boolean),
     period: 'month',
   });
 }

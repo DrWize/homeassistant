@@ -1,5 +1,6 @@
 // ====== shared.js — Common code for all Home Assistant dashboards ======
 // Requires: config.js loaded first (HA_WS, HA_TOKEN, HA_BASE, HA_HOST)
+// Requires: entities.js loaded first (ENTITIES object)
 // Requires: THEME object defined in inline <script> before this file loads
 
 // ═══════════════════════════════════════════════════
@@ -10,11 +11,64 @@ if (typeof DEV_MODE !== 'undefined' && DEV_MODE && !location.search.includes('_c
 }
 
 // ═══════════════════════════════════════════════════
-// FEATURE FLAGS
+// CONFIG VALIDATION
 // ═══════════════════════════════════════════════════
-const FEATURES = {
-  washer: true,
-};
+function showConfigError(title, msg) {
+  document.body.innerHTML = `<div style="
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:#1a1a1a;color:#e0e0e0;font-family:monospace;padding:40px;z-index:99999">
+    <div style="max-width:600px;text-align:center">
+      <h1 style="color:#e05050;font-size:1.5rem;margin-bottom:16px">${title}</h1>
+      <p style="color:#aaa;line-height:1.6;white-space:pre-line">${msg}</p>
+    </div>
+  </div>`;
+  throw new Error(title);
+}
+
+if (typeof HA_HOST === 'undefined' || typeof HA_TOKEN === 'undefined') {
+  showConfigError('Missing config.js',
+    'Copy config.js.example to config.js and add your Home Assistant host and token.\n\ncp config.js.example config.js');
+}
+if (typeof ENTITIES === 'undefined') {
+  showConfigError('Missing entities.js',
+    'Copy entities.js.example to entities.js and configure your Home Assistant entity IDs.\n\ncp entities.js.example entities.js');
+}
+if (!ENTITIES.rooms || ENTITIES.rooms.length === 0) {
+  showConfigError('No rooms configured',
+    'Add at least one room to ENTITIES.rooms in entities.js.');
+}
+// Warn about placeholder values (still allow loading)
+(function checkPlaceholders() {
+  const json = JSON.stringify(ENTITIES);
+  if (json.includes('YOUR_')) {
+    console.warn('[HomeA] entities.js contains placeholder values (YOUR_*). Replace them with your actual Home Assistant entity IDs.');
+  }
+})();
+
+// ═══════════════════════════════════════════════════
+// DERIVED CONFIG (auto-built from entities.js)
+// ═══════════════════════════════════════════════════
+const INT = ENTITIES.integrations || {};
+const FEATURES = { washer: !!INT.washer?.enabled };
+
+const rooms = ENTITIES.rooms;
+const DIMMABLE = new Set(rooms.flatMap(r => (r.lights || []).filter(l => l.dimmable).map(l => l.id)));
+const LIGHT_ENTITIES = rooms.flatMap(r => (r.lights || []).map(l => l.id));
+const MEDIA_PLAYER_ENTITIES = ENTITIES.mediaPlayers || [];
+const MEDIA_PLAYER_IDS = new Set(MEDIA_PLAYER_ENTITIES.map(e => e.id));
+
+// Sensor IDs — derived from rooms (temp, humidity, lux)
+const ALL_SENSOR_IDS = new Set(rooms.flatMap(r =>
+  [r.sensors?.temp, r.sensors?.humidity, r.sensors?.lux].filter(Boolean)
+));
+
+// Power config — derived from rooms power[] arrays
+const LC_POWER_SENSORS = rooms.flatMap(r => (r.power || []).map(p => p.sensor));
+const LC_KWH_SENSORS   = Object.fromEntries(rooms.flatMap(r => (r.power || []).map(p => [p.sensor, p.kwh])));
+const LC_POWER_LABELS  = Object.fromEntries(rooms.flatMap(r => (r.power || []).map(p => [p.sensor, p.label])));
+
+// Backward compat: rooms still need powerSensors array for renderRooms
+rooms.forEach(r => { if (!r.powerSensors) r.powerSensors = (r.power || []).map(p => p.sensor); });
 
 // ═══════════════════════════════════════════════════
 // AVAILABLE THEMES
@@ -29,138 +83,6 @@ const THEMES = [
   { file: 'winamp-dashboard.html', icon: '\u25B6', label: 'WINAMP' },
 ];
 
-// ═══════════════════════════════════════════════════
-// ENTITY CONFIGURATION
-// ═══════════════════════════════════════════════════
-const rooms = [
-  {
-    id: 'living', name: 'Living Room',
-    sensors: { temp: 'sensor.livingroomtemphum_air_temperature_2', humidity: 'sensor.livingroomtemphum_humidity_2', lux: null },
-    lights: [
-      { id: 'light.livingroomwindow', label: 'Window' },
-      { id: 'light.livingroomsofa',   label: 'Sofa'   },
-    ],
-    powerSensors: ['sensor.livingroomwindow_power', 'sensor.livingroomsofa_power', 'sensor.livingroomwallplugtelevision_power']
-  },
-  {
-    id: 'kitchen', name: 'Kitchen',
-    sensors: { temp: 'sensor.kitchenmotiondetector_air_temperature', humidity: null, lux: 'sensor.kitchenmotiondetector_illuminance' },
-    lights: [{ id: 'light.kitchenwindow', label: 'Window' }],
-    powerSensors: ['sensor.kitchenwindow_power']
-  },
-  {
-    id: 'bedroom', name: 'Bedroom',
-    sensors: { temp: 'sensor.bedroomtemphum_air_temperature', humidity: 'sensor.bedroomtemphum_humidity', lux: null },
-    lights: [
-      { id: 'light.bedroomroof',     label: 'Ceiling'   },
-      { id: 'light.bedroomwinleft',  label: 'Win Left'  },
-      { id: 'light.bedroomwinright', label: 'Win Right' },
-    ],
-    powerSensors: ['sensor.bedroomroof_power', 'sensor.bedroomwinleft_power', 'sensor.bedroomwinright_power_2']
-  },
-  {
-    id: 'guestbedroom', name: 'Guest Room',
-    sensors: { temp: 'sensor.guestbedroomtemphum_air_temperature', humidity: 'sensor.guestbedroomtemphum_humidity', lux: null },
-    lights: [
-      { id: 'light.guestbedroomroof',   label: 'Ceiling' },
-      { id: 'light.guestbedroomwindow', label: 'Window'  },
-    ],
-    powerSensors: ['sensor.guestbedroomroof_power', 'sensor.guestbedroomwindow_power', 'sensor.guestbedroomwallplugcomputer_power_2']
-  },
-  {
-    id: 'balcony', name: 'Balcony',
-    sensors: { temp: 'sensor.balconyluxtemp_air_temperature', humidity: null, lux: 'sensor.balconyluxtemp_illuminance' },
-    lights: [{ id: 'light.balconyonoff', label: 'Deco Lights' }],
-    powerSensors: ['sensor.balconyonoff_power']
-  },
-  {
-    id: 'bathroom', name: 'Bathroom',
-    sensors: { temp: 'sensor.bathroomtemphum_air_temperature', humidity: 'sensor.bathroomtemphum_humidity', lux: null },
-    lights: [], powerSensors: ['sensor.washer_power']
-  },
-  {
-    id: 'hall', name: 'Hall',
-    sensors: { temp: 'sensor.motion_sensor_air_temperature', humidity: null, lux: 'sensor.motion_sensor_illuminance' },
-    lights: [], powerSensors: []
-  },
-  {
-    id: 'wardrobe', name: 'Wardrobe',
-    sensors: { temp: 'sensor.wardrobetemphum_air_temperature', humidity: 'sensor.wardrobetemphum_humidity', lux: null },
-    lights: [], powerSensors: []
-  },
-];
-
-const DIMMABLE = new Set(['light.bedroomroof', 'light.guestbedroomroof']);
-
-const MEDIA_PLAYER_ENTITIES = [
-  { id: 'media_player.livingroom_arc', label: 'Living Room Arc', type: 'SONOS' },
-  { id: 'media_player.kitchen',        label: 'Kitchen', type: 'SONOS' },
-  { id: 'media_player.bathroom',       label: 'Bathroom', type: 'SONOS' },
-  { id: 'media_player.bedroompb',      label: 'Bedroom', type: 'SONOS' },
-  { id: 'media_player.sonos_move_small_bedroom', label: 'Guest Room Move', type: 'SONOS' },
-  { id: 'media_player.living_room',     label: 'Living Room Apple TV', type: 'ATV' },
-  { id: 'media_player.bedroom_4k_gen1', label: 'Bedroom Apple TV', type: 'ATV' },
-];
-const MEDIA_PLAYER_IDS = new Set(MEDIA_PLAYER_ENTITIES.map(e => e.id));
-
-const LIGHT_ENTITIES = [
-  'light.livingroomwindow','light.livingroomsofa','light.kitchenwindow',
-  'light.bedroomroof','light.bedroomwinleft','light.bedroomwinright',
-  'light.guestbedroomroof','light.guestbedroomwindow','light.balconyonoff',
-];
-
-const ALL_SENSOR_IDS = new Set([
-  'sensor.livingroomtemphum_air_temperature_2','sensor.livingroomtemphum_humidity_2',
-  'sensor.kitchenmotiondetector_air_temperature','sensor.kitchenmotiondetector_illuminance',
-  'sensor.bedroomtemphum_air_temperature','sensor.bedroomtemphum_humidity',
-  'sensor.guestbedroomtemphum_air_temperature','sensor.guestbedroomtemphum_humidity',
-  'sensor.balconyluxtemp_air_temperature','sensor.balconyluxtemp_illuminance',
-  'sensor.bathroomtemphum_air_temperature','sensor.bathroomtemphum_humidity',
-  'sensor.motion_sensor_air_temperature','sensor.motion_sensor_illuminance',
-  'sensor.wardrobetemphum_air_temperature','sensor.wardrobetemphum_humidity',
-]);
-
-
-// Map power sensor → cumulative kWh sensor for each device
-const LC_KWH_SENSORS = {
-  'sensor.kitchenwindow_power':                    'sensor.kitchenwindow_electric_consumption_kwh',
-  'sensor.livingroomwindow_power':                 'sensor.livingroomwindow_electric_consumption_kwh',
-  'sensor.guestbedroomwindow_power':               'sensor.guestbedroomwindow_electric_consumption_kwh',
-  'sensor.livingroomsofa_power':                   'sensor.livingroomsofa_electric_consumption_kwh',
-  'sensor.bedroomwinleft_power':                   'sensor.bedroomwinleft_electric_consumption_kwh',
-  'sensor.bedroomwinright_power_2':                'sensor.bedroomwinright_electric_consumption_kwh_2',
-  'sensor.balconyonoff_power':                     'sensor.balconyonoff_electric_consumption_kwh',
-  'sensor.guestbedroomroof_power':                 'sensor.guestbedroomroof_electric_consumption_kwh',
-  'sensor.bedroomroof_power':                      'sensor.bedroomroof_electric_consumption_kwh',
-  'sensor.livingroomwallplugtelevision_power':     'sensor.livingroomwallplugtelevision_electric_consumption_kwh',
-  'sensor.guestbedroomwallplugcomputer_power_2':   'sensor.guestbedroomwallplugcomputer_electric_consumption_kwh_2',
-  'sensor.washer_power':                           'sensor.washer_energy',
-};
-
-// Friendly labels for power sensors (used in power panel device table)
-const LC_POWER_LABELS = {
-  'sensor.kitchenwindow_power':                  'Window Light',
-  'sensor.livingroomwindow_power':               'Window Light',
-  'sensor.guestbedroomwindow_power':             'Window Light',
-  'sensor.livingroomsofa_power':                 'Sofa Light',
-  'sensor.bedroomwinleft_power':                 'Win Left',
-  'sensor.bedroomwinright_power_2':              'Win Right',
-  'sensor.balconyonoff_power':                   'Deco Lights',
-  'sensor.guestbedroomroof_power':               'Ceiling',
-  'sensor.bedroomroof_power':                    'Ceiling',
-  'sensor.livingroomwallplugtelevision_power':   'Television',
-  'sensor.guestbedroomwallplugcomputer_power_2': 'Computer',
-  'sensor.washer_power':                         'Washer',
-};
-
-const LC_POWER_SENSORS = [
-  'sensor.kitchenwindow_power','sensor.livingroomwindow_power',
-  'sensor.guestbedroomwindow_power','sensor.livingroomsofa_power',
-  'sensor.bedroomwinleft_power','sensor.bedroomwinright_power_2',
-  'sensor.balconyonoff_power','sensor.guestbedroomroof_power','sensor.bedroomroof_power',
-  'sensor.livingroomwallplugtelevision_power','sensor.guestbedroomwallplugcomputer_power_2',
-  'sensor.washer_power',
-];
 
 // ═══════════════════════════════════════════════════
 // STATE
@@ -173,20 +95,7 @@ let liveData = {
   weatherForecast: [], nordpool48h: [],
   sessions: {}, streamCount: 0, streamDirectPlay: 0, streamTranscode: 0,
   totalBandwidth: 0, lanBandwidth: 0, wanBandwidth: 0,
-  power: {
-    'sensor.kitchenwindow_power': null,
-    'sensor.livingroomwindow_power': null,
-    'sensor.guestbedroomwindow_power': null,
-    'sensor.livingroomsofa_power': null,
-    'sensor.bedroomwinleft_power': null,
-    'sensor.bedroomwinright_power_2': null,
-    'sensor.balconyonoff_power': null,
-    'sensor.guestbedroomroof_power': null,
-    'sensor.bedroomroof_power': null,
-    'sensor.livingroomwallplugtelevision_power': null,
-    'sensor.guestbedroomwallplugcomputer_power_2': null,
-    'sensor.washer_power': null,
-  },
+  power: Object.fromEntries(LC_POWER_SENSORS.map(s => [s, null])),
   powerHistory: [],
   kwh: {},  // cumulative kWh per device, keyed by kWh entity_id
   outsideLux: null,
@@ -1271,13 +1180,15 @@ function haConnect() {
       ws.send(JSON.stringify({ id: msgId++, type: 'get_states' }));
       ws.send(JSON.stringify({ id: msgId++, type: 'subscribe_events', event_type: 'state_changed' }));
       // Fetch hourly weather forecast (returns as a 'result' message)
-      weatherForecastMsgId = msgId;
-      ws.send(JSON.stringify({
-        id: msgId++, type: 'call_service',
-        domain: 'weather', service: 'get_forecasts',
-        service_data: { entity_id: 'weather.forecast_home_2', type: 'hourly' },
-        return_response: true
-      }));
+      if (INT.weather) {
+        weatherForecastMsgId = msgId;
+        ws.send(JSON.stringify({
+          id: msgId++, type: 'call_service',
+          domain: 'weather', service: 'get_forecasts',
+          service_data: { entity_id: INT.weather, type: 'hourly' },
+          return_response: true
+        }));
+      }
       // Request washer monthly statistics if enabled
       if (FEATURES.washer && typeof washerRequestStats === 'function') {
         washerRequestStats(
@@ -1308,7 +1219,7 @@ function haConnect() {
         // handled by washer module
       // Weather forecast result
       } else if (msg.id === weatherForecastMsgId && msg.result?.response) {
-        const fc = msg.result.response?.['weather.forecast_home_2']?.forecast;
+        const fc = msg.result.response?.[INT.weather]?.forecast;
         if (Array.isArray(fc)) {
           liveData.weatherForecast = fc.slice(0, 24);
           renderWeather();
@@ -1324,23 +1235,22 @@ function haConnect() {
       // Re-render affected UI sections based on which entity changed
       if (id.startsWith('light.') || ALL_SENSOR_IDS.has(id)) renderRooms();
       if (id in liveData.power) renderRooms(); // Power sensor changes must also update room cards
-      if (id === 'sun.sun')              { renderSun(); updateDayNight(); }
-      if (id === 'weather.forecast_home_2') {
+      if (INT.sun && id === INT.sun)      { renderSun(); updateDayNight(); }
+      if (INT.weather && id === INT.weather) {
         // Weather entity changed — re-fetch the hourly forecast
         weatherForecastMsgId = msgId;
         ws.send(JSON.stringify({
           id: msgId++, type: 'call_service',
           domain: 'weather', service: 'get_forecasts',
-          service_data: { entity_id: 'weather.forecast_home_2', type: 'hourly' },
+          service_data: { entity_id: INT.weather, type: 'hourly' },
           return_response: true
         }));
       }
       if (id.includes('nordpool'))       { renderNordpoolBars(); renderNordpool48h(); }
-      if (['sensor.outside_temperature_met_no',
-           'sensor.nordpool_current_price_15m','sensor.nordpool_last_this_next_hour'].includes(id)) {
+      if ([INT.outsideTemp, INT.nordpool, INT.nordpoolExtra].filter(Boolean).includes(id)) {
         renderEnviro();
       }
-      if (FEATURES.washer && id === 'sensor.washer_job_state') renderEnviro();
+      if (FEATURES.washer && INT.washer?.jobState && id === INT.washer.jobState) renderEnviro();
       if (THEME.onStateChanged) THEME.onStateChanged(id, s);
     }
   };
@@ -1384,7 +1294,7 @@ function ingestState(s) {
   }
 
   // ── Sun: rise/set times, elevation, above/below horizon ──
-  if (id === 'sun.sun') {
+  if (INT.sun && id === INT.sun) {
     liveData.sun.nextRising  = s.attributes?.next_rising  ?? null;
     liveData.sun.nextSetting = s.attributes?.next_setting ?? null;
     liveData.sun.elevation   = s.attributes?.elevation    ?? null;
@@ -1392,15 +1302,15 @@ function ingestState(s) {
   }
 
   // ── Environment: outside temp + electricity prices ──
-  if (id === 'sensor.outside_temperature_met_no') {
+  if (INT.outsideTemp && id === INT.outsideTemp) {
     liveData.outsideTemp = isNaN(parseFloat(s.state)) ? null : parseFloat(s.state);
   }
-  if (id === 'sensor.nordpool_current_price_15m') {
+  if (INT.nordpool && id === INT.nordpool) {
     liveData.elecNow = parseFloat(s.state) || null;
   }
   // Nordpool composite sensor — tries multiple attribute names because different
   // Nordpool integration versions expose prices under different keys
-  if (id === 'sensor.nordpool_last_this_next_hour') {
+  if (INT.nordpoolExtra && id === INT.nordpoolExtra) {
     const stateVal = parseFloat(s.state);
     if (!isNaN(stateVal)) liveData.elecNow = stateVal;
     const attrs = s.attributes || {};
@@ -1416,8 +1326,8 @@ function ingestState(s) {
   }
 
   // ── Plex: active sessions from Tautulli sensors ──
-  if (id.startsWith('sensor.plex_session_') && id.endsWith('_tautulli')) {
-    const sessionNum = id.replace('sensor.plex_session_','').replace('_tautulli','');
+  if (INT.tautulli && id.startsWith(INT.tautulli.sessionPrefix) && id.endsWith(INT.tautulli.sessionSuffix)) {
+    const sessionNum = id.replace(INT.tautulli.sessionPrefix,'').replace(INT.tautulli.sessionSuffix,'');
     if (s.state === 'playing' || s.state === 'paused') {
       liveData.sessions[sessionNum] = {
         state:              s.state,
@@ -1450,12 +1360,12 @@ function ingestState(s) {
     }
     renderMedia();
   }
-  if (id === 'sensor.tautulli_stream_count')              { liveData.streamCount = parseInt(s.state) || 0; renderMedia(); }
-  if (id === 'sensor.tautulli_stream_count_direct_play')  { liveData.streamDirectPlay = parseInt(s.state) || 0; }
-  if (id === 'sensor.tautulli_stream_count_transcode')    { liveData.streamTranscode = parseInt(s.state) || 0; }
-  if (id === 'sensor.tautulli_total_bandwidth')           { liveData.totalBandwidth = parseFloat(s.state) || 0; }
-  if (id === 'sensor.tautulli_lan_bandwidth')             { liveData.lanBandwidth = parseFloat(s.state) || 0; }
-  if (id === 'sensor.tautulli_wan_bandwidth')             { liveData.wanBandwidth = parseFloat(s.state) || 0; renderMedia(); }
+  if (INT.tautulli?.streamCount    && id === INT.tautulli.streamCount)    { liveData.streamCount = parseInt(s.state) || 0; renderMedia(); }
+  if (INT.tautulli?.directPlay     && id === INT.tautulli.directPlay)     { liveData.streamDirectPlay = parseInt(s.state) || 0; }
+  if (INT.tautulli?.transcode      && id === INT.tautulli.transcode)      { liveData.streamTranscode = parseInt(s.state) || 0; }
+  if (INT.tautulli?.totalBandwidth && id === INT.tautulli.totalBandwidth) { liveData.totalBandwidth = parseFloat(s.state) || 0; }
+  if (INT.tautulli?.lanBandwidth   && id === INT.tautulli.lanBandwidth)   { liveData.lanBandwidth = parseFloat(s.state) || 0; }
+  if (INT.tautulli?.wanBandwidth   && id === INT.tautulli.wanBandwidth)   { liveData.wanBandwidth = parseFloat(s.state) || 0; renderMedia(); }
 
   // ── Power sensors: per-room wattage, tracked for energy chart history ──
   if (id in liveData.power) {
@@ -1472,7 +1382,7 @@ function ingestState(s) {
     if (!isNaN(v) && v < 100000) liveData.kwh[id] = v;
     renderPowerPanel();
   }
-  if (id === 'sensor.balconyluxtemp_illuminance') {
+  if (INT.outsideLux && id === INT.outsideLux) {
     liveData.outsideLux = isNaN(parseFloat(s.state)) ? null : parseFloat(s.state);
   }
 

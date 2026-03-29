@@ -1,0 +1,126 @@
+// ====== entities.js — All user-specific entity IDs in one place ======
+//
+// SETUP: Copy this file to entities.js and replace the YOUR_* placeholders
+//        with your actual Home Assistant entity IDs.
+//
+//        cp entities.js.example entities.js
+//
+// TIPS:  - Find your entity IDs in HA → Developer Tools → States
+//        - Set any sensor to null if your room doesn't have it
+//        - Set integration sections to null to disable them
+//        - This file is gitignored — your entity IDs stay private
+
+const ENTITIES = {
+
+  // ═══════════════════════════════════════════════════
+  // ROOMS
+  // ═══════════════════════════════════════════════════
+  // Define your rooms with their sensors, lights, and power monitors.
+  // You can add, remove, or reorder rooms freely.
+  //
+  // sensors:  temp/humidity/lux — set to null if not available
+  // lights:   dimmable: true for lights that support brightness control
+  // power:    smart plug power sensors with kWh tracking and friendly labels
+  rooms: [
+    {
+      id: 'living', name: 'Living Room',
+      sensors: {
+        temp:     'sensor.YOUR_LIVINGROOM_TEMP',
+        humidity: 'sensor.YOUR_LIVINGROOM_HUMIDITY',
+        lux:      null,  // no lux sensor in this room
+      },
+      lights: [
+        { id: 'light.YOUR_LIVINGROOM_LIGHT_1', label: 'Ceiling',  dimmable: true },
+        { id: 'light.YOUR_LIVINGROOM_LIGHT_2', label: 'Table Lamp', dimmable: false },
+      ],
+      power: [
+        { sensor: 'sensor.YOUR_PLUG_1_POWER', kwh: 'sensor.YOUR_PLUG_1_KWH', label: 'Ceiling Light' },
+        { sensor: 'sensor.YOUR_PLUG_2_POWER', kwh: 'sensor.YOUR_PLUG_2_KWH', label: 'TV' },
+      ],
+    },
+    {
+      id: 'bedroom', name: 'Bedroom',
+      sensors: {
+        temp:     'sensor.YOUR_BEDROOM_TEMP',
+        humidity: 'sensor.YOUR_BEDROOM_HUMIDITY',
+        lux:      null,
+      },
+      lights: [
+        { id: 'light.YOUR_BEDROOM_LIGHT', label: 'Ceiling', dimmable: true },
+      ],
+      power: [],  // no power monitoring in this room
+    },
+    // Add more rooms here...
+  ],
+
+  // ═══════════════════════════════════════════════════
+  // MEDIA PLAYERS
+  // ═══════════════════════════════════════════════════
+  // Sonos speakers, Apple TV, Chromecast, or any media_player entity.
+  // type: 'SONOS' or 'ATV' — affects display formatting.
+  // Remove this array or leave empty [] if you don't use media players.
+  mediaPlayers: [
+    { id: 'media_player.YOUR_SPEAKER',  label: 'Living Room Speaker', type: 'SONOS' },
+    { id: 'media_player.YOUR_TV',       label: 'Living Room TV',      type: 'ATV' },
+  ],
+
+  // ═══════════════════════════════════════════════════
+  // INTEGRATIONS
+  // ═══════════════════════════════════════════════════
+  // Set any value to null to disable that integration.
+  // The dashboard will gracefully hide sections for disabled integrations.
+  integrations: {
+
+    // Sun — drives day/night mode (almost always 'sun.sun')
+    sun: 'sun.sun',
+
+    // Outside temperature — shown in the status bar
+    outsideTemp: 'sensor.YOUR_OUTSIDE_TEMP',
+
+    // Outside lux — used by some theme effects (e.g. Pip-Boy Geiger counter)
+    outsideLux: null,  // or 'sensor.YOUR_OUTDOOR_LUX'
+
+    // Weather — forecast cards on the Data tab
+    // Find your weather entity in HA → Developer Tools → States → search "weather."
+    weather: 'weather.YOUR_WEATHER_ENTITY',
+
+    // ── Nordpool electricity prices ──
+    // Set all three to null if you don't use Nordpool.
+    nordpool:      null,  // or 'sensor.nordpool_current_price_15m'
+    nordpoolExtra: null,  // or 'sensor.nordpool_last_this_next_hour'
+    nordpool48h:   null,  // or 'sensor.nordpool_next_24h_15m'
+
+    // ── Plex / Tautulli ──
+    // Set to null to disable Plex session tracking.
+    tautulli: null,
+    // Or configure with your Tautulli sensor names:
+    // tautulli: {
+    //   streamCount:    'sensor.tautulli_stream_count',
+    //   directPlay:     'sensor.tautulli_stream_count_direct_play',
+    //   transcode:      'sensor.tautulli_stream_count_transcode',
+    //   totalBandwidth: 'sensor.tautulli_total_bandwidth',
+    //   lanBandwidth:   'sensor.tautulli_lan_bandwidth',
+    //   wanBandwidth:   'sensor.tautulli_wan_bandwidth',
+    //   sessionPrefix:  'sensor.plex_session_',
+    //   sessionSuffix:  '_tautulli',
+    // },
+
+    // ── Washer (Samsung SmartThings) ──
+    // Set enabled: false or the whole washer object to null to disable.
+    washer: null,
+    // Or configure with your washer entity IDs:
+    // washer: {
+    //   enabled:     true,
+    //   jobState:    'sensor.washer_job_state',
+    //   machState:   'sensor.washer_machine_state',
+    //   completion:  'sensor.washer_completion_time',
+    //   power:       'sensor.washer_power',
+    //   energy:      'sensor.washer_energy',
+    //   water:       'sensor.washer_water_consumption',
+    //   cycles:      'sensor.washer_cycle_count',
+    //   waterTemp:   'select.washer_water_temperature',
+    //   spinLevel:   'select.washer_spin_level',
+    //   rinses:      'number.washer_rinse_cycles',
+    // },
+  },
+};
