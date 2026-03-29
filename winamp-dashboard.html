@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Winamp // Home Automation</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23232323'/><polygon points='10,8 10,24 24,16' fill='%2300E000'/></svg>">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
+
+  :root {
+    --green: #00E000;
+    --green-dim: #006600;
+    --green-mid: #00AA00;
+    --green-glow: rgba(0, 224, 0, 0.3);
+    --green-faint: rgba(0, 224, 0, 0.06);
+    --yellow: #EAEC23;
+    --amber: #EAEC23;
+    --orange: #FF8800;
+    --red: #E05050;
+    --bg: #232323;
+    --bg2: #1A1A1A;
+    --bg-deep: #131313;
+    --chrome: #6B7B8D;
+    --chrome-light: #9BA5AE;
+    --chrome-dark: #3A4550;
+    --white: #E0E0E0;
+    --grey: #3A3A3A;
+    --grey-mid: #6B7B8D;
+    --blue: #4488CC;
+    --teal: #00E0E0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: #0A0A0A;
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    height: 100%;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  /* ── WRAPPER ── */
+  .winamp {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 1px solid var(--chrome-dark);
+    box-shadow: inset 1px 1px 0 var(--chrome-light), inset -1px -1px 0 #111,
+                0 0 30px rgba(0,0,0,0.8);
+  }
+
+  /* ══════════════════════════════════
+     TITLE BAR — Winamp chrome
+     ══════════════════════════════════ */
+  .wa-titlebar {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    background: linear-gradient(180deg, #4A5A6B 0%, #2A3540 40%, #1A2530 100%);
+    border-bottom: 1px solid #111;
+    padding: 0 6px;
+    flex-shrink: 0;
+    /* Bumps texture */
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0px, transparent 2px, rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 4px),
+      linear-gradient(180deg, #4A5A6B 0%, #2A3540 40%, #1A2530 100%);
+  }
+  .wa-titlebar-text {
+    flex: 1;
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: var(--white);
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .wa-titlebar-buttons {
+    display: flex;
+    gap: 2px;
+  }
+  .wa-titlebar-btn {
+    width: 14px; height: 14px;
+    border: 1px outset var(--chrome);
+    background: linear-gradient(180deg, var(--chrome-light) 0%, var(--chrome-dark) 100%);
+    font-size: 8px; line-height: 12px; text-align: center;
+    color: #000; cursor: pointer;
+  }
+
+  /* ══════════════════════════════════
+     MARQUEE + DISPLAY PANEL
+     ══════════════════════════════════ */
+  .wa-display {
+    background: #000;
+    border: 2px inset #333;
+    margin: 4px 6px;
+    padding: 6px 10px;
+    flex-shrink: 0;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .wa-display::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 1px,
+      rgba(0,0,0,0.15) 1px,
+      rgba(0,0,0,0.15) 2px
+    );
+    pointer-events: none;
+  }
+
+  .wa-time {
+    font-family: 'VT323', monospace;
+    font-size: 2rem;
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green-glow), 0 0 20px var(--green-glow);
+    letter-spacing: 2px;
+    flex-shrink: 0;
+    min-width: 90px;
+  }
+
+  .wa-marquee-wrap {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .wa-marquee {
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green-glow);
+    letter-spacing: 2px;
+    white-space: nowrap;
+    animation: marquee-scroll 20s linear infinite;
+  }
+  @keyframes marquee-scroll {
+    0%   { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .wa-meta-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .wa-bitrate {
+    font-size: 0.6rem;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+  }
+  .wa-conn-dot { display: inline; }
+  .wa-conn-dot.online  { color: var(--green); }
+  .wa-conn-dot.online::before  { content: ''; }
+  .wa-conn-dot.connecting { color: var(--amber); }
+  .wa-conn-dot.connecting::before { content: ''; }
+  .wa-conn-dot.offline { color: var(--red); }
+  .wa-conn-dot.offline::before { content: ''; }
+
+  #conn-dot { display: inline; }
+  #conn-dot.online  { color: var(--green); }
+  #conn-dot.online::before  { content: '\25CF '; }
+  #conn-dot.connecting { color: var(--amber); }
+  #conn-dot.connecting::before { content: '\25CB '; }
+  #conn-dot.offline { color: var(--red); }
+  #conn-dot.offline::before { content: '\2715 '; }
+
+  /* ══════════════════════════════════
+     SPECTRUM ANALYZER (power viz)
+     ══════════════════════════════════ */
+  .wa-spectrum {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 36px;
+    background: #000;
+    border: 2px inset #333;
+    margin: 0 6px 4px;
+    padding: 3px 4px;
+    flex-shrink: 0;
+  }
+  .wa-spec-bar {
+    flex: 1;
+    min-width: 4px;
+    transition: height 0.4s ease;
+    position: relative;
+  }
+  .wa-spec-bar-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(0deg, var(--green) 0%, var(--yellow) 60%, var(--orange) 85%, var(--red) 100%);
+    transition: height 0.5s ease;
+  }
+  .wa-spec-bar-peak {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--white);
+    transition: bottom 1.2s ease;
+  }
+
+  /* ══════════════════════════════════
+     TABS — Winamp playlist-style
+     ══════════════════════════════════ */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin: 0 6px;
+    flex-shrink: 0;
+  }
+  .tab {
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    padding: 3px 14px;
+    border: 1px outset var(--chrome);
+    border-bottom: none;
+    background: linear-gradient(180deg, var(--chrome) 0%, var(--chrome-dark) 100%);
+    color: #000;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .tab:hover {
+    background: linear-gradient(180deg, var(--chrome-light) 0%, var(--chrome) 100%);
+  }
+  .tab.active {
+    background: var(--bg);
+    color: var(--green);
+    border: 1px solid var(--chrome);
+    border-bottom: 1px solid var(--bg);
+    text-shadow: 0 0 6px var(--green-glow);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ══════════════════════════════════
+     MAIN CONTENT — playlist area
+     ══════════════════════════════════ */
+  .content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg-deep);
+    border: 2px inset #333;
+    margin: 0 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--chrome) var(--bg-deep);
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+  .content::-webkit-scrollbar { width: 14px; }
+  .content::-webkit-scrollbar-track { background: var(--bg-deep); border-left: 1px solid #333; }
+  .content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--chrome-light) 0%, var(--chrome-dark) 100%);
+    border: 1px outset var(--chrome);
+  }
+
+  .page { display: none; padding: 10px 14px; }
+  .page.active { display: block; animation: fadein 0.3s ease; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── SECTION HEADERS — like playlist group headers ── */
+  .section-title {
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--chrome-light);
+    background: linear-gradient(90deg, var(--chrome-dark) 0%, transparent 100%);
+    padding: 3px 8px;
+    margin-bottom: 12px;
+    margin-top: 16px;
+    border-left: 3px solid var(--green);
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  /* ══════════════════════════════════
+     ROOM GRID
+     ══════════════════════════════════ */
+  .room-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+  }
+
+  .room-card {
+    border: 1px solid var(--grey);
+    background: rgba(255,255,255,0.02);
+    position: relative;
+    transition: all 0.2s;
+  }
+  .room-card:hover {
+    border-color: var(--chrome);
+    background: rgba(255,255,255,0.04);
+  }
+  .room-card.lit {
+    background: rgba(0,224,0,0.04);
+    border-color: var(--green-dim);
+  }
+  .room-card.lit:hover {
+    border-color: var(--green);
+    box-shadow: 0 0 10px var(--green-glow);
+  }
+
+  .room-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px 4px;
+  }
+  .room-body { padding: 0 12px 10px; }
+
+  .room-name {
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    color: var(--white);
+    text-shadow: 0 0 4px rgba(255,255,255,0.1);
+  }
+  .room-card.lit .room-name {
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green-glow);
+  }
+
+  .room-lit-badge {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    padding: 1px 6px;
+    border: 1px solid var(--green);
+    color: var(--green);
+    text-shadow: 0 0 4px var(--green-glow);
+    display: none;
+  }
+  .room-card.lit .room-lit-badge { display: inline-block; }
+
+  /* ── SENSOR CHIPS ── */
+  .sensor-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .sensor-chip {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+    border: 1px solid var(--grey);
+    color: var(--grey-mid);
+    background: transparent;
+    transition: all 0.3s;
+  }
+  .sensor-chip.active {
+    color: var(--yellow);
+    border-color: var(--yellow);
+    text-shadow: 0 0 6px rgba(234,236,35,0.4);
+    background: rgba(234,236,35,0.04);
+  }
+  .sensor-chip.active.power {
+    color: var(--orange);
+    border-color: var(--orange);
+    text-shadow: 0 0 6px rgba(255,136,0,0.4);
+  }
+  .sensor-icon { font-style: normal; font-size: 0.7rem; }
+
+  /* ── LIGHT ROWS ── */
+  .light-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .light-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--grey-mid);
+  }
+  .light-row.on .light-label { color: var(--green); }
+
+  .light-indicator {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--grey);
+    flex-shrink: 0;
+  }
+  .light-row.on .light-indicator {
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { box-shadow: 0 0 4px var(--green); }
+    50%      { box-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow); }
+  }
+
+  .light-state {
+    font-size: 0.63rem;
+    color: var(--grey-mid);
+  }
+  .light-row.on .light-state { color: var(--green); }
+
+  /* ── TOGGLE SWITCH ── */
+  .lc-toggle {
+    position: relative;
+    width: 36px;
+    height: 16px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .lc-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .lc-toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-deep);
+    border: 1px solid var(--grey);
+    transition: all 0.2s;
+  }
+  .lc-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    background: var(--chrome);
+    transition: all 0.2s;
+  }
+  .lc-toggle input:checked ~ .lc-toggle-track {
+    background: rgba(0,224,0,0.12);
+    border-color: var(--green);
+    box-shadow: 0 0 6px var(--green-glow);
+  }
+  .lc-toggle input:checked ~ .lc-toggle-thumb {
+    left: 22px;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  /* ── DIMMER (EQ-slider style) ── */
+  .dimmer-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 4px;
+    padding-left: 12px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.25s, max-height 0.25s;
+  }
+  .dimmer-row.visible {
+    opacity: 1;
+    max-height: 30px;
+  }
+  .dimmer-label {
+    font-size: 0.63rem;
+    color: var(--grey-mid);
+    letter-spacing: 1px;
+    width: 28px;
+    flex-shrink: 0;
+  }
+  .lc-dimmer {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 6px;
+    background: linear-gradient(90deg, var(--green-dim) 0%, var(--green) 100%);
+    outline: none;
+    cursor: pointer;
+    border: 1px inset #333;
+  }
+  .lc-dimmer::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 18px;
+    background: linear-gradient(180deg, var(--chrome-light), var(--chrome-dark));
+    border: 1px outset var(--chrome);
+    cursor: pointer;
+  }
+  .lc-dimmer::-moz-range-thumb {
+    width: 10px;
+    height: 18px;
+    background: linear-gradient(180deg, var(--chrome-light), var(--chrome-dark));
+    border: 1px outset var(--chrome);
+    cursor: pointer;
+  }
+  .dimmer-pct {
+    font-size: 0.63rem;
+    color: var(--green);
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── LOAD BARS ── */
+  .load-bar-wrap { margin-top: 8px; }
+  .load-bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.63rem; color: var(--grey-mid);
+    margin-bottom: 3px; letter-spacing: 1px;
+  }
+  .load-bar {
+    height: 6px;
+    background: var(--grey);
+    border: 1px inset #222;
+    position: relative;
+    overflow: hidden;
+  }
+  .load-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green) 0%, var(--yellow) 70%, var(--orange) 100%);
+    box-shadow: 0 0 4px var(--green-glow);
+    transition: width 1s ease;
+  }
+
+  /* ── WEATHER ── */
+  .weather-strip {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    border: 1px solid var(--grey);
+    background: rgba(255,255,255,0.02);
+    margin-bottom: 14px;
+  }
+  .w-item { font-size: 0.7rem; letter-spacing: 1px; }
+  .w-item label { color: var(--grey-mid); display: block; font-size: 0.63rem; margin-bottom: 2px; }
+  .w-item .w-val {
+    color: var(--green);
+    font-size: 1rem;
+    text-shadow: 0 0 6px var(--green-glow);
+  }
+
+  /* Weather forecast cards */
+  .weather-card {
+    flex: 1; min-width: 60px; text-align: center;
+    border: 1px solid var(--grey); padding: 6px 4px;
+    background: transparent;
+  }
+  .weather-card.now {
+    border-color: var(--green-dim);
+    background: rgba(0,224,0,0.06);
+  }
+  .wc-time { font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 1px; }
+  .wc-icon { font-size: 1rem; margin: 4px 0; }
+  .wc-temp { font-size: 0.75rem; color: var(--green); text-shadow: 0 0 6px var(--green-glow); }
+  .wc-detail { font-size: 0.63rem; color: var(--blue); margin-top: 2px; }
+  .wc-wind { font-size: 0.63rem; color: var(--grey-mid); margin-top: 1px; }
+  #d-weather {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;
+  }
+
+  /* ── NORDPOOL 48H GRAPH ── */
+  #d-np48 {
+    display: flex; align-items: flex-end; height: 80px; gap: 1px; position: relative;
+  }
+  .np48-bar-wrap {
+    flex: 1; position: relative; cursor: pointer; height: 100%; display: flex; align-items: flex-end;
+  }
+  .np48-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    transition: height 0.5s;
+  }
+  .np48-bar.current { border-top: 2px solid var(--green); }
+  .np48-midnight {
+    position: absolute; bottom: 0; left: 0; width: 1px; height: 100%;
+    background: var(--grey-mid); opacity: 0.5;
+  }
+  #d-np48-xaxis {
+    display: flex; justify-content: space-between;
+    font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 1px; margin-top: 4px;
+  }
+  #d-np48-minmax {
+    font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 1px; margin-top: 8px;
+  }
+
+  .np-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.7rem; letter-spacing: 1px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .np-label { width: 60px; color: var(--grey-mid); }
+  .np-bar-wrap { flex: 1; height: 8px; background: var(--grey); border: 1px inset #222; overflow: hidden; }
+  .data-bar-fill, .np-bar-fill { height: 100%; transition: width 1s; }
+  .data-bar-fill.high, .np-bar-fill.high { background: var(--red); box-shadow: 0 0 4px var(--red); }
+  .data-bar-fill.mid, .np-bar-fill.mid   { background: var(--yellow); box-shadow: 0 0 4px var(--yellow); }
+  .data-bar-fill.low, .np-bar-fill.low   { background: var(--green); box-shadow: 0 0 4px var(--green-glow); }
+  .data-val, .np-val { width: 60px; text-align: right; color: var(--green); }
+  .data-val.high, .np-val.high { color: var(--red); }
+  .data-val.mid, .np-val.mid   { color: var(--yellow); }
+
+  /* ── TEMPERATURE GRAPH ── */
+  #d-tempgraph {
+    display: flex; align-items: flex-end; height: 60px; gap: 2px; padding-bottom: 4px;
+  }
+  .temp-bar {
+    flex: 1; cursor: pointer; transition: height 1s;
+  }
+  #d-tempminmax {
+    font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 1px; margin-top: 6px;
+  }
+
+  /* ══════════════════════════════════
+     TRANSPORT CONTROLS (footer)
+     ══════════════════════════════════ */
+  .wa-transport {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    background: linear-gradient(180deg, var(--chrome) 0%, var(--chrome-dark) 100%);
+    border-top: 1px solid var(--chrome-light);
+    padding: 0 8px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .wa-transport-btn {
+    width: 28px; height: 22px;
+    border: 1px outset var(--chrome);
+    background: linear-gradient(180deg, var(--chrome-light) 0%, var(--chrome-dark) 100%);
+    color: #000;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+  }
+  .wa-transport-btn:hover {
+    border-style: inset;
+    background: linear-gradient(180deg, var(--chrome-dark) 0%, var(--chrome-light) 100%);
+  }
+  .wa-transport-btn:active {
+    border-style: inset;
+  }
+  .wa-transport-spacer { flex: 1; }
+  .wa-transport-text {
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    color: #000;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
+  }
+
+  /* ── Washer badge ── */
+  .washer-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+    border: 1px solid;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .washer-badge.running {
+    border-color: var(--orange);
+    color: var(--orange);
+    text-shadow: 0 0 6px var(--orange);
+    animation: blink 0.8s step-end infinite;
+  }
+  .washer-badge.idle {
+    border-color: var(--grey);
+    color: var(--grey-mid);
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ── Notification toast ── */
+  .toast {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    background: var(--bg);
+    border: 1px outset var(--chrome);
+    color: var(--green);
+    padding: 10px 18px;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 10000;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .toast.show { opacity: 1; transform: none; }
+
+  /* ══════════════════════════════════
+     MEDIA PAGE
+     ══════════════════════════════════ */
+  .media-header-strip {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    padding: 10px 14px; border: 1px solid var(--grey);
+    background: rgba(255,255,255,0.02); margin-bottom: 14px;
+  }
+  .sessions-grid { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+  .session-card {
+    display: flex; gap: 12px; border: 1px solid var(--grey);
+    background: rgba(255,255,255,0.02); padding: 12px;
+    flex: 1; min-width: 300px; position: relative; transition: border-color 0.3s;
+  }
+  .session-card.active { border-color: var(--green-dim); }
+  .session-card.paused { opacity: 0.7; }
+  .session-poster {
+    width: 90px; flex-shrink: 0; aspect-ratio: 2/3;
+    background: var(--bg-deep); border: 1px solid var(--grey); overflow: hidden;
+  }
+  .session-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .session-poster-ph {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-family: 'VT323', monospace; font-size: 2rem; color: var(--grey-mid);
+  }
+  .session-info { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden; }
+  .session-show {
+    font-size: 0.66rem; color: var(--grey-mid); letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;
+  }
+  .session-title {
+    font-family: 'VT323', monospace; font-size: 1.05rem; color: var(--green);
+    letter-spacing: 1px; line-height: 1.2; text-shadow: 0 0 6px var(--green-glow);
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .session-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sbadge {
+    font-size: 0.63rem; letter-spacing: 1px; padding: 1px 5px;
+    border: 1px solid var(--grey); color: var(--grey-mid); text-transform: uppercase;
+  }
+  .sbadge.hi { border-color: var(--green-dim); color: var(--green-dim); }
+  .sbadge.amber { border-color: var(--orange); color: var(--orange); }
+  .session-progress-wrap { margin-top: auto; }
+  .session-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 1px; margin-bottom: 3px;
+  }
+  .session-progress-bar { height: 5px; background: var(--grey); overflow: hidden; }
+  .session-progress-fill {
+    height: 100%; background: var(--green);
+    box-shadow: 0 0 4px var(--green-glow); transition: width 2s ease;
+  }
+  .session-user {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .session-avatar {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1px solid var(--grey); overflow: hidden; flex-shrink: 0;
+  }
+  .session-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .no-streams {
+    font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--grey-mid);
+    letter-spacing: 3px; text-align: center; padding: 40px;
+    border: 1px solid var(--grey); width: 100%;
+  }
+
+  /* ── MEDIA PLAYER CARDS ── */
+  .mp-grid {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch;
+  }
+  .mp-card {
+    display: flex; gap: 12px; border: 1px solid var(--grey);
+    background: rgba(255,255,255,0.02); padding: 12px;
+    flex: 1; min-width: 260px; max-width: 400px;
+    position: relative; transition: all 0.3s;
+  }
+  .mp-card.playing {
+    border-color: var(--green-dim);
+    background: rgba(0,224,0,0.04);
+    box-shadow: 0 0 10px var(--green-glow);
+  }
+  .mp-card.paused { opacity: 0.7; }
+  .mp-art {
+    width: 60px; height: 60px; flex-shrink: 0;
+    background: var(--bg-deep); border: 1px solid var(--grey); overflow: hidden;
+  }
+  .mp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mp-art-ph {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-family: 'VT323', monospace; font-size: 1.4rem; color: var(--grey-mid);
+  }
+  .mp-info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; overflow: hidden; }
+  .mp-name {
+    font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 1px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .mp-name .mp-type {
+    font-size: 0.58rem; padding: 0 4px; border: 1px solid var(--grey); color: var(--grey-mid);
+  }
+  .mp-card.playing .mp-name .mp-type { border-color: var(--green-dim); color: var(--green-dim); }
+  .mp-title {
+    font-family: 'VT323', monospace; font-size: 1rem; color: var(--green);
+    letter-spacing: 1px; text-shadow: 0 0 6px var(--green-glow);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mp-artist {
+    font-size: 0.66rem; color: var(--grey-mid); letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mp-source {
+    font-size: 0.58rem; color: var(--grey); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .mp-vol-wrap {
+    display: flex; align-items: center; gap: 6px; margin-top: 2px;
+  }
+  .mp-vol-label { font-size: 0.58rem; color: var(--grey-mid); letter-spacing: 1px; }
+  .mp-vol-bar {
+    flex: 1; height: 4px; background: var(--grey); overflow: hidden;
+  }
+  .mp-vol-fill {
+    height: 100%; background: var(--green);
+    box-shadow: 0 0 4px var(--green-glow); transition: width 0.5s;
+  }
+  .mp-vol-pct { font-size: 0.58rem; color: var(--green); width: 28px; text-align: right; }
+  .mp-state-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .mp-card.playing .mp-state-dot {
+    background: var(--green); box-shadow: 0 0 6px var(--green);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  .mp-card.paused .mp-state-dot {
+    background: var(--orange); box-shadow: 0 0 4px var(--orange);
+  }
+  .mp-progress-wrap { margin-top: 3px; }
+  .mp-progress-bar { height: 4px; background: var(--grey); overflow: hidden; }
+  .mp-progress-fill {
+    height: 100%; background: var(--green);
+    box-shadow: 0 0 4px var(--green-glow); transition: width 2s ease;
+  }
+  .mp-card.paused .mp-progress-fill {
+    background: var(--orange); box-shadow: 0 0 4px var(--orange);
+  }
+  .mp-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.56rem; color: var(--grey-mid); letter-spacing: 1px; margin-top: 2px;
+  }
+  .mp-badge {
+    display: inline-block; font-size: 0.53rem; letter-spacing: 1px; padding: 0 4px;
+    border: 1px solid var(--grey); color: var(--grey-mid); margin-left: 4px;
+    vertical-align: middle;
+  }
+  .mp-badge.muted { border-color: var(--red); color: var(--red); }
+  .no-mp {
+    font-family: 'VT323', monospace; font-size: 0.9rem; color: var(--grey-mid);
+    letter-spacing: 2px; text-align: center; padding: 16px; width: 100%;
+  }
+  .summary-text {
+    font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 0.5px; line-height: 1.6; margin-top: 4px;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  }
+
+  /* ══════════════════════════════════
+     ENERGY / POWER PANEL
+     ══════════════════════════════════ */
+  .energy-wrap { margin-bottom: 14px; }
+  #lc-energy-chart {
+    position: relative; height: 80px;
+    display: flex; align-items: flex-end; gap: 1px;
+  }
+  .lc-energy-bar {
+    flex: 1; position: relative; height: 100%; display: flex; align-items: flex-end;
+    cursor: pointer;
+  }
+  .lc-energy-bar-power {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--green); opacity: 0.85;
+    box-shadow: 0 0 4px var(--green-glow);
+    transition: height 1s ease;
+  }
+  .lc-energy-bar-price {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    opacity: 0.35; transition: height 1s ease;
+  }
+  .lc-energy-bar.current .lc-energy-bar-power {
+    background: var(--orange); box-shadow: 0 0 8px var(--orange);
+  }
+  #lc-energy-xaxis {
+    display: flex; justify-content: space-between;
+    font-size: 0.63rem; color: var(--grey-mid); letter-spacing: 1px;
+    margin-top: 3px;
+  }
+  .energy-legend {
+    display: flex; gap: 16px; font-size: 0.63rem; letter-spacing: 1px; margin-top: 6px; flex-wrap: wrap;
+  }
+  .energy-total {
+    font-family: 'VT323', monospace; font-size: 1.4rem; color: var(--green);
+    text-shadow: 0 0 8px var(--green-glow); letter-spacing: 2px;
+  }
+  .energy-cost {
+    font-size: 0.63rem; color: var(--orange); letter-spacing: 1px; margin-top: 2px;
+  }
+
+  /* ── WASHER PANEL ── */
+  #washer-panel { background: rgba(0,0,0,0.4); border: 1px solid var(--grey); padding: 14px 16px; margin-top: 10px; }
+  .washer-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .washer-icon { font-size: 1.2rem; }
+  .washer-title { font-size: 0.85rem; letter-spacing: 2px; color: var(--green); font-weight: bold; font-family: 'VT323', monospace; }
+  .washer-status { margin-left: auto; font-size: 0.75rem; letter-spacing: 2px; padding: 2px 10px; font-family: 'VT323', monospace; }
+  .washer-status.running { background: var(--green); color: #000; }
+  .washer-status.complete { background: var(--orange); color: #000; }
+  .washer-status.idle { color: var(--grey-mid); }
+  .washer-phases { display: flex; align-items: center; gap: 4px; margin: 8px 0; font-size: 0.7rem; letter-spacing: 1px; font-family: 'VT323', monospace; }
+  .washer-phase { padding: 2px 8px; color: var(--grey-mid); }
+  .washer-phase.active { background: var(--green); color: #000; font-weight: bold; }
+  .washer-phase.done { color: var(--green); }
+  .washer-phase-sep { color: var(--grey); opacity: 0.3; }
+  .washer-phase-sep.done { color: var(--green); opacity: 1; }
+  .washer-eta { font-size: 0.75rem; color: var(--orange); letter-spacing: 1px; display: block; margin: 6px 0; font-family: 'VT323', monospace; }
+  .washer-settings { font-size: 0.7rem; color: var(--grey-mid); letter-spacing: 1px; margin: 6px 0; font-family: 'VT323', monospace; }
+  .washer-stats { margin-top: 12px; }
+  .washer-year-header { font-size: 0.7rem; letter-spacing: 2px; color: var(--green); margin: 10px 0 6px; border-bottom: 1px solid var(--grey); padding-bottom: 4px; font-family: 'VT323', monospace; }
+  .washer-month-grid { display: flex; flex-direction: column; gap: 3px; }
+  .washer-month-row { display: flex; align-items: center; gap: 8px; font-size: 0.63rem; letter-spacing: 1px; font-family: 'VT323', monospace; }
+  .washer-month-label { width: 30px; color: var(--grey-mid); }
+  .washer-month-bar-wrap { flex: 1; height: 8px; background: rgba(0,224,0,0.08); border-radius: 3px; overflow: hidden; }
+  .washer-month-bar { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.3s; }
+  .washer-month-val { width: 65px; text-align: right; color: var(--grey-mid); }
+  .washer-lifetime { font-size: 0.63rem; letter-spacing: 2px; color: var(--grey-mid); margin-top: 10px; text-align: center; border-top: 1px solid var(--grey); padding-top: 6px; font-family: 'VT323', monospace; }
+
+  /* ── POWER PANEL ── */
+  .lc-power-panel { margin-top: 10px; }
+  .lc-power-hero {
+    display: flex; align-items: baseline; gap: 18px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .lc-power-hero-main {
+    font-size: 2.2rem; font-weight: 700; color: var(--orange); line-height: 1;
+  }
+  .lc-power-hero-stats { display: flex; gap: 18px; flex-wrap: wrap; }
+  .lc-power-hero-stat label {
+    font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--grey-mid); display: block;
+  }
+  .lc-power-hero-stat .val { font-size: 0.9rem; font-weight: 600; color: var(--green); }
+  .lc-power-hero-stat .val.blue { color: var(--blue); }
+  .lc-device-table {
+    width: 100%; border-collapse: collapse; font-size: 0.73rem;
+  }
+  .lc-device-table th {
+    text-align: left; font-size: 0.58rem; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--grey-mid); padding: 4px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .lc-device-table th.right { text-align: right; }
+  .lc-device-table td { padding: 3px 8px; vertical-align: middle; }
+  .lc-device-table td.right { text-align: right; font-variant-numeric: tabular-nums; }
+  .lc-device-table tr:hover { background: rgba(255,255,255,0.04); }
+  .room-group-header td {
+    padding: 8px 8px 2px; font-size: 0.58rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--green-dim);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .room-group-header td.right { font-variant-numeric: tabular-nums; }
+  .room-total-w { color: var(--orange); font-weight: 700; font-size: 0.63rem; }
+  .room-total-kwh { color: var(--blue); font-weight: 600; font-size: 0.63rem; }
+  .watts-val { color: var(--orange); font-weight: 600; }
+  .watts-val.off { color: var(--grey-mid); font-weight: 400; }
+  .kwh-val { color: var(--blue); font-weight: 400; }
+  .power-bar-cell { width: 90px; }
+  .power-bar-bg {
+    width: 100%; height: 6px; background: rgba(255,255,255,0.08);
+    border-radius: 3px; overflow: hidden;
+  }
+  .power-bar-fill {
+    height: 100%; background: var(--orange); border-radius: 3px;
+    transition: width 0.4s;
+  }
+
+  /* Night protocol button */
+  .night-protocol-btn {
+    display: block; margin: 0 0 12px 0; padding: 8px 20px;
+    background: transparent;
+    border: 1px outset var(--chrome);
+    color: var(--green);
+    font-family: inherit; font-size: 0.68rem;
+    letter-spacing: 2px; cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .night-protocol-btn:hover {
+    background: var(--green);
+    color: #000;
+    border-style: inset;
+  }
+
+  /* ── WCAG FOCUS ── */
+  :focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(0,224,0,0.2);
+  }
+  .tab:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+  .lc-toggle input:focus-visible ~ .lc-toggle-track { outline: 2px solid var(--green); outline-offset: 2px; }
+  .lc-dimmer:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+  button, .lc-toggle, .tab { cursor: pointer; }
+
+  /* ── DAY/NIGHT ── */
+  body.night-mode {
+    --green: #009900;
+    --green-glow: rgba(0,153,0,0.2);
+  }
+
+  /* ── REDUCED MOTION ── */
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0s !important; animation-duration: 0s !important; }
+    .wa-marquee { animation: none !important; }
+  }
+
+  /* ── HIGH CONTRAST ── */
+  @media (prefers-contrast: more) {
+    .room-card { border-width: 2px; }
+    .sensor-chip { border-width: 2px; }
+    .tab { border-width: 2px; }
+  }
+
+  /* THEME SWITCHER */
+  .theme-zone { position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998; cursor: pointer; }
+  .theme-switcher {
+    position: fixed; bottom: 12px; left: 12px; z-index: 9999;
+    display: flex; gap: 6px; align-items: flex-end;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .theme-switcher.visible { opacity: 1; pointer-events: auto; }
+  .theme-switcher-btn {
+    width: 40px; height: 40px; border: 2px outset var(--chrome); border-radius: 50%;
+    background: linear-gradient(180deg, var(--chrome-light), var(--chrome-dark));
+    color: #000; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.2s; font-family: inherit;
+  }
+  .theme-switcher-btn:hover { transform: scale(1.1); border-style: inset; }
+  .theme-switcher-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+  .theme-menu {
+    display: none; position: absolute; bottom: 48px; left: 0;
+    background: var(--bg); border: 2px outset var(--chrome); border-radius: 2px;
+    padding: 6px 0; min-width: 180px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  .theme-menu.open { display: block; }
+  .theme-menu a {
+    display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+    color: var(--grey-mid); text-decoration: none; font-size: 0.75rem; font-family: inherit;
+    letter-spacing: 1px; white-space: nowrap;
+  }
+  .theme-menu a:hover { background: rgba(0,224,0,0.08); color: var(--green); }
+  .theme-menu a.active { color: var(--green); font-weight: bold; }
+  .theme-menu a .tm-icon { width: 22px; text-align: center; font-size: 14px; }
+
+  .night-protocol-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link" style="position:absolute;top:-40px;left:0;background:var(--green);color:#000;padding:8px 16px;z-index:99999;font-family:'Share Tech Mono',monospace;font-size:0.875rem;letter-spacing:1px;transition:top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">SKIP TO MAIN CONTENT</a>
+
+<div class="winamp" role="application" aria-label="Winamp Home Automation Dashboard">
+
+  <!-- TITLE BAR -->
+  <div class="wa-titlebar">
+    <div class="wa-titlebar-text">WINAMP HOME AUTOMATION v2.86 - [NOT PLAYING]</div>
+    <div class="wa-titlebar-buttons">
+      <div class="wa-titlebar-btn" title="Minimize">_</div>
+      <div class="wa-titlebar-btn" title="Shade mode">=</div>
+      <div class="wa-titlebar-btn" title="Close">X</div>
+    </div>
+  </div>
+
+  <!-- DISPLAY PANEL (marquee + time) -->
+  <div class="wa-display">
+    <div class="wa-time" id="clock">--:--</div>
+    <div class="wa-marquee-wrap">
+      <div class="wa-marquee" id="wa-marquee">
+        *** WINAMP HOME AUTOMATION *** AWAITING CONNECTION TO HOME ASSISTANT ***
+      </div>
+    </div>
+    <div class="wa-meta-right">
+      <div style="font-size:0.63rem;color:var(--green-dim);letter-spacing:1px;">
+        <span id="conn-dot" class="status-dot connecting"></span> <span id="conn-label">CONNECTING</span>
+      </div>
+      <div id="date-display" style="font-size:0.6rem;color:var(--grey-mid);letter-spacing:1px;">-- --- ----</div>
+    </div>
+  </div>
+
+  <!-- SPECTRUM ANALYZER -->
+  <div class="wa-spectrum" id="wa-spectrum" aria-label="Power spectrum analyzer">
+    <!-- 20 bars populated by JS -->
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="page-playlist" tabindex="0" onclick="switchTab('playlist')">PLAYLIST</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-controls" tabindex="-1" onclick="switchTab('controls')">CONTROLS</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-eq" tabindex="-1" onclick="switchTab('eq')">EQ</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-media" tabindex="-1" onclick="switchTab('media')">MEDIA</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-vis" tabindex="-1" onclick="switchTab('vis')">VIS</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="main-content" tabindex="-1">
+
+    <!-- ═══════════════ PLAYLIST TAB ═══════════════ -->
+    <div class="page active" id="page-playlist">
+      <div class="section-title">ENVIRONMENTAL STATUS</div>
+
+      <div class="weather-strip">
+        <div class="w-item">
+          <label>OUTSIDE TEMP</label>
+          <span class="w-val" id="stat-temp">-- °C</span>
+        </div>
+        <div class="w-item">
+          <label>ELECTRICITY NOW</label>
+          <span class="w-val" id="stat-elec">-- SEK</span>
+        </div>
+        <div class="w-item" data-feature="washer">
+          <label>WASHER</label>
+          <span id="stat-washer" class="washer-badge idle">IDLE</span>
+        </div>
+        <div class="w-item">
+          <label>ACTIVE LIGHTS</label>
+          <span class="w-val" id="stat-lights">--</span>
+        </div>
+        <div class="w-item">
+          <label>SUN STATE</label>
+          <span class="w-val" id="stat-sun">--</span>
+        </div>
+      </div>
+
+      <div class="section-title">ROOM STATUS</div>
+      <div class="room-grid" id="rooms-playlist">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="section-title">POWER DISTRIBUTION</div>
+      <div class="lc-power-panel">
+        <div class="lc-power-hero">
+          <div class="lc-power-hero-main" id="power-hero-watts">-- W</div>
+          <div class="lc-power-hero-stats">
+            <div class="lc-power-hero-stat">
+              <label>Est. Cost/Hour</label>
+              <div class="val" id="power-hero-cost">-- SEK/h</div>
+            </div>
+            <div class="lc-power-hero-stat">
+              <label>All-Time Tracked</label>
+              <div class="val blue" id="power-hero-kwh">-- kWh</div>
+            </div>
+          </div>
+        </div>
+        <table class="lc-device-table">
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th class="right">Now</th>
+              <th style="width:90px"></th>
+              <th class="right">kWh</th>
+            </tr>
+          </thead>
+          <tbody id="power-panel-table">
+            <tr><td colspan="4" style="color:var(--grey-mid);font-size:0.73rem;padding:8px;">Awaiting data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ CONTROLS TAB ═══════════════ -->
+    <div class="page" id="page-controls">
+      <div class="section-title">LIGHT CONTROL PANEL</div>
+      <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">LIGHTS OUT</button>
+      <div class="room-grid" id="rooms-controls">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- ═══════════════ EQ TAB ═══════════════ -->
+    <div class="page" id="page-eq">
+
+      <div class="section-title">SOLAR EVENTS</div>
+      <div class="weather-strip" style="gap:28px;">
+        <div class="w-item">
+          <label>NEXT SUNRISE</label>
+          <span class="w-val" id="d-sunrise">--:--</span>
+        </div>
+        <div class="w-item">
+          <label>NEXT SUNSET</label>
+          <span class="w-val" id="d-sunset">--:--</span>
+        </div>
+        <div class="w-item">
+          <label>DAYLIGHT</label>
+          <span class="w-val" id="d-daylight">-- HRS</span>
+        </div>
+        <div class="w-item">
+          <label>SUN STATE</label>
+          <span class="w-val" id="d-sunstate">--</span>
+        </div>
+        <div class="w-item">
+          <label>ELEVATION</label>
+          <span class="w-val" id="d-elevation">--°</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:18px;">WEATHER FORECAST (24H)</div>
+      <div id="d-weather" style="padding:4px 0 8px;">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="section-title" style="margin-top:18px;">NORDPOOL PRICES (48H)</div>
+      <div style="padding:6px 0;">
+        <div id="d-np48"></div>
+        <div id="d-np48-xaxis"></div>
+        <div id="d-np48-minmax"></div>
+      </div>
+      <div id="np-chart" style="margin-top:14px;">
+        <div class="np-row">
+          <span class="np-label">LAST HR</span>
+          <div class="np-bar-wrap"><div class="data-bar-fill" id="np-last-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-last-val">--</span>
+        </div>
+        <div class="np-row">
+          <span class="np-label">NOW</span>
+          <div class="np-bar-wrap"><div class="data-bar-fill" id="np-now-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-now-val">--</span>
+        </div>
+        <div class="np-row">
+          <span class="np-label">NEXT HR</span>
+          <div class="np-bar-wrap"><div class="data-bar-fill" id="np-next-bar" style="width:0%"></div></div>
+          <span class="data-val" id="np-next-val">--</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:24px;">TEMPERATURE GRAPH (NEXT 24H)</div>
+      <div style="padding:6px 0;">
+        <div id="d-tempgraph"></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.63rem;color:var(--grey-mid);letter-spacing:1px;margin-top:4px;">
+          <span>NOW</span><span>+6H</span><span>+12H</span><span>+18H</span><span>+24H</span>
+        </div>
+        <div id="d-tempminmax"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:24px;">SYSTEM DIAGNOSTICS</div>
+      <div style="font-size:0.7rem;letter-spacing:1px;line-height:2;">
+        <div style="color:var(--grey-mid);">ENTITY COUNT <span style="float:right;color:var(--green);">10 LIGHTS + 16 SENSORS</span></div>
+        <div style="color:var(--grey-mid);">INTEGRATIONS <span style="float:right;color:var(--green);">Z-WAVE / NORDPOOL / MET.NO / TMDB</span></div>
+        <div style="color:var(--grey-mid);">NFC TAGS <span style="float:right;color:var(--green);">1 ACTIVE (SOFA)</span></div>
+        <div style="color:var(--grey-mid);">AUTOMATIONS <span style="float:right;color:var(--green);">7 ACTIVE</span></div>
+        <div style="color:var(--grey-mid);">HA HOST <span style="float:right;color:var(--green);" id="diag-host">-</span></div>
+        <div style="color:var(--grey-mid);">WINAMP BUILD <span style="float:right;color:var(--grey-mid);">v2.86 // LLAMA GROUP</span></div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════ MEDIA TAB ═══════════════ -->
+    <div class="page" id="page-media">
+      <div class="section-title">PLEX TRANSMISSION STATUS</div>
+
+      <div class="media-header-strip">
+        <div class="w-item">
+          <label>ACTIVE STREAMS</label>
+          <span class="w-val" id="m-stream-count">--</span>
+        </div>
+        <div class="w-item">
+          <label>DIRECT PLAY</label>
+          <span class="w-val" id="m-direct-play">--</span>
+        </div>
+        <div class="w-item">
+          <label>TRANSCODING</label>
+          <span class="w-val" id="m-transcode">--</span>
+        </div>
+        <div class="w-item">
+          <label>TOTAL BANDWIDTH</label>
+          <span class="w-val" id="m-bandwidth">-- kbps</span>
+        </div>
+        <div class="w-item">
+          <label>LAN / WAN</label>
+          <span class="w-val" id="m-lan-wan">-- / --</span>
+        </div>
+      </div>
+
+      <div class="section-title">NOW PLAYING</div>
+      <div id="no-media-msg" class="no-streams">*** NO ACTIVE STREAMS ***</div>
+      <div class="sessions-grid" id="sessions-grid"></div>
+      <div class="mp-grid" id="mp-grid"></div>
+    </div>
+
+
+    <!-- ═══════════════ VIS TAB ═══════════════ -->
+    <div class="page" id="page-vis">
+
+      <div class="section-title">ENERGY CONSUMPTION VS PRICE</div>
+      <div class="energy-wrap">
+        <div style="display:flex;gap:16px;align-items:baseline;margin-bottom:8px;">
+          <div>
+            <div style="font-size:0.63rem;color:var(--grey-mid);letter-spacing:1px;">CURRENT LOAD</div>
+            <div class="energy-total" id="lc-energy-total">-- W</div>
+          </div>
+          <div>
+            <div style="font-size:0.63rem;color:var(--grey-mid);letter-spacing:1px;">EST. COST NOW</div>
+            <div class="energy-cost" id="lc-energy-cost">-- SEK/h</div>
+          </div>
+          <div>
+            <div style="font-size:0.63rem;color:var(--grey-mid);letter-spacing:1px;">PRICE NOW</div>
+            <div class="energy-cost" id="lc-energy-price">-- SEK/kWh</div>
+          </div>
+        </div>
+        <div id="lc-energy-chart">
+          <div style="color:var(--grey-mid);font-size:0.73rem;align-self:center;">AWAITING DATA...</div>
+        </div>
+        <div id="lc-energy-xaxis"></div>
+        <div class="energy-legend">
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--green);margin-right:4px;"></span>POWER (W)</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--orange);opacity:0.5;margin-right:4px;"></span>PRICE OVERLAY</span>
+          <span style="margin-left:auto;color:var(--grey-mid);font-size:0.63rem;" id="lc-energy-minmax"></span>
+        </div>
+      </div>
+
+      <div data-feature="washer">
+        <div class="section-title" style="margin-top:10px;">LAUNDRY STATUS</div>
+        <div id="washer-panel"></div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- TRANSPORT CONTROLS -->
+  <div class="wa-transport">
+    <button class="wa-transport-btn" title="Previous" aria-label="Previous">&#9198;</button>
+    <button class="wa-transport-btn" title="Play" aria-label="Play">&#9654;</button>
+    <button class="wa-transport-btn" title="Pause" aria-label="Pause">&#9208;</button>
+    <button class="wa-transport-btn" title="Stop" aria-label="Stop">&#9632;</button>
+    <button class="wa-transport-btn" title="Next" aria-label="Next">&#9197;</button>
+    <div class="wa-transport-spacer"></div>
+    <span class="wa-transport-text" id="footer-status">WINAMP HOME AUTOMATION // LLAMA GROUP</span>
+  </div>
+
+</div><!-- /winamp -->
+
+<!-- THEME SWITCHER -->
+<div class="theme-zone" onclick="showSwitcher()"></div>
+<div class="theme-switcher" id="theme-switcher">
+  <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme"></button>
+  <div class="theme-menu" id="theme-menu"></div>
+  <button class="theme-switcher-btn" id="daynight-btn" onclick="toggleDayNight()" aria-label="Toggle day/night mode" title="Toggle day/night mode">&#9788; AUTO</button>
+  <button class="theme-switcher-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#9974;</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="config.js"></script>
+<script>
+const THEME = {
+  title: 'WINAMP HOME AUTOMATION',
+  subtitle: 'IT REALLY WHIPS THE LLAMA\'S ASS',
+  footer: 'WINAMP HOME AUTOMATION // LLAMA GROUP',
+  tabs: ['PLAYLIST', 'CONTROLS', 'EQ', 'MEDIA', 'VIS'],
+  tabIds: ['playlist', 'controls', 'eq', 'media', 'vis'],
+  emptyMedia: '*** NO ACTIVE STREAMS ***',
+  connOnline: 'ONLINE',
+  connOffline: 'OFFLINE',
+  connConnecting: 'CONNECTING',
+  connToast: 'CONNECTED TO HOME ASSISTANT',
+  footerOnline: 'WINAMP HOME AUTOMATION // CONNECTED',
+  footerConnecting: 'ESTABLISHING LINK...',
+  footerOffline: 'CONNECTION LOST — RETRYING',
+
+  sensors: { temp: {icon:'\uD83C\uDF21 ', unit:'\u00B0'}, hum: {icon:'\uD83D\uDCA7 ', unit:'%'}, lux: {icon:'\u2600 ', unit:' lx'} },
+  dimmerColors: { fill: '--green', bg: '--grey' },
+  clockEl: 'clock',
+  dateEl: 'date-display',
+  lightCountEls: ['stat-lights'],
+  nightToast: 'LIGHTS OUT ENGAGED',
+  toastArrow: '\u25B6',
+  washer: {
+    title: 'LAUNDRY', icon: '\uD83E\uDDFA',
+    phaseLabels: { weight_sensing:'DETECT', wash:'WASH', rinse:'RINSE', spin:'SPIN', finish:'DONE' },
+    statusLabels: { idle:'IDLE', running:'RUNNING', paused:'PAUSED', complete:'COMPLETE' },
+    lifetimeLabel: 'TOTAL USAGE', etaLabel: 'remaining',
+  },
+
+  onInit() {
+    initSpectrum();
+  },
+  onStatesLoaded() {
+    updateSpectrum();
+    updateMarquee();
+  },
+  onStateChanged(id, s) {
+    if (id.includes('power')) updateSpectrum();
+  },
+  intervals: [
+    [() => updateSpectrum(), 2000],
+    [() => updateMarquee(), 15000],
+  ]
+};
+
+// ── WINAMP-SPECIFIC: Spectrum Analyzer ──
+const SPEC_BARS = 20;
+let specPeaks = new Array(SPEC_BARS).fill(0);
+
+function initSpectrum() {
+  const el = document.getElementById('wa-spectrum');
+  if (!el || el.children.length > 0) return;
+  for (let i = 0; i < SPEC_BARS; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'wa-spec-bar';
+    bar.innerHTML = '<div class="wa-spec-bar-fill" style="height:0%"></div><div class="wa-spec-bar-peak" style="bottom:0%"></div>';
+    el.appendChild(bar);
+  }
+}
+
+function updateSpectrum() {
+  const el = document.getElementById('wa-spectrum');
+  if (!el) return;
+  const bars = el.querySelectorAll('.wa-spec-bar');
+  if (bars.length === 0) return;
+
+  // Map power sensors to bar heights
+  const powers = Object.values(liveData.power || {}).filter(v => v !== null);
+  const maxW = 200;
+
+  bars.forEach((bar, i) => {
+    let val;
+    if (i < powers.length) {
+      val = Math.min(100, (powers[i] / maxW) * 100);
+    } else {
+      // Ambient variation for empty bars
+      val = Math.random() * 8 + 2;
+    }
+    // Add organic jitter
+    val = Math.max(2, val + (Math.random() - 0.5) * 10);
+
+    const fill = bar.querySelector('.wa-spec-bar-fill');
+    const peak = bar.querySelector('.wa-spec-bar-peak');
+    if (fill) fill.style.height = val + '%';
+
+    // Peak hold with gravity
+    if (val > specPeaks[i]) {
+      specPeaks[i] = val;
+    } else {
+      specPeaks[i] = Math.max(val, specPeaks[i] - 2);
+    }
+    if (peak) peak.style.bottom = specPeaks[i] + '%';
+  });
+}
+
+// ── WINAMP-SPECIFIC: Marquee ──
+function updateMarquee() {
+  const el = document.getElementById('wa-marquee');
+  if (!el) return;
+
+  const parts = [];
+  if (liveData.outsideTemp !== null) parts.push('OUTSIDE: ' + Number(liveData.outsideTemp).toFixed(1) + '\u00B0C');
+  if (liveData.elecNow !== null) parts.push('POWER PRICE: ' + Number(liveData.elecNow).toFixed(1) + ' SEK/kWh');
+
+  const lightsOn = Object.values(liveData.lights).filter(Boolean).length;
+  parts.push('LIGHTS: ' + lightsOn + '/' + Object.keys(liveData.lights).length);
+
+  const totalPower = Object.values(liveData.power || {}).reduce((s, v) => s + (v || 0), 0);
+  if (totalPower > 0) parts.push('LOAD: ' + totalPower.toFixed(0) + 'W');
+
+  if (liveData.sun?.state) parts.push('SUN: ' + liveData.sun.state.toUpperCase());
+
+  if (parts.length === 0) {
+    parts.push('WINAMP HOME AUTOMATION - IT REALLY WHIPS THE LLAMA\'S ASS');
+  }
+
+  el.textContent = '*** ' + parts.join('  ***  ') + '  ***';
+}
+
+// ── TITLEBAR: Update playing state ──
+const origOnStatesLoaded = THEME.onStatesLoaded;
+THEME.onStatesLoaded = function() {
+  origOnStatesLoaded();
+  const titleEl = document.querySelector('.wa-titlebar-text');
+  if (titleEl) {
+    const lightsOn = Object.values(liveData.lights).filter(Boolean).length;
+    if (lightsOn > 0) {
+      titleEl.textContent = 'WINAMP HOME AUTOMATION v2.86 - [' + lightsOn + ' LIGHTS ACTIVE]';
+    } else {
+      titleEl.textContent = 'WINAMP HOME AUTOMATION v2.86 - [ALL QUIET]';
+    }
+  }
+};
+</script>
+<script src="shared.js"></script>
+<script src="washer.js"></script>
+</body>
+</html>
