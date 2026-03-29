@@ -485,11 +485,11 @@ function renderWeather() {
       box-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 15px var(--green-glow, rgba(0,170,0,0.2));
       font-family: 'Share Tech Mono', monospace;
       scrollbar-width: thin;
-      scrollbar-color: var(--grey-mid, #666) var(--bg, #1a1a1a);
+      scrollbar-color: var(--grey-mid, #999) var(--bg, #1a1a1a);
     }
     .weather-popup::-webkit-scrollbar { width: 6px; }
     .weather-popup::-webkit-scrollbar-track { background: var(--bg, #1a1a1a); }
-    .weather-popup::-webkit-scrollbar-thumb { background: var(--grey-mid, #666); }
+    .weather-popup::-webkit-scrollbar-thumb { background: var(--grey-mid, #999); }
     .wp-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 12px 16px;
@@ -504,7 +504,7 @@ function renderWeather() {
     }
     .wp-close {
       background: none; border: 1px solid var(--grey, #333);
-      color: var(--grey-mid, #666); font-family: inherit;
+      color: var(--grey-mid, #999); font-family: inherit;
       font-size: 0.75rem; letter-spacing: 1px; padding: 4px 10px;
       cursor: pointer; transition: all 0.2s;
     }
@@ -523,11 +523,11 @@ function renderWeather() {
       text-shadow: 0 0 12px var(--green-glow, rgba(0,170,0,0.3));
     }
     .wp-hero-cond {
-      font-size: 0.8rem; color: var(--grey-mid, #666);
+      font-size: 0.8rem; color: var(--grey-mid, #999);
       letter-spacing: 1px; margin-top: 4px; text-transform: capitalize;
     }
     .wp-hero-time {
-      font-size: 0.7rem; color: var(--grey-mid, #666);
+      font-size: 0.7rem; color: var(--grey-mid, #999);
       letter-spacing: 1px;
     }
     .wp-stats {
@@ -541,7 +541,7 @@ function renderWeather() {
     }
     .wp-stat-label {
       font-size: 0.6rem; letter-spacing: 1.5px;
-      color: var(--grey-mid, #666); text-transform: uppercase;
+      color: var(--grey-mid, #999); text-transform: uppercase;
       margin-bottom: 2px;
     }
     .wp-stat-val {
@@ -550,7 +550,7 @@ function renderWeather() {
     }
     .wp-hourly-title {
       font-size: 0.65rem; letter-spacing: 2px;
-      color: var(--grey-mid, #666); padding: 10px 16px 6px;
+      color: var(--grey-mid, #999); padding: 10px 16px 6px;
       text-transform: uppercase;
     }
     .wp-hourly-row {
@@ -565,12 +565,12 @@ function renderWeather() {
       background: var(--green-faint, rgba(0,170,0,0.06));
       border-color: var(--green-dim, #060);
     }
-    .wp-h-time { width: 42px; color: var(--grey-mid, #666); letter-spacing: 1px; flex-shrink: 0; }
+    .wp-h-time { width: 42px; color: var(--grey-mid, #999); letter-spacing: 1px; flex-shrink: 0; }
     .wp-h-icon { width: 22px; text-align: center; flex-shrink: 0; }
     .wp-h-temp { width: 38px; color: var(--green, #0a0); text-align: right; flex-shrink: 0; }
-    .wp-h-cond { flex: 1; color: var(--grey-mid, #666); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wp-h-cond { flex: 1; color: var(--grey-mid, #999); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .wp-h-rain { width: 50px; text-align: right; color: var(--blue, #48c); flex-shrink: 0; }
-    .wp-h-wind { width: 55px; text-align: right; color: var(--grey-mid, #666); flex-shrink: 0; }
+    .wp-h-wind { width: 55px; text-align: right; color: var(--grey-mid, #999); flex-shrink: 0; }
 
     /* Reference grid lines for charts */
     .np48-grid-line {
@@ -583,7 +583,7 @@ function renderWeather() {
     .np48-grid-label {
       position: absolute; right: 2px; top: -10px;
       font-size: 0.55rem; letter-spacing: 0.5px;
-      color: var(--grey-mid, #666);
+      color: var(--grey-mid, #999);
       opacity: 0.8;
       pointer-events: none;
     }
@@ -597,7 +597,7 @@ function renderWeather() {
     .lc-energy-grid-label {
       position: absolute; right: 2px; top: -10px;
       font-size: 0.55rem; letter-spacing: 0.5px;
-      color: var(--grey-mid, #666);
+      color: var(--grey-mid, #999);
       opacity: 0.8;
       pointer-events: none;
     }
@@ -611,7 +611,7 @@ function renderWeather() {
     .temp-grid-label {
       position: absolute; right: 2px; top: -10px;
       font-size: 0.55rem; letter-spacing: 0.5px;
-      color: var(--grey-mid, #666);
+      color: var(--grey-mid, #999);
       opacity: 0.8;
       pointer-events: none;
     }
