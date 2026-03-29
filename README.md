@@ -4,6 +4,8 @@ Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript cor
 
 ### Get Running
 
+> **Tip — enable Dev Mode while setting up**: In `config.js`, set `DEV_MODE = true`. This adds a cache-busting parameter to every page load, so the browser always fetches your latest changes to `entities.js`, `shared.js`, and the dashboards. Without it, you'll be refreshing and wondering why your edits aren't showing up. Set it to `false` once everything is working — cached files load faster.
+
 **Option A — Setup Wizard** (recommended for new users):
 1. Copy all files to your Home Assistant `www` folder: `/config/www/`
 2. Open `http://your-ha:8123/local/tools/setup.html` in your browser
