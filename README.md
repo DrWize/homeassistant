@@ -366,66 +366,7 @@ These Home Assistant entities must exist for full functionality:
 - `sensor.washer_power` — Real-time power draw (W)
 - `sensor.washer_energy` — Lifetime energy (kWh, used for monthly statistics)
 - `sensor.washer_water_consumption` — Lifetime water (L, used for monthly statistics)
-- `sensor.washer_cycle_count` — Wash cycle counter (requires counter helper + automation, see below)
-
-**Washer cycle counting setup (required for per-month cycle stats):**
-
-The Samsung SmartThings integration does not expose a cycle counter entity. To track how many wash cycles have run per month/year, you need to create three things in Home Assistant: a **counter helper**, a **template sensor**, and an **automation**. Without these, the washer panel will still show live status, energy, and water stats — but the "cycles" column in the monthly breakdown will be missing.
-
-**Step 1 — Counter helper** (`configuration.yaml`)
-
-Add a top-level `counter:` block (not inside any other block). This stores the raw count and persists across restarts:
-
-```yaml
-counter:
-  washer_cycles:
-    name: Washer Cycles
-    initial: 0
-    step: 1
-```
-
-**Step 2 — Template sensor** (`configuration.yaml`)
-
-Add this inside your existing `template:` → `sensor:` block. The `state_class: total_increasing` is critical — it tells HA's recorder to track long-term statistics (monthly/yearly totals), which is what the dashboard reads via `recorder/statistics_during_period`:
-
-```yaml
-template:
-  - sensor:
-      - name: "Washer Cycle Count"
-        unique_id: washer_cycle_count
-        state: "{{ states('counter.washer_cycles') | int(0) }}"
-        state_class: total_increasing
-        unit_of_measurement: "cycles"
-```
-
-> If you already have a `template:` block, just add the sensor entry to the existing `sensor:` list — don't duplicate the `template:` key.
-
-**Step 3 — Automation** (via UI or `automations.yaml`)
-
-This increments the counter each time the washer enters the `wash` phase. The condition prevents double-counting if the state bounces:
-
-```yaml
-- alias: "Count washer cycles"
-  trigger:
-    - platform: state
-      entity_id: sensor.washer_job_state
-      to: "wash"
-  condition:
-    - condition: template
-      value_template: "{{ trigger.from_state.state != 'wash' }}"
-  action:
-    - service: counter.increment
-      target:
-        entity_id: counter.washer_cycles
-```
-
-**Step 4 — Restart Home Assistant**
-
-A full restart is required (not just "Reload YAML") because counter entities are only created at boot. After restart, verify both entities exist in **Developer Tools → States**:
-- `counter.washer_cycles` — should show `0`
-- `sensor.washer_cycle_count` — should show `0` with `state_class: total_increasing`
-
-> **Note**: Statistics data starts accumulating from the moment the template sensor is created. Historical cycles before setup are not retroactively counted.
+- `sensor.washer_cycle_count` — Wash cycle counter (requires counter helper + automation, see [Washer Panel → Cycle counting setup](#cycle-counting-setup))
 
 **Power (per-room):**
 - `sensor.*_power` — Smart plug power sensors
@@ -485,18 +426,104 @@ Power data comes from Z-Wave smart plug sensors (`sensor.*_power` for live watts
 
 ### Washer Panel
 
-The Sensors tab includes a washer status panel powered by Samsung SmartThings entities. It shows:
+The Sensors tab includes a washer status panel powered by Samsung SmartThings entities. Set `integrations.washer` to `null` in `entities.js` to disable it entirely — the panel hides gracefully.
 
-- **Live status**: current cycle phase with progress indicator (e.g. WASH → RINSE → SPIN)
-- **ETA countdown**: time remaining and estimated completion time
-- **Cycle settings**: temperature, spin speed, rinse count, power draw
-- **Monthly statistics**: energy (kWh) and water (L) bar charts per month, grouped by year
-- **Yearly totals**: cumulative energy and water per year
-- **Lifetime totals**: all-time energy and water consumption
+#### What it shows
 
-Monthly and yearly stats use HA's `recorder/statistics_during_period` API, which keeps long-term data indefinitely.
+- **Live status**: current cycle phase with animated progress indicator (e.g. WASH → RINSE → SPIN)
+- **ETA countdown**: time remaining and estimated completion timestamp, auto-updates every second during active cycles
+- **Cycle settings**: water temperature, spin speed (RPM), rinse count, real-time power draw (W) — shown only during active cycles
+- **Monthly statistics**: energy (kWh) and water (L) bar charts per month, grouped by year, with cycle counts
+- **Yearly totals**: aggregated energy, water, and cycle count per year
+- **Lifetime totals**: all-time cumulative energy (kWh), water (L), and cycle count
 
-Each theme uses its own labels:
+Monthly and yearly stats use HA's `recorder/statistics_during_period` API with `period: 'month'`, fetching the last ~2 years of data. Statistics accumulate indefinitely in HA's recorder database.
+
+#### Required entities
+
+Configure these in `entities.js` under `integrations.washer`. All entity IDs come from the Samsung SmartThings integration:
+
+| Config Key | Entity ID Example | Type | What it provides |
+|------------|-------------------|------|------------------|
+| `jobState` | `sensor.washer_job_state` | sensor | Current cycle phase: `none`, `wash`, `rinse`, `spin`, `finish` |
+| `machState` | `sensor.washer_machine_state` | sensor | Machine state: `run`, `stop`, `pause` |
+| `completion` | `sensor.washer_completion_time` | sensor | ISO 8601 timestamp of estimated completion |
+| `power` | `sensor.washer_power` | sensor | Real-time power draw in watts |
+| `energy` | `sensor.washer_energy` | sensor | Lifetime energy in kWh (`state_class: total_increasing`) |
+| `water` | `sensor.washer_water_consumption` | sensor | Lifetime water in liters (`state_class: total_increasing`) |
+| `cycles` | `sensor.washer_cycle_count` | sensor | Lifetime wash cycle count (requires helper, see below) |
+| `waterTemp` | `select.washer_water_temperature` | select | Selected wash temperature (e.g. "40", "60") |
+| `spinLevel` | `select.washer_spin_level` | select | Selected spin speed (e.g. "800", "1200") |
+| `rinses` | `number.washer_rinse_cycles` | number | Number of rinse cycles selected |
+
+#### Expected entity values
+
+The dashboard interprets these state values to drive the UI:
+
+**`jobState`** — determines which phase indicator is active:
+- `none` → idle (panel shows "STANDBY")
+- `wash` → washing phase active
+- `rinse` → rinsing phase active
+- `spin` → spinning phase active
+- `finish` → cycle complete (panel shows completion message)
+- Any other value → treated as active/unknown phase
+
+**`machState`** — determines the status badge in the environment bar:
+- `run` → badge shows "RUNNING" (green)
+- `pause` → badge shows "PAUSED" (yellow)
+- `stop` → badge shows "IDLE"
+
+**`completion`** — must be an ISO 8601 timestamp (e.g. `2026-03-29T22:30:00+01:00`). The dashboard calculates remaining time from this. If the timestamp is in the past or missing, the ETA section is hidden.
+
+**`energy` / `water`** — must have `state_class: total_increasing` for HA's recorder to track monthly statistics. Without this, the monthly bar charts will be empty.
+
+#### Cycle counting setup
+
+The SmartThings integration does not expose a cycle counter. To track cycles per month, create three things in Home Assistant:
+
+**1. Counter helper** (`configuration.yaml`):
+```yaml
+counter:
+  washer_cycles:
+    name: Washer Cycles
+    initial: 0
+    step: 1
+```
+
+**2. Template sensor** (`configuration.yaml` under `template:`):
+```yaml
+template:
+  - sensor:
+      - name: "Washer Cycle Count"
+        unique_id: washer_cycle_count
+        state: "{{ states('counter.washer_cycles') | int(0) }}"
+        state_class: total_increasing
+        unit_of_measurement: "cycles"
+```
+
+The `state_class: total_increasing` is critical — it tells HA's recorder to track long-term statistics, which is what the dashboard reads via `recorder/statistics_during_period`.
+
+**3. Automation** (UI or `automations.yaml`):
+```yaml
+- alias: "Count washer cycles"
+  trigger:
+    - platform: state
+      entity_id: sensor.washer_job_state
+      to: "wash"
+  condition:
+    - condition: template
+      value_template: "{{ trigger.from_state.state != 'wash' }}"
+  action:
+    - service: counter.increment
+      target:
+        entity_id: counter.washer_cycles
+```
+
+After creating these, restart Home Assistant (not just "Reload YAML" — counters are only created at boot). Statistics start accumulating from the moment the template sensor is created.
+
+#### Theme labels
+
+Each theme uses its own names for the washer panel and cycle phases:
 
 | Theme | Panel Title | Phase Names |
 |-------|------------|-------------|
