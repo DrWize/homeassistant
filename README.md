@@ -577,6 +577,54 @@ All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 6. Modify the HTML header/footer structure
 7. Update the `.active` class in the theme switcher menu
 
+### Adding a New Tab
+
+All themes use the same 5 standard tab IDs (`systems`, `controls`, `data`, `media`, `sensors`) with theme-specific display names. To add a 6th tab:
+
+**1. Add the tab button** in the HTML `<div role="tablist">`:
+
+```html
+<button class="tab" role="tab" aria-selected="false" aria-controls="page-network"
+  tabindex="-1" onclick="switchTab('network')">NETWORK</button>
+```
+
+**2. Add the tab page** as a new `<div class="page">` section:
+
+```html
+<div class="page" id="page-network">
+  <div class="section-title">NETWORK STATUS</div>
+  <div id="network-content">
+    <!-- Your content here -->
+  </div>
+</div>
+```
+
+**3. Register the tab** in the `THEME` object:
+
+```js
+const THEME = {
+  tabs: ['SYSTEMS', 'CONTROLS', 'DATA', 'MEDIA', 'SENSORS', 'NETWORK'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'network'],
+  // ...
+};
+```
+
+**4. Add rendering logic** (optional) — add a render function in the dashboard's inline `<script>` and hook it into `onStatesLoaded` or `onStateChanged`:
+
+```js
+function renderNetwork() {
+  const el = document.getElementById('network-content');
+  if (!el) return;
+  el.innerHTML = '...'; // Your rendering logic
+}
+
+// In THEME hooks:
+onStatesLoaded() { renderNetwork(); },
+onStateChanged(id, s) { if (id.includes('unifi')) renderNetwork(); },
+```
+
+Repeat steps 1-3 for each theme dashboard you want the tab in. The tab ID must match across all themes; the display name can be different per theme.
+
 ## File Structure
 
 ```
@@ -594,6 +642,10 @@ All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 ├── weyland-dashboard.html ← Alien Weyland-Yutani theme
 ├── diablo-dashboard.html  ← Diablo IV Sanctuary theme
 ├── winamp-dashboard.html  ← Winamp 2.x media player theme
+├── tools/
+│   ├── setup.html             ← Setup wizard (generates entities.js via browser UI)
+│   ├── capture-gifs.py        ← Retake all 7 demo GIFs (requires Playwright)
+│   └── capture-screenshots.py ← Retake all 7 system screenshots (requires Playwright)
 └── README.md              ← This file
 ```
 
