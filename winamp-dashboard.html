@@ -1413,6 +1413,7 @@ const THEME = {
 
   sensors: { temp: {icon:'\uD83C\uDF21 ', unit:'\u00B0'}, hum: {icon:'\uD83D\uDCA7 ', unit:'%'}, lux: {icon:'\u2600 ', unit:' lx'} },
   dimmerColors: { fill: '--green', bg: '--grey' },
+  rainbowBars: true, // Set to false to use standard theme colors for graphs
   clockEl: 'clock',
   dateEl: 'date-display',
   lightCountEls: ['stat-lights'],
@@ -1431,20 +1432,17 @@ const THEME = {
   onStatesLoaded() {
     updateSpectrum();
     updateMarquee();
-    rainbowNordpool();
-    rainbowTempGraph();
-    rainbowNordpoolBars();
-    rainbowEnergy();
+    applyRainbow();
   },
   onStateChanged(id, s) {
-    if (id.includes('power')) { updateSpectrum(); rainbowEnergy(); }
-    if (id.includes('nordpool')) { rainbowNordpool(); rainbowNordpoolBars(); }
-    if (id.includes('temperature') || id.includes('forecast')) rainbowTempGraph();
+    if (id.includes('power')) { updateSpectrum(); applyRainbow(); }
+    if (id.includes('nordpool')) applyRainbow();
+    if (id.includes('temperature') || id.includes('forecast')) applyRainbow();
   },
   intervals: [
     [() => updateSpectrum(), 2000],
     [() => updateMarquee(), 15000],
-    [() => { rainbowNordpool(); rainbowTempGraph(); rainbowEnergy(); }, 5000],
+    [() => applyRainbow(), 5000],
   ]
 };
 
@@ -1510,6 +1508,14 @@ function updateSpectrum() {
 }
 
 // ── WINAMP-SPECIFIC: Rainbow Graph Overrides ──
+function applyRainbow() {
+  if (!THEME.rainbowBars) return;
+  rainbowNordpool();
+  rainbowTempGraph();
+  rainbowNordpoolBars();
+  rainbowEnergy();
+}
+
 function rainbowNordpool() {
   const bars = document.querySelectorAll('#d-np48 .np48-bar');
   if (!bars.length) return;
