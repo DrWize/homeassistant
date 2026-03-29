@@ -26,6 +26,7 @@ const THEMES = [
   { file: 'matrix-dashboard.html',  icon: '\u25CF', label: 'MATRIX' },
   { file: 'weyland-dashboard.html', icon: 'W-Y',    label: 'WEYLAND' },
   { file: 'diablo-dashboard.html',  icon: '\u2620', label: 'DIABLO' },
+  { file: 'winamp-dashboard.html', icon: '\u25B6', label: 'WINAMP' },
 ];
 
 // ═══════════════════════════════════════════════════
@@ -403,24 +404,37 @@ function renderSun() {
   }
 }
 
+function condIcon(c) {
+  c = (c || '').toLowerCase();
+  if (c.includes('clear') || c.includes('sunny'))    return '☀';
+  if (c.includes('partly'))                           return '⛅';
+  if (c.includes('cloud') || c.includes('overcast')) return '☁';
+  if (c.includes('rain')  || c.includes('drizzle'))  return '🌧';
+  if (c.includes('snow'))                             return '❄';
+  if (c.includes('thunder') || c.includes('storm'))  return '⚡';
+  if (c.includes('fog')   || c.includes('mist'))     return '🌫';
+  if (c.includes('wind'))                             return '💨';
+  return '—';
+}
+
+function condLabel(c) {
+  c = (c || '').toLowerCase();
+  if (c.includes('clear') || c.includes('sunny'))    return 'Clear';
+  if (c.includes('partlycloudy'))                     return 'Partly Cloudy';
+  if (c.includes('cloud') || c.includes('overcast')) return 'Cloudy';
+  if (c.includes('rain')  || c.includes('drizzle'))  return 'Rain';
+  if (c.includes('snow'))                             return 'Snow';
+  if (c.includes('thunder') || c.includes('storm'))  return 'Thunderstorm';
+  if (c.includes('fog')   || c.includes('mist'))     return 'Fog';
+  if (c.includes('wind'))                             return 'Windy';
+  return c || 'Unknown';
+}
+
 function renderWeather() {
   const el = document.getElementById('d-weather');
   if (!el) return;
   const fc = liveData.weatherForecast;
   if (!fc.length) { el.innerHTML = '<div style="color:var(--grey-mid);font-size:0.75rem;padding:10px;">AWAITING DATA...</div>'; return; }
-
-  const condIcon = c => {
-    c = (c || '').toLowerCase();
-    if (c.includes('clear') || c.includes('sunny'))    return '☀';
-    if (c.includes('partly'))                           return '⛅';
-    if (c.includes('cloud') || c.includes('overcast')) return '☁';
-    if (c.includes('rain')  || c.includes('drizzle'))  return '🌧';
-    if (c.includes('snow'))                             return '❄';
-    if (c.includes('thunder') || c.includes('storm'))  return '⚡';
-    if (c.includes('fog')   || c.includes('mist'))     return '🌫';
-    if (c.includes('wind'))                             return '💨';
-    return '—';
-  };
 
   const slots = fc.filter((_, i) => i % 3 === 0).slice(0, 8);
   let html = '';
@@ -428,7 +442,8 @@ function renderWeather() {
     const d   = new Date(s.datetime);
     const hh  = d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
     const t   = s.temperature ?? '--';
-    html += `<div class="weather-card ${i === 0 ? 'now' : ''}">
+    const slotIdx = i * 3;
+    html += `<div class="weather-card ${i === 0 ? 'now' : ''}" onclick="showWeatherPopup(${slotIdx})" style="cursor:pointer;">
       <div class="wc-time">${hh}</div>
       <div class="wc-icon">${condIcon(s.condition)}</div>
       <div class="wc-temp">${t}°</div>
@@ -437,6 +452,216 @@ function renderWeather() {
     </div>`;
   });
   el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
+// WEATHER DETAIL POPUP
+// ═══════════════════════════════════════════════════
+(function injectWeatherPopupCSS() {
+  const style = document.createElement('style');
+  style.textContent = `
+    .weather-popup-overlay {
+      position: fixed; inset: 0; z-index: 10001;
+      background: rgba(0,0,0,0.7);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .weather-popup-overlay.visible {
+      opacity: 1; pointer-events: auto;
+    }
+    .weather-popup {
+      background: var(--bg, #1a1a1a);
+      border: 2px solid var(--green, #0a0);
+      max-width: 520px; width: 92vw;
+      max-height: 80vh; overflow-y: auto;
+      padding: 0;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 15px var(--green-glow, rgba(0,170,0,0.2));
+      font-family: 'Share Tech Mono', monospace;
+      scrollbar-width: thin;
+      scrollbar-color: var(--grey-mid, #666) var(--bg, #1a1a1a);
+    }
+    .weather-popup::-webkit-scrollbar { width: 6px; }
+    .weather-popup::-webkit-scrollbar-track { background: var(--bg, #1a1a1a); }
+    .weather-popup::-webkit-scrollbar-thumb { background: var(--grey-mid, #666); }
+    .wp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--grey, #333);
+      position: sticky; top: 0; background: var(--bg, #1a1a1a); z-index: 1;
+    }
+    .wp-title {
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem; letter-spacing: 2px;
+      color: var(--green, #0a0);
+      text-shadow: 0 0 8px var(--green-glow, rgba(0,170,0,0.3));
+    }
+    .wp-close {
+      background: none; border: 1px solid var(--grey, #333);
+      color: var(--grey-mid, #666); font-family: inherit;
+      font-size: 0.75rem; letter-spacing: 1px; padding: 4px 10px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .wp-close:hover { color: var(--green, #0a0); border-color: var(--green, #0a0); }
+    .wp-hero {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px;
+      border-bottom: 1px solid var(--grey, #333);
+    }
+    .wp-hero-icon { font-size: 2.5rem; }
+    .wp-hero-info { flex: 1; }
+    .wp-hero-temp {
+      font-family: 'VT323', monospace;
+      font-size: 2.4rem; line-height: 1;
+      color: var(--green, #0a0);
+      text-shadow: 0 0 12px var(--green-glow, rgba(0,170,0,0.3));
+    }
+    .wp-hero-cond {
+      font-size: 0.8rem; color: var(--grey-mid, #666);
+      letter-spacing: 1px; margin-top: 4px; text-transform: capitalize;
+    }
+    .wp-hero-time {
+      font-size: 0.7rem; color: var(--grey-mid, #666);
+      letter-spacing: 1px;
+    }
+    .wp-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--grey, #333);
+      border-bottom: 1px solid var(--grey, #333);
+    }
+    .wp-stat {
+      background: var(--bg, #1a1a1a);
+      padding: 10px 14px;
+    }
+    .wp-stat-label {
+      font-size: 0.6rem; letter-spacing: 1.5px;
+      color: var(--grey-mid, #666); text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .wp-stat-val {
+      font-size: 0.9rem; color: var(--green, #0a0);
+      text-shadow: 0 0 4px var(--green-glow, rgba(0,170,0,0.2));
+    }
+    .wp-hourly-title {
+      font-size: 0.65rem; letter-spacing: 2px;
+      color: var(--grey-mid, #666); padding: 10px 16px 6px;
+      text-transform: uppercase;
+    }
+    .wp-hourly-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.72rem;
+      transition: background 0.15s;
+    }
+    .wp-hourly-row:hover { background: rgba(255,255,255,0.03); }
+    .wp-hourly-row.current {
+      background: var(--green-faint, rgba(0,170,0,0.06));
+      border-color: var(--green-dim, #060);
+    }
+    .wp-h-time { width: 42px; color: var(--grey-mid, #666); letter-spacing: 1px; flex-shrink: 0; }
+    .wp-h-icon { width: 22px; text-align: center; flex-shrink: 0; }
+    .wp-h-temp { width: 38px; color: var(--green, #0a0); text-align: right; flex-shrink: 0; }
+    .wp-h-cond { flex: 1; color: var(--grey-mid, #666); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wp-h-rain { width: 50px; text-align: right; color: var(--blue, #48c); flex-shrink: 0; }
+    .wp-h-wind { width: 55px; text-align: right; color: var(--grey-mid, #666); flex-shrink: 0; }
+  `;
+  document.head.appendChild(style);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'weather-popup-overlay';
+  overlay.id = 'weather-popup-overlay';
+  overlay.innerHTML = '<div class="weather-popup" id="weather-popup"></div>';
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeWeatherPopup();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeWeatherPopup();
+  });
+  document.body.appendChild(overlay);
+})();
+
+function showWeatherPopup(slotIdx) {
+  const fc = liveData.weatherForecast;
+  if (!fc.length) return;
+
+  const entry = fc[slotIdx] || fc[0];
+  const d = new Date(entry.datetime);
+
+  const time = d.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' })
+    + ' ' + d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+
+  const windowStart = slotIdx;
+  const windowEnd = Math.min(slotIdx + 3, fc.length);
+  const windowEntries = fc.slice(windowStart, windowEnd);
+
+  const temps = windowEntries.map(e => e.temperature).filter(v => v != null);
+  const precips = windowEntries.map(e => e.precipitation || 0);
+  const winds = windowEntries.map(e => e.wind_speed || 0);
+  const humidities = windowEntries.map(e => e.humidity).filter(v => v != null);
+  const pressures = windowEntries.map(e => e.pressure).filter(v => v != null);
+  const windBearings = windowEntries.map(e => e.wind_bearing).filter(v => v != null);
+
+  const bearingToDir = deg => {
+    if (deg == null) return '--';
+    const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    return dirs[Math.round(deg / 22.5) % 16];
+  };
+
+  let html = '';
+  html += `<div class="wp-header">
+    <div class="wp-title">FORECAST DETAIL</div>
+    <button class="wp-close" onclick="closeWeatherPopup()">CLOSE</button>
+  </div>`;
+
+  html += `<div class="wp-hero">
+    <div class="wp-hero-icon">${condIcon(entry.condition)}</div>
+    <div class="wp-hero-info">
+      <div class="wp-hero-temp">${entry.temperature ?? '--'}°C</div>
+      <div class="wp-hero-cond">${condLabel(entry.condition)}</div>
+      <div class="wp-hero-time">${time}</div>
+    </div>
+  </div>`;
+
+  html += '<div class="wp-stats">';
+  html += `<div class="wp-stat"><div class="wp-stat-label">Wind</div><div class="wp-stat-val">${winds.length ? Math.max(...winds).toFixed(1) : '--'} m/s</div></div>`;
+  html += `<div class="wp-stat"><div class="wp-stat-label">Direction</div><div class="wp-stat-val">${bearingToDir(windBearings[0])}${windBearings[0] != null ? ' (' + windBearings[0] + '°)' : ''}</div></div>`;
+  html += `<div class="wp-stat"><div class="wp-stat-label">Precipitation</div><div class="wp-stat-val">${precips.reduce((a,b) => a+b, 0).toFixed(1)} mm</div></div>`;
+  html += `<div class="wp-stat"><div class="wp-stat-label">Humidity</div><div class="wp-stat-val">${humidities.length ? humidities[0] + '%' : '--'}</div></div>`;
+  html += `<div class="wp-stat"><div class="wp-stat-label">Pressure</div><div class="wp-stat-val">${pressures.length ? pressures[0] + ' hPa' : '--'}</div></div>`;
+  html += `<div class="wp-stat"><div class="wp-stat-label">Temp Range</div><div class="wp-stat-val">${temps.length > 1 ? Math.min(...temps).toFixed(1) + '° – ' + Math.max(...temps).toFixed(1) + '°' : (entry.temperature ?? '--') + '°'}</div></div>`;
+  html += '</div>';
+
+  html += '<div class="wp-hourly-title">HOURLY BREAKDOWN</div>';
+  fc.forEach((h, i) => {
+    const hd = new Date(h.datetime);
+    const hh = hd.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    const isCurrent = i === slotIdx;
+    const isInWindow = i >= windowStart && i < windowEnd;
+    html += `<div class="wp-hourly-row ${isCurrent ? 'current' : ''}" ${isInWindow ? 'style="background:var(--green-faint,rgba(0,170,0,0.06));"' : ''}>
+      <span class="wp-h-time">${hh}</span>
+      <span class="wp-h-icon">${condIcon(h.condition)}</span>
+      <span class="wp-h-temp">${h.temperature ?? '--'}°</span>
+      <span class="wp-h-cond">${condLabel(h.condition)}</span>
+      <span class="wp-h-rain">${h.precipitation ? h.precipitation + 'mm' : ''}</span>
+      <span class="wp-h-wind">${h.wind_speed ? h.wind_speed + 'm/s' : ''}</span>
+    </div>`;
+  });
+
+  const popup = document.getElementById('weather-popup');
+  const overlay = document.getElementById('weather-popup-overlay');
+  if (popup) popup.innerHTML = html;
+  if (overlay) overlay.classList.add('visible');
+
+  setTimeout(() => {
+    const rows = popup.querySelectorAll('.wp-hourly-row');
+    if (rows[slotIdx]) rows[slotIdx].scrollIntoView({ block: 'nearest' });
+  }, 50);
+}
+
+function closeWeatherPopup() {
+  const overlay = document.getElementById('weather-popup-overlay');
+  if (overlay) overlay.classList.remove('visible');
 }
 
 function renderNordpool48h() {
