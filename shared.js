@@ -45,6 +45,46 @@ if (!ENTITIES.rooms || ENTITIES.rooms.length === 0) {
   }
 })();
 
+/**
+ * After get_states, check which configured entities actually exist in HA.
+ * Logs missing entities to console and shows a toast if any are missing.
+ */
+function validateEntities(states) {
+  const haIds = new Set(states.map(s => s.entity_id));
+  const missing = [];
+
+  // Check room sensors
+  rooms.forEach(r => {
+    ['temp', 'humidity', 'lux'].forEach(k => {
+      if (r.sensors?.[k] && !haIds.has(r.sensors[k]))
+        missing.push({ entity: r.sensors[k], context: `${r.name} ${k}` });
+    });
+    (r.lights || []).forEach(l => {
+      if (!haIds.has(l.id)) missing.push({ entity: l.id, context: `${r.name} light` });
+    });
+    (r.power || []).forEach(p => {
+      if (!haIds.has(p.sensor)) missing.push({ entity: p.sensor, context: `${r.name} power` });
+    });
+  });
+
+  // Check media players
+  MEDIA_PLAYER_ENTITIES.forEach(m => {
+    if (!haIds.has(m.id)) missing.push({ entity: m.id, context: 'media player' });
+  });
+
+  // Check integrations
+  if (INT.sun && !haIds.has(INT.sun))               missing.push({ entity: INT.sun, context: 'sun' });
+  if (INT.outsideTemp && !haIds.has(INT.outsideTemp)) missing.push({ entity: INT.outsideTemp, context: 'outside temp' });
+  if (INT.weather && !haIds.has(INT.weather))         missing.push({ entity: INT.weather, context: 'weather' });
+  if (INT.nordpool && !haIds.has(INT.nordpool))       missing.push({ entity: INT.nordpool, context: 'nordpool' });
+
+  if (missing.length > 0) {
+    console.warn(`[HomeA] ${missing.length} configured entity ID(s) not found in Home Assistant:`);
+    missing.forEach(m => console.warn(`  - ${m.entity} (${m.context})`));
+    showToast(`${missing.length} entity ID(s) not found — check browser console`);
+  }
+}
+
 // ═══════════════════════════════════════════════════
 // DERIVED CONFIG (auto-built from entities.js)
 // ═══════════════════════════════════════════════════
@@ -1214,6 +1254,8 @@ function haConnect() {
         if (FEATURES.washer && typeof renderWasher === 'function') renderWasher();
         updateDayNight();
         if (THEME.onStatesLoaded) THEME.onStatesLoaded();
+        // Validate configured entities against what HA actually returned
+        validateEntities(msg.result);
       // Washer statistics result (monthly energy/water/cycles)
       } else if (FEATURES.washer && typeof washerHandleResult === 'function' && washerHandleResult(msg)) {
         // handled by washer module
@@ -1417,14 +1459,14 @@ function ingestState(s) {
 
   if (FEATURES.washer && typeof washerIngest === 'function') washerIngest(id, s);
 
-  if (id === 'sensor.outside_temp_next_24h_hourly') {
+  if (INT.outsideTemp24h && id === INT.outsideTemp24h) {
     const temps = s.attributes?.temps;
     if (Array.isArray(temps)) {
       liveData.tempNext24h = temps.slice(0, 24).map(Number);
       renderTempGraph();
     }
   }
-  if (id === 'sensor.nordpool_next_24h_15m' || id === 'sensor.nordpool') {
+  if (INT.nordpool48h && (id === INT.nordpool48h || id === 'sensor.nordpool')) {
     const today    = s.attributes?.raw_today    || [];
     const tomorrow = s.attributes?.raw_tomorrow || [];
     if (today.length) {

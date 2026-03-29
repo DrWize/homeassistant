@@ -80,6 +80,9 @@ const ENTITIES = {
     // Outside lux — used by some theme effects (e.g. Pip-Boy Geiger counter)
     outsideLux: null,  // or 'sensor.YOUR_OUTDOOR_LUX'
 
+    // Outside temperature 24h forecast — used for temperature history graph
+    outsideTemp24h: null,  // or 'sensor.YOUR_TEMP_FORECAST_24H'
+
     // Weather — forecast cards on the Data tab
     // Find your weather entity in HA → Developer Tools → States → search "weather."
     weather: 'weather.YOUR_WEATHER_ENTITY',

@@ -1,6 +1,6 @@
 # Home Assistant Themed Dashboards
 
-> **Get running in 2 minutes**: `cp config.js.example config.js` → paste your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) → copy everything to `/config/www/` → open `http://your-ha:8123/local/lcars-dashboard.html`. Press the lower-left corner to open the theme switcher and fullscreen toggle.
+> **Get running in 5 minutes**: `cp config.js.example config.js` → `cp entities.js.example entities.js` → add your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) and entity IDs → copy everything to `/config/www/` → open `http://your-ha:8123/local/lcars-dashboard.html`. Press the lower-left corner to open the theme switcher and fullscreen toggle.
 
 Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
@@ -55,13 +55,14 @@ Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript cor
 
 ## Quick Start
 
-### 1. Create your config file
+### 1. Create your config files
 
 ```bash
 cp config.js.example config.js
+cp entities.js.example entities.js
 ```
 
-Edit `config.js` with your Home Assistant details:
+Edit `config.js` with your Home Assistant connection:
 
 ```js
 const HA_HOST  = '192.168.1.30:8123';            // Your HA IP:port (see mDNS note below)
@@ -69,17 +70,49 @@ const HA_TOKEN = 'YOUR_LONG_LIVED_ACCESS_TOKEN'; // Generate in HA → Profile �
 const DEV_MODE = true;                           // Cache busting (set false for production)
 ```
 
+Edit `entities.js` with your entity IDs. This is the **only file** you need to customize for your home. It defines your rooms, sensors, lights, media players, and integrations:
+
+```js
+const ENTITIES = {
+  rooms: [
+    {
+      id: 'living', name: 'Living Room',
+      sensors: { temp: 'sensor.your_temp', humidity: 'sensor.your_humidity', lux: null },
+      lights: [
+        { id: 'light.your_light', label: 'Ceiling', dimmable: true },
+      ],
+      power: [
+        { sensor: 'sensor.your_plug_power', kwh: 'sensor.your_plug_kwh', label: 'Ceiling Light' },
+      ],
+    },
+    // ... more rooms
+  ],
+  mediaPlayers: [ /* your Sonos/Apple TV entities */ ],
+  integrations: {
+    sun: 'sun.sun',
+    weather: 'weather.your_weather_entity',
+    nordpool: null,    // set to null if you don't use Nordpool
+    tautulli: null,    // set to null if you don't use Plex/Tautulli
+    washer: null,      // set to null if you don't have a smart washer
+    // ... see entities.js.example for all options
+  },
+};
+```
+
+> Find your entity IDs in **HA → Developer Tools → States**. Set any integration to `null` to disable it — the dashboard will gracefully hide those sections.
+
 > **mDNS warning**: Use your Home Assistant's **IP address**, not `homeassistant.local`. Android 12+ added mDNS `.local` support, but it silently breaks if **Private DNS** is enabled (Settings → Network → Private DNS) — a common default on Samsung tablets. Older Android versions lack `.local` support entirely. The WebSocket connection will silently fail and dashboards will show "Awaiting data..." with no error. Find your HA IP with `ping homeassistant.local` on a desktop.
 
 ### 2. Copy files to Home Assistant
 
-Copy all `.html` files, `shared.js`, `washer.js`, and `config.js` to your Home Assistant `www` folder:
+Copy all `.html` files, `.js` files, and your config to your Home Assistant `www` folder:
 
 ```
 /config/www/
-├── config.js              ← Your secrets (not shared)
+├── config.js              ← Your HA connection (gitignored)
+├── entities.js            ← Your entity IDs (gitignored)
 ├── shared.js              ← Common JS (all dashboards need this)
-├── washer.js              ← Washer module (optional, see Feature Flags)
+├── washer.js              ← Washer module (optional)
 ├── lcars-dashboard.html
 ├── pipboy-dashboard.html
 ├── c64-dashboard.html
@@ -101,7 +134,7 @@ http://<your-ha-ip>:8123/local/lcars-dashboard.html
 
 ### config.js
 
-The only file you need to edit. Contains your connection settings:
+Connection settings (host, token, dev mode):
 
 | Variable | Description | Example |
 |----------|-------------|---------|
@@ -157,12 +190,13 @@ Each dashboard is an HTML file with inline CSS and a `THEME` config, plus `share
 
 ```html
 <script src="config.js"></script>     <!-- HA connection secrets -->
+<script src="entities.js"></script>   <!-- Your rooms, sensors, lights, integrations -->
 <script>
   const THEME = { ... };              <!-- Theme config + hooks -->
   // Theme-specific functions (e.g. renderLrs, initRain, renderMother)
 </script>
-<script src="shared.js"></script>     <!-- All shared logic -->
-<script src="washer.js"></script>     <!-- Washer module (loaded conditionally via FEATURES flag) -->
+<script src="shared.js"></script>     <!-- All shared logic (derives config from ENTITIES) -->
+<script src="washer.js"></script>     <!-- Washer module (enabled via ENTITIES.integrations.washer) -->
 ```
 
 Theme-specific functions can reference `shared.js` globals (`liveData`, `rooms`, etc.) because they are defined but not called until after `shared.js` loads.
@@ -173,12 +207,15 @@ Theme-specific functions can reference `shared.js` globals (`liveData`, `rooms`,
 
 ### Feature Flags
 
-Feature flags are defined at the top of `shared.js` in the `FEATURES` object:
+Features are controlled via `ENTITIES.integrations` in `entities.js`. Set any integration to `null` to disable it:
 
 ```js
-const FEATURES = {
-  washer: true,   // Set to false to disable washer functionality
-};
+// entities.js
+integrations: {
+  nordpool: null,     // Disables electricity price charts
+  tautulli: null,     // Disables Plex session tracking
+  washer: null,       // Disables washer panel (or { enabled: false, ... })
+}
 ```
 
 When `FEATURES.washer` is `false`, all washer-related WebSocket subscriptions, state ingestion, and rendering are skipped — even if `washer.js` is loaded. This makes it safe to leave the script tag in place and toggle the feature with a single flag.
@@ -522,12 +559,13 @@ All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 ### Step-by-step
 
 1. **Copy `config.js.example` to `config.js`** — add your HA host and token
-2. **Edit room config** — update the `rooms` array with your entity IDs
-3. **Edit light entities** — update `LIGHT_ENTITIES` and `DIMMABLE`
-4. **Edit media players** — update `MEDIA_PLAYER_ENTITIES` with your Sonos/ATV entities
-5. **Edit power sensors** — update `powerSensors` arrays and `liveData.power` initial values
-6. **Edit sensor IDs** — update `ALL_SENSOR_IDS` to include all entities you want to subscribe to
-7. **Customize THEME** — change tab names, titles, and status messages
+2. **Copy `entities.js.example` to `entities.js`** — this is the main file to customize:
+   - **Rooms**: add/remove rooms, set sensor entity IDs, define lights (mark `dimmable: true` where supported), add power monitors
+   - **Media players**: add your Sonos/Apple TV/Chromecast entities
+   - **Integrations**: enable/disable Nordpool, Plex, washer, weather by setting entities or `null`
+3. **Customize THEME** (optional) — change tab names, titles, and status messages in each dashboard HTML
+
+> **Note**: `LIGHT_ENTITIES`, `ALL_SENSOR_IDS`, `DIMMABLE`, and all power config arrays are **auto-derived** from your rooms config. You only edit `entities.js` — `shared.js` builds everything else automatically.
 
 ### Creating a New Theme
 
@@ -544,9 +582,11 @@ All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 ```
 ├── config.js              ← Your HA connection (gitignored)
 ├── config.js.example      ← Template for config.js
-├── shared.js              ← Common JS: entities, state, render, WS, init
-├── washer.js              ← Washer module: state, rendering, stats (toggled via FEATURES.washer)
-├── .gitignore             ← Excludes config.js
+├── entities.js            ← Your rooms, sensors, lights, integrations (gitignored)
+├── entities.js.example    ← Template for entities.js
+├── shared.js              ← Common JS: state, render, WS, init (derives config from entities.js)
+├── washer.js              ← Washer module: state, rendering, stats
+├── .gitignore             ← Excludes config.js and entities.js
 ├── lcars-dashboard.html   ← Star Trek LCARS theme
 ├── pipboy-dashboard.html  ← Fallout Pip-Boy theme
 ├── c64-dashboard.html     ← Commodore 64 theme
