@@ -643,7 +643,6 @@ function showWeatherPopup(slotIdx) {
   const precips = windowEntries.map(e => e.precipitation || 0);
   const winds = windowEntries.map(e => e.wind_speed || 0);
   const humidities = windowEntries.map(e => e.humidity).filter(v => v != null);
-  const pressures = windowEntries.map(e => e.pressure).filter(v => v != null);
   const windBearings = windowEntries.map(e => e.wind_bearing).filter(v => v != null);
 
   const bearingToDir = deg => {
@@ -672,7 +671,7 @@ function showWeatherPopup(slotIdx) {
   html += `<div class="wp-stat"><div class="wp-stat-label">Direction</div><div class="wp-stat-val">${bearingToDir(windBearings[0])}${windBearings[0] != null ? ' (' + windBearings[0] + '°)' : ''}</div></div>`;
   html += `<div class="wp-stat"><div class="wp-stat-label">Precipitation</div><div class="wp-stat-val">${precips.reduce((a,b) => a+b, 0).toFixed(1)} mm</div></div>`;
   html += `<div class="wp-stat"><div class="wp-stat-label">Humidity</div><div class="wp-stat-val">${humidities.length ? humidities[0] + '%' : '--'}</div></div>`;
-  html += `<div class="wp-stat"><div class="wp-stat-label">Pressure</div><div class="wp-stat-val">${pressures.length ? pressures[0] + ' hPa' : '--'}</div></div>`;
+  html += `<div class="wp-stat"><div class="wp-stat-label">Cloud Cover</div><div class="wp-stat-val">${entry.cloud_coverage != null ? Math.round(entry.cloud_coverage) + '%' : '--'}</div></div>`;
   html += `<div class="wp-stat"><div class="wp-stat-label">Temp Range</div><div class="wp-stat-val">${temps.length > 1 ? Math.min(...temps).toFixed(1) + '° – ' + Math.max(...temps).toFixed(1) + '°' : (entry.temperature ?? '--') + '°'}</div></div>`;
   html += '</div>';
 
@@ -807,12 +806,14 @@ function renderTempGraph() {
     </div>`;
   }
 
+  const nowHour = new Date().getHours();
   let html = '';
   temps.forEach((t, i) => {
     const h = ((t - min) / range) * 80 + 10;
     const col = i === 0 ? `var(${accentVar})` : 'var(--grey-mid)';
+    const hour = String((nowHour + i) % 24).padStart(2, '0') + ':00';
     html += `<div class="temp-bar" role="img" tabindex="0" style="height:${h}%;background:${col};"
-      onmouseenter="showToast('H+${i}: ${t}°C')"></div>`;
+      onmouseenter="showToast('${hour}: ${t}°C')"></div>`;
   });
   el.style.position = 'relative';
   el.innerHTML = gridHtml + html;
@@ -1112,7 +1113,7 @@ function renderLcEnergy() {
     const maxP = Math.max(...prices.map(p => p.value), 0.01);
     // Reference grid lines for price levels
     let barHtml = '';
-    const ePriceLevels = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+    const ePriceLevels = [1.0, 2.0, 3.0];
     ePriceLevels.forEach(level => {
       const pct = (level / maxP) * 100;
       if (pct > 0 && pct < 100) {
