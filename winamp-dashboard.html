@@ -1431,13 +1431,20 @@ const THEME = {
   onStatesLoaded() {
     updateSpectrum();
     updateMarquee();
+    rainbowNordpool();
+    rainbowTempGraph();
+    rainbowNordpoolBars();
+    rainbowEnergy();
   },
   onStateChanged(id, s) {
-    if (id.includes('power')) updateSpectrum();
+    if (id.includes('power')) { updateSpectrum(); rainbowEnergy(); }
+    if (id.includes('nordpool')) { rainbowNordpool(); rainbowNordpoolBars(); }
+    if (id.includes('temperature') || id.includes('forecast')) rainbowTempGraph();
   },
   intervals: [
     [() => updateSpectrum(), 2000],
     [() => updateMarquee(), 15000],
+    [() => { rainbowNordpool(); rainbowTempGraph(); rainbowEnergy(); }, 5000],
   ]
 };
 
@@ -1499,6 +1506,53 @@ function updateSpectrum() {
       specPeaks[i] = Math.max(val, specPeaks[i] - 1.5);
     }
     if (peak) peak.style.bottom = Math.min(specPeaks[i], 98) + '%';
+  });
+}
+
+// ── WINAMP-SPECIFIC: Rainbow Graph Overrides ──
+function rainbowNordpool() {
+  const bars = document.querySelectorAll('#d-np48 .np48-bar');
+  if (!bars.length) return;
+  bars.forEach((bar, i) => {
+    const hue = Math.round((i / bars.length) * 360);
+    const isCurrent = bar.classList.contains('current');
+    bar.style.background = 'hsl(' + hue + ', 100%, ' + (isCurrent ? '60%' : '50%') + ')';
+    bar.style.boxShadow = isCurrent ? '0 0 8px hsl(' + hue + ',100%,60%)' : 'none';
+  });
+}
+
+function rainbowTempGraph() {
+  const bars = document.querySelectorAll('#d-tempgraph .temp-bar');
+  if (!bars.length) return;
+  bars.forEach((bar, i) => {
+    const hue = Math.round((i / bars.length) * 360);
+    bar.style.background = 'hsl(' + hue + ', 100%, 50%)';
+  });
+}
+
+function rainbowNordpoolBars() {
+  const fills = document.querySelectorAll('#np-chart .data-bar-fill');
+  const vals = document.querySelectorAll('#np-chart .data-val');
+  const hues = [120, 60, 0]; // green, yellow, red
+  fills.forEach((fill, i) => {
+    const hue = hues[i] || 120;
+    fill.style.background = 'hsl(' + hue + ', 100%, 50%)';
+    fill.style.boxShadow = '0 0 4px hsl(' + hue + ',100%,50%)';
+  });
+  vals.forEach((val, i) => {
+    const hue = hues[i] || 120;
+    val.style.color = 'hsl(' + hue + ', 100%, 50%)';
+  });
+}
+
+// Patch energy chart bars with rainbow
+function rainbowEnergy() {
+  const bars = document.querySelectorAll('#lc-energy-chart .lc-energy-bar-power');
+  if (!bars.length) return;
+  bars.forEach((bar, i) => {
+    const hue = Math.round((i / bars.length) * 360);
+    bar.style.background = 'hsl(' + hue + ', 100%, 50%)';
+    bar.style.boxShadow = '0 0 4px hsl(' + hue + ',100%,50%)';
   });
 }
 
