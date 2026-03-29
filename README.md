@@ -2,6 +2,22 @@
 
 Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
+## Table of Contents
+
+- [Get Running](#get-running)
+- [Themes](#themes)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration) — [config.js](#configjs) | [THEME object](#theme-object)
+- [Dashboard Structure](#dashboard-structure) — [Script Load Order](#script-load-order) | [Dev Mode](#dev-mode) | [Feature Flags](#feature-flags) | [Tabs](#tabs-5-per-dashboard)
+- [Room Configuration](#room-configuration) — [Adding a Room](#adding-a-room) | [Adding a Light](#adding-a-light) | [Media Players](#media-players)
+- [Entity Reference](#entity-reference)
+- [Features](#features) — [Night Mode](#night-mode) | [All Lights Off](#all-lights-off-button) | [Power Distribution](#power-distribution-panel) | [Washer Panel](#washer-panel) | [Weather](#weather-forecast-popup) | [Charts](#chart-reference-grid-lines) | [Theme Switcher](#theme-switcher--fullscreen) | [Kiosk Mode](#fullscreen--kiosk-mode) | [PWA](#pwa--add-to-home-screen) | [Accessibility](#accessibility-wcag-22-aa)
+- [Adapting for Your Home](#adapting-for-your-home) — [Creating a New Theme](#creating-a-new-theme) | [Adding a New Tab](#adding-a-new-tab)
+- [File Structure](#file-structure)
+- [Technical Details](#technical-details) — [How It Works](#how-it-works) | [Key Functions](#key-functions-in-sharedjs) | [THEME Hooks](#theme-hooks) | [Performance](#performance-notes)
+- [Setup Wizard](#setup-wizard)
+- [Troubleshooting](#troubleshooting)
+
 ### Get Running
 
 > **Tip — enable Dev Mode while setting up**: In `config.js`, set `DEV_MODE = true`. This adds a cache-busting parameter to every page load, so the browser always fetches your latest changes to `entities.js`, `shared.js`, and the dashboards. Without it, you'll be refreshing and wondering why your edits aren't showing up. Set it to `false` once everything is working — cached files load faster.
