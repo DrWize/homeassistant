@@ -86,6 +86,63 @@ function validateEntities(states) {
 }
 
 // ═══════════════════════════════════════════════════
+// RESPONSIVE CSS (injected so all themes get it)
+// ═══════════════════════════════════════════════════
+(function injectResponsiveCSS() {
+  const style = document.createElement('style');
+  style.textContent = `
+    @media (max-width: 768px) {
+      /* Stack room cards in a single column */
+      .room-grid { grid-template-columns: 1fr !important; }
+
+      /* Make tab bars scrollable */
+      [role="tablist"] {
+        overflow-x: auto; -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap !important; white-space: nowrap;
+        scrollbar-width: none;
+      }
+      [role="tablist"]::-webkit-scrollbar { display: none; }
+
+      /* Shrink status bar items */
+      .status-bar, .enviro-bar, .env-status {
+        flex-wrap: wrap !important; gap: 6px !important;
+      }
+      .status-block { min-width: 0 !important; flex: 1 1 45% !important; }
+
+      /* Stack power panel for readability */
+      .power-panel table { font-size: 0.7rem; }
+
+      /* Weather cards scroll horizontally */
+      .weather-grid, .forecast-grid {
+        display: flex !important; overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch; gap: 8px !important;
+        flex-wrap: nowrap !important; padding-bottom: 6px;
+      }
+      .weather-card, .forecast-card { min-width: 100px; flex-shrink: 0; }
+
+      /* Sidebar: hide on mobile (use top nav instead) */
+      .lcars-sidebar, .sidebar { display: none !important; }
+      .lcars-main, .main-content { margin-left: 0 !important; }
+
+      /* Nordpool chart: ensure it scrolls */
+      .nordpool-chart, .chart-wrap { overflow-x: auto !important; }
+
+      /* EQ panel: scroll horizontally */
+      .wa-eq-panel { overflow-x: auto !important; flex-wrap: nowrap !important; }
+    }
+
+    @media (max-width: 480px) {
+      /* Even smaller: single-column everything */
+      .room-grid { gap: 8px !important; }
+      .room-card { padding: 10px !important; }
+      .section-title { font-size: 0.75rem !important; }
+      .status-block { flex: 1 1 100% !important; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// ═══════════════════════════════════════════════════
 // DERIVED CONFIG (auto-built from entities.js)
 // ═══════════════════════════════════════════════════
 const INT = ENTITIES.integrations || {};

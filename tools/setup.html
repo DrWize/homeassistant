@@ -88,6 +88,13 @@
     font-family: 'Consolas', monospace; font-size: 0.8rem; white-space: pre-wrap; overflow-x: auto;
     max-height: 500px; overflow-y: auto; line-height: 1.4; color: #ccc; }
   .copy-row { display: flex; gap: 8px; margin-top: 12px; }
+
+  /* Theme gallery */
+  .theme-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .theme-thumb { background: #222; border: 1px solid #333; border-radius: 6px; overflow: hidden; text-align: center; transition: border-color 0.2s; }
+  .theme-thumb:hover { border-color: #00E000; }
+  .theme-thumb img { width: 100%; height: auto; display: block; }
+  .theme-thumb span { display: block; padding: 6px; font-size: 0.75rem; color: #aaa; letter-spacing: 1px; }
 </style>
 </head>
 <body>
@@ -115,6 +122,17 @@
     <div id="conn-status"></div>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="connectHA()">Connect</button>
+    </div>
+    <h3 style="margin-top:28px">Available Themes</h3>
+    <p style="font-size:0.8rem;color:#666;margin-bottom:12px">After setup, pick any theme — they all share the same entities.js config.</p>
+    <div class="theme-gallery">
+      <div class="theme-thumb"><img src="../screenshots/lcars-systems.png" alt="LCARS"><span>LCARS</span></div>
+      <div class="theme-thumb"><img src="../screenshots/pipboy-systems.png" alt="Pip-Boy"><span>Pip-Boy</span></div>
+      <div class="theme-thumb"><img src="../screenshots/c64-systems.png" alt="C64"><span>C64</span></div>
+      <div class="theme-thumb"><img src="../screenshots/matrix-systems.png" alt="Matrix"><span>Matrix</span></div>
+      <div class="theme-thumb"><img src="../screenshots/weyland-systems.png" alt="Weyland"><span>Weyland</span></div>
+      <div class="theme-thumb"><img src="../screenshots/diablo-systems.png" alt="Diablo"><span>Diablo</span></div>
+      <div class="theme-thumb"><img src="../screenshots/winamp-systems.png" alt="Winamp"><span>Winamp</span></div>
     </div>
   </div>
 
@@ -346,23 +364,41 @@ function guessMediaType(e) {
 }
 
 function autoDetectRooms() {
-  // Group lights by common prefix to infer rooms
+  // Group lights by room, extracted from friendly_name or entity_id
   const roomMap = {};
   lights.forEach(e => {
+    const friendly = e.attributes?.friendly_name || '';
     const id = e.entity_id.replace('light.', '');
-    const name = e.attributes?.friendly_name || id;
-    // Try to extract room from friendly name (e.g. "Living Room Ceiling" -> "Living Room")
-    const parts = name.split(/\s+/);
     let roomName, lightLabel;
-    if (parts.length >= 2) {
-      // Heuristic: last word is the light name, rest is room
+
+    if (friendly && friendly.includes(' ') && friendly.split(/\s+/).length >= 2) {
+      // friendly_name like "Living Room Ceiling" -> room="Living Room", label="Ceiling"
+      const parts = friendly.split(/\s+/);
       lightLabel = parts[parts.length - 1];
       roomName = parts.slice(0, -1).join(' ');
     } else {
-      roomName = name;
-      lightLabel = name;
+      // Fall back to entity_id: split camelCase/underscores, e.g. "livingroomwindow"
+      // Try to find a known room word boundary
+      const cleaned = id.replace(/_/g, '');
+      const roomWords = ['livingroom','kitchen','bedroom','guestbedroom','bathroom','balcony','hall','wardrobe',
+        'office','garage','nursery','den','studio','laundry','closet','attic','basement','patio','garden'];
+      const found = roomWords.find(w => cleaned.toLowerCase().startsWith(w));
+      if (found) {
+        roomName = found.replace(/([a-z])([A-Z])/g, '$1 $2')
+          .replace(/^./, c => c.toUpperCase())
+          .replace('livingroom', 'Living Room').replace('guestbedroom', 'Guest Room')
+          .replace('bedroom', 'Bedroom').replace('bathroom', 'Bathroom');
+        lightLabel = cleaned.slice(found.length) || friendly || id;
+        // Capitalize label
+        lightLabel = lightLabel.replace(/^./, c => c.toUpperCase());
+      } else {
+        // No pattern match — use friendly_name or entity_id as-is
+        roomName = friendly || id;
+        lightLabel = friendly || id;
+      }
     }
-    const roomId = roomName.toLowerCase().replace(/\s+/g, '');
+
+    const roomId = roomName.toLowerCase().replace(/[^a-z0-9]/g, '');
     if (!roomMap[roomId]) roomMap[roomId] = { id: roomId, name: roomName, lights: [], sensors: { temp: null, humidity: null, lux: null }, power: [] };
     const supportsBri = e.attributes?.supported_color_modes?.some(m => m === 'brightness' || m === 'color_temp' || m === 'xy' || m === 'hs' || m === 'rgb');
     roomMap[roomId].lights.push({ id: e.entity_id, label: lightLabel, dimmable: !!supportsBri });
