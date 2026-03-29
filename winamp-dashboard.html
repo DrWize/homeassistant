@@ -1206,18 +1206,18 @@
 
   <!-- TABS -->
   <div class="tabs" role="tablist" aria-label="Dashboard sections">
-    <button class="tab active" role="tab" aria-selected="true" aria-controls="page-playlist" tabindex="0" onclick="switchTab('playlist')">PLAYLIST</button>
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="page-systems" tabindex="0" onclick="switchTab('systems')">PLAYLIST</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-controls" tabindex="-1" onclick="switchTab('controls')">CONTROLS</button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="page-eq" tabindex="-1" onclick="switchTab('eq')">EQ</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-data" tabindex="-1" onclick="switchTab('data')">EQ</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-media" tabindex="-1" onclick="switchTab('media')">MEDIA</button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="page-vis" tabindex="-1" onclick="switchTab('vis')">VIS</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-sensors" tabindex="-1" onclick="switchTab('sensors')">VIS</button>
   </div>
 
   <!-- CONTENT -->
   <div class="content" id="main-content" tabindex="-1">
 
     <!-- ═══════════════ PLAYLIST TAB ═══════════════ -->
-    <div class="page active" id="page-playlist">
+    <div class="page active" id="page-systems">
       <div class="section-title">ENVIRONMENTAL STATUS</div>
 
       <div class="weather-strip">
@@ -1244,7 +1244,7 @@
       </div>
 
       <div class="section-title">ROOM STATUS</div>
-      <div class="room-grid" id="rooms-playlist">
+      <div class="room-grid" id="rooms-systems">
         <!-- populated by JS -->
       </div>
 
@@ -1290,7 +1290,7 @@
     </div>
 
     <!-- ═══════════════ EQ TAB ═══════════════ -->
-    <div class="page" id="page-eq">
+    <div class="page" id="page-data">
 
       <div class="section-title">EQUALIZER — LIGHT DIMMERS</div>
       <div class="wa-eq-panel" id="wa-eq-panel">
@@ -1406,7 +1406,7 @@
 
 
     <!-- ═══════════════ VIS TAB ═══════════════ -->
-    <div class="page" id="page-vis">
+    <div class="page" id="page-sensors">
 
       <div class="section-title">ENERGY CONSUMPTION VS PRICE</div>
       <div class="energy-wrap">
@@ -1475,7 +1475,7 @@ const THEME = {
   subtitle: 'IT REALLY WHIPS THE LLAMA\'S ASS',
   footer: 'WINAMP HOME AUTOMATION // LLAMA GROUP',
   tabs: ['PLAYLIST', 'CONTROLS', 'EQ', 'MEDIA', 'VIS'],
-  tabIds: ['playlist', 'controls', 'eq', 'media', 'vis'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
   emptyMedia: '*** NO ACTIVE STREAMS ***',
   connOnline: 'ONLINE',
   connOffline: 'OFFLINE',

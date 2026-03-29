@@ -1079,18 +1079,18 @@
 
   <!-- TABS -->
   <div class="tabs" role="tablist" aria-label="Dashboard sections">
-    <button class="tab active" role="tab" aria-selected="true" aria-controls="page-stat" tabindex="0" onclick="switchTab('stat')">STAT</button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="page-items" tabindex="-1" onclick="switchTab('items')">ITEMS</button>
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="page-systems" tabindex="0" onclick="switchTab('systems')">STAT</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-controls" tabindex="-1" onclick="switchTab('controls')">ITEMS</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-data" tabindex="-1" onclick="switchTab('data')">DATA</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-media" tabindex="-1" onclick="switchTab('media')">MEDIA</button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="page-vault" tabindex="-1" onclick="switchTab('vault')">VAULT</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-sensors" tabindex="-1" onclick="switchTab('sensors')">VAULT</button>
   </div>
 
   <!-- CONTENT -->
   <div class="content" id="main-content" tabindex="-1">
 
     <!-- ═══════════════ STAT TAB ═══════════════ -->
-    <div class="page active" id="page-stat">
+    <div class="page active" id="page-systems">
       <div class="section-title">// ENVIRONMENTAL STATUS</div>
 
       <div class="weather-strip">
@@ -1117,7 +1117,7 @@
       </div>
 
       <div class="section-title">// ROOM STATUS</div>
-      <div class="room-grid" id="rooms-stat">
+      <div class="room-grid" id="rooms-systems">
         <!-- populated by JS -->
       </div>
 
@@ -1156,10 +1156,10 @@
     </div>
 
     <!-- ═══════════════ ITEMS TAB ═══════════════ -->
-    <div class="page" id="page-items">
+    <div class="page" id="page-controls">
       <div class="section-title">// LIGHT CONTROL PANEL</div>
       <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">VAULT CURFEW</button>
-      <div class="room-grid" id="rooms-items">
+      <div class="room-grid" id="rooms-controls">
         <!-- populated by JS -->
       </div>
     </div>
@@ -1287,7 +1287,7 @@
 
 
     <!-- ═══════════════ VAULT TAB ═══════════════ -->
-    <div class="page" id="page-vault">
+    <div class="page" id="page-sensors">
 
       <div class="section-title">// GEIGER COUNTER — RADIATION MONITOR</div>
       <div class="geiger-wrap">
@@ -1379,7 +1379,7 @@ const THEME = {
   subtitle: 'HOME MANAGEMENT SYSTEM // VAULT-TEC CORP',
   footer: 'VAULT-TEC CORPORATION // HOME AUTOMATION UNIT',
   tabs: ['STAT', 'ITEMS', 'DATA', 'MEDIA', 'VAULT'],
-  tabIds: ['stat', 'items', 'data', 'media', 'vault'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
   emptyMedia: '// NO ACTIVE TRANSMISSIONS //',
   connOnline: 'SYSTEM ONLINE',
   connOffline: 'OFFLINE',

@@ -8,20 +8,20 @@ from playwright.async_api import async_playwright
 BASE_URL = "http://localhost:5502"
 SCREENSHOT_DIR = Path(__file__).parent.parent / "screenshots"
 VIEWPORT = {"width": 1280, "height": 800}
-DEFAULT_TABS = ["systems", "controls", "data", "media", "sensors"]
+TAB_IDS = ["systems", "controls", "data", "media", "sensors"]
 THEMES = {
-    "lcars":   ("lcars-dashboard.html",   DEFAULT_TABS),
-    "pipboy":  ("pipboy-dashboard.html",  ["stat", "items", "data", "media", "vault"]),
-    "c64":     ("c64-dashboard.html",     DEFAULT_TABS),
-    "matrix":  ("matrix-dashboard.html",  DEFAULT_TABS),
-    "weyland": ("weyland-dashboard.html", DEFAULT_TABS),
-    "diablo":  ("diablo-dashboard.html",  DEFAULT_TABS),
-    "winamp":  ("winamp-dashboard.html",  ["playlist", "controls", "eq", "media", "vis"]),
+    "lcars":   "lcars-dashboard.html",
+    "pipboy":  "pipboy-dashboard.html",
+    "c64":     "c64-dashboard.html",
+    "matrix":  "matrix-dashboard.html",
+    "weyland": "weyland-dashboard.html",
+    "diablo":  "diablo-dashboard.html",
+    "winamp":  "winamp-dashboard.html",
 }
 FRAME_DURATION_MS = 2000  # 2 seconds per tab
 
 
-async def capture_theme(page, theme_name, html_file, tab_ids):
+async def capture_theme(page, theme_name, html_file):
     """Navigate to a theme dashboard, capture each tab as a screenshot."""
     url = f"{BASE_URL}/{html_file}"
     print(f"\n--- {theme_name.upper()} ---")
@@ -29,7 +29,7 @@ async def capture_theme(page, theme_name, html_file, tab_ids):
     await page.wait_for_timeout(6000)  # let WS data load
 
     frames = []
-    for tab_id in tab_ids:
+    for tab_id in TAB_IDS:
         print(f"  Tab: {tab_id}")
         await page.evaluate(f"switchTab('{tab_id}')")
         await page.wait_for_timeout(1500)  # let render settle
@@ -51,7 +51,7 @@ async def capture_theme(page, theme_name, html_file, tab_ids):
     print(f"  -> {gif_path} ({gif_path.stat().st_size // 1024} KB)")
 
     # Clean up temp PNGs
-    for tab_id in tab_ids:
+    for tab_id in TAB_IDS:
         tmp = SCREENSHOT_DIR / f"_tmp_{theme_name}_{tab_id}.png"
         tmp.unlink(missing_ok=True)
 
@@ -63,8 +63,8 @@ async def main():
         browser = await p.chromium.launch()
         page = await browser.new_page(viewport=VIEWPORT)
 
-        for theme_name, (html_file, tab_ids) in THEMES.items():
-            await capture_theme(page, theme_name, html_file, tab_ids)
+        for theme_name, html_file in THEMES.items():
+            await capture_theme(page, theme_name, html_file)
 
         await browser.close()
 
