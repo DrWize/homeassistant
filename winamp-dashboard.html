@@ -51,8 +51,6 @@
     flex-direction: column;
     height: 100vh;
     height: 100dvh;
-    max-width: 1280px;
-    margin: 0 auto;
     background: var(--bg);
     border: 1px solid var(--chrome-dark);
     box-shadow: inset 1px 1px 0 var(--chrome-light), inset -1px -1px 0 #111,
@@ -561,7 +559,7 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    min-width: 40px;
+    min-width: 60px;
   }
   .wa-eq-slider {
     -webkit-appearance: none;
@@ -599,7 +597,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 50px;
+    max-width: 70px;
   }
   .wa-eq-val {
     font-size: 0.55rem;
@@ -608,6 +606,8 @@
   .wa-eq-channel.off .wa-eq-slider { opacity: 0.3; }
   .wa-eq-channel.off .wa-eq-label { color: var(--grey); }
   .wa-eq-channel.off .wa-eq-val { color: var(--grey); }
+  .wa-eq-channel.toggle { cursor: pointer; }
+  .wa-eq-channel.toggle .wa-eq-slider { cursor: pointer; }
   }
 
   /* ── LOAD BARS ── */
@@ -1836,13 +1836,13 @@ function renderEqPanel() {
       const bri = isDimmable ? (liveData.brightness[light.id] ?? 255) : (on ? 255 : 0);
       const pct = Math.round((bri / 255) * 100);
       const safeId = light.id.replace(/\./g, '_');
-      html += `<div class="wa-eq-channel ${on ? '' : 'off'}">
-        <span class="wa-eq-val" id="eq-val-${safeId}">${pct}%</span>
+      const cls = isDimmable ? '' : ' toggle';
+      html += `<div class="wa-eq-channel${cls} ${on ? '' : 'off'}">
+        <span class="wa-eq-val" id="eq-val-${safeId}">${isDimmable ? pct + '%' : (on ? 'ON' : 'OFF')}</span>
         <input type="range" class="wa-eq-slider" min="0" max="255" value="${bri}"
-          ${isDimmable ? `oninput="eqDim('${light.id}', this.value)"` : ''}
-          ${!isDimmable ? 'disabled' : ''}
+          ${isDimmable ? `oninput="eqDim('${light.id}', this.value)"` : `onclick="eqToggle('${light.id}')"`}
           aria-label="${room.name} ${light.label}">
-        <span class="wa-eq-label">${light.label}</span>
+        <span class="wa-eq-label">${room.name}<br>${light.label}</span>
       </div>`;
     });
   });
@@ -1855,6 +1855,11 @@ function eqDim(id, val) {
   const pct = Math.round((val / 255) * 100);
   const valEl = document.getElementById('eq-val-' + safeId);
   if (valEl) valEl.textContent = pct + '%';
+}
+
+function eqToggle(id) {
+  const on = liveData.lights[id] || false;
+  toggleLight(id, !on);
 }
 
 // Hook into statesLoaded and stateChanged to keep EQ panel in sync
