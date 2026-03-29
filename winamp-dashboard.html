@@ -1843,7 +1843,7 @@ function renderEqPanel() {
     room.lights.forEach(light => {
       const on = liveData.lights[light.id] || false;
       const isDimmable = DIMMABLE.has(light.id);
-      const bri = isDimmable ? (liveData.brightness[light.id] ?? 255) : (on ? 255 : 0);
+      const bri = on ? (isDimmable ? (liveData.brightness[light.id] ?? 255) : 255) : 0;
       const pct = Math.round((bri / 255) * 100);
       const safeId = light.id.replace(/\./g, '_');
       const cls = isDimmable ? '' : ' toggle';
