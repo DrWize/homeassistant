@@ -1551,14 +1551,23 @@ function rainbowNordpoolBars() {
   });
 }
 
-// Patch energy chart bars with rainbow
+// Patch energy chart bars with rainbow (both price overlay and power bars)
 function rainbowEnergy() {
-  const bars = document.querySelectorAll('#lc-energy-chart .lc-energy-bar-power');
-  if (!bars.length) return;
-  bars.forEach((bar, i) => {
-    const hue = Math.round((i / bars.length) * 360);
-    bar.style.background = 'hsl(' + hue + ', 100%, 50%)';
-    bar.style.boxShadow = '0 0 4px hsl(' + hue + ',100%,50%)';
+  const containers = document.querySelectorAll('#lc-energy-chart .lc-energy-bar');
+  if (!containers.length) return;
+  containers.forEach((container, i) => {
+    const hue = Math.round((i / containers.length) * 360);
+    const color = 'hsl(' + hue + ', 100%, 50%)';
+    const price = container.querySelector('.lc-energy-bar-price');
+    const power = container.querySelector('.lc-energy-bar-power');
+    if (price) {
+      price.style.background = color;
+      price.style.opacity = '0.6';
+    }
+    if (power) {
+      power.style.background = color;
+      power.style.boxShadow = '0 0 4px ' + color;
+    }
   });
 }
 
