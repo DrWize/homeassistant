@@ -1,8 +1,31 @@
 # Home Assistant Themed Dashboards
 
-> **Get running in 5 minutes**: `cp config.js.example config.js` → `cp entities.js.example entities.js` → add your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) and entity IDs → copy everything to `/config/www/` → open `http://your-ha:8123/local/lcars-dashboard.html`. Press the lower-left corner to open the theme switcher and fullscreen toggle.
-
 Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
+
+### Get Running
+
+**Option A — Setup Wizard** (recommended for new users):
+1. Copy all files to your Home Assistant `www` folder: `/config/www/`
+2. Open `http://your-ha:8123/local/tools/setup.html` in your browser
+3. Enter your HA host and token — the wizard discovers your entities automatically
+4. Configure rooms, lights, media players, and integrations with dropdowns
+5. Click **Generate entities.js** → download and save to `/config/www/`
+6. Also create `config.js` from the template: `cp config.js.example config.js` and add your host + token
+7. Open `http://your-ha:8123/local/lcars-dashboard.html` — press the lower-left corner for the theme switcher
+
+**Option B — Manual setup** (if you prefer editing files directly):
+1. `cp config.js.example config.js` → add your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) and host IP
+2. `cp entities.js.example entities.js` → add your entity IDs (find them in HA → Developer Tools → States)
+3. Copy everything to `/config/www/`
+4. Open `http://your-ha:8123/local/lcars-dashboard.html`
+
+**Files to copy to `/config/www/`:**
+```
+config.js, entities.js, shared.js, washer.js,
+lcars-dashboard.html, pipboy-dashboard.html, c64-dashboard.html,
+matrix-dashboard.html, weyland-dashboard.html, diablo-dashboard.html,
+winamp-dashboard.html, tools/setup.html (optional, for the wizard)
+```
 
 ## Themes
 
