@@ -190,34 +190,58 @@
     display: flex;
     align-items: flex-end;
     gap: 2px;
-    height: 36px;
+    height: 60px;
     background: #000;
     border: 2px inset #333;
     margin: 0 6px 4px;
     padding: 3px 4px;
     flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Reflection gradient overlay */
+  .wa-spectrum::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
   }
   .wa-spec-bar {
     flex: 1;
     min-width: 4px;
-    transition: height 0.4s ease;
     position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
   }
   .wa-spec-bar-fill {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(0deg, var(--green) 0%, var(--yellow) 60%, var(--orange) 85%, var(--red) 100%);
+    /* Color set per-bar via JS */
     transition: height 0.5s ease;
+    /* Segmented look */
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.4) 3px,
+      rgba(0,0,0,0.4) 4px
+    );
+    background-size: 100% 4px;
   }
   .wa-spec-bar-peak {
     position: absolute;
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--white);
     transition: bottom 1.2s ease;
+    z-index: 2;
   }
 
   /* ══════════════════════════════════
@@ -538,7 +562,9 @@
   }
   .load-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--green) 0%, var(--yellow) 70%, var(--orange) 100%);
+    background: linear-gradient(90deg,
+      hsl(120,100%,50%) 0%, hsl(180,100%,50%) 20%, hsl(240,100%,50%) 40%,
+      hsl(300,100%,50%) 60%, hsl(0,100%,50%) 75%, hsl(60,100%,50%) 100%);
     box-shadow: 0 0 4px var(--green-glow);
     transition: width 1s ease;
   }
@@ -1416,16 +1442,27 @@ const THEME = {
 };
 
 // ── WINAMP-SPECIFIC: Spectrum Analyzer ──
-const SPEC_BARS = 20;
+const SPEC_BARS = 32;
 let specPeaks = new Array(SPEC_BARS).fill(0);
+
+// Rainbow hues cycling: green → cyan → blue → purple → magenta → red → orange → yellow → green
+function barHue(i, total) {
+  // Cycle through full rainbow
+  return Math.round((i / total) * 360);
+}
 
 function initSpectrum() {
   const el = document.getElementById('wa-spectrum');
   if (!el || el.children.length > 0) return;
   for (let i = 0; i < SPEC_BARS; i++) {
+    const hue = barHue(i, SPEC_BARS);
+    const color = 'hsl(' + hue + ', 100%, 50%)';
+    const colorDim = 'hsl(' + hue + ', 80%, 25%)';
     const bar = document.createElement('div');
     bar.className = 'wa-spec-bar';
-    bar.innerHTML = '<div class="wa-spec-bar-fill" style="height:0%"></div><div class="wa-spec-bar-peak" style="bottom:0%"></div>';
+    bar.innerHTML =
+      '<div class="wa-spec-bar-fill" style="height:0%;background-color:' + color + '"></div>' +
+      '<div class="wa-spec-bar-peak" style="bottom:0%;background-color:' + color + ';box-shadow:0 0 6px ' + color + '"></div>';
     el.appendChild(bar);
   }
 }
@@ -1445,11 +1482,11 @@ function updateSpectrum() {
     if (i < powers.length) {
       val = Math.min(100, (powers[i] / maxW) * 100);
     } else {
-      // Ambient variation for empty bars
-      val = Math.random() * 8 + 2;
+      // Ambient variation for empty bars — more dynamic
+      val = Math.random() * 25 + 5;
     }
     // Add organic jitter
-    val = Math.max(2, val + (Math.random() - 0.5) * 10);
+    val = Math.max(3, val + (Math.random() - 0.5) * 15);
 
     const fill = bar.querySelector('.wa-spec-bar-fill');
     const peak = bar.querySelector('.wa-spec-bar-peak');
@@ -1459,9 +1496,9 @@ function updateSpectrum() {
     if (val > specPeaks[i]) {
       specPeaks[i] = val;
     } else {
-      specPeaks[i] = Math.max(val, specPeaks[i] - 2);
+      specPeaks[i] = Math.max(val, specPeaks[i] - 1.5);
     }
-    if (peak) peak.style.bottom = specPeaks[i] + '%';
+    if (peak) peak.style.bottom = Math.min(specPeaks[i], 98) + '%';
   });
 }
 
