@@ -2,7 +2,7 @@
 
 > **Get running in 2 minutes**: `cp config.js.example config.js` → paste your [HA token](https://www.home-assistant.io/docs/authentication/#your-account-profile) → copy everything to `/config/www/` → open `http://your-ha:8123/local/lcars-dashboard.html`. Press the lower-left corner to open the theme switcher and fullscreen toggle.
 
-Six themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
+Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
 ## Themes
 
@@ -14,6 +14,7 @@ Six themed HTML dashboards for Home Assistant, sharing a common JavaScript core 
 | **Matrix** | `matrix-dashboard.html` | The Matrix digital rain |
 | **Weyland-Yutani** | `weyland-dashboard.html` | Alien franchise MU/TH/UR 6000 |
 | **Diablo IV** | `diablo-dashboard.html` | Diablo IV Sanctuary / Horadric UI |
+| **Winamp** | `winamp-dashboard.html` | Winamp 2.x media player |
 
 ### LCARS — Star Trek
 ![LCARS Dashboard](screenshots/lcars-systems.png)
@@ -39,6 +40,9 @@ Six themed HTML dashboards for Home Assistant, sharing a common JavaScript core 
 ![Diablo Dashboard](screenshots/diablo-systems.png)
 ![Diablo Tabs Demo](screenshots/diablo-demo.gif)
 
+### Winamp 2.x
+![Winamp Dashboard](screenshots/winamp-systems.png)
+
 ### Theme-Specific Extras
 - **LCARS**: Animated radar sweep on the Sensors tab with randomized blip contacts
 - **Pip-Boy**: Geiger counter that ticks based on ambient lux, plus a threat assessment panel
@@ -46,6 +50,7 @@ Six themed HTML dashboards for Home Assistant, sharing a common JavaScript core 
 - **Matrix**: Digital rain canvas background that responds to total power usage and slows at night
 - **Weyland**: MOTHER AI status readout panel showing atmospheric, life support, and power diagnostics
 - **Diablo IV**: Worldstone terminal readout with Cinzel Decorative font and blood-red/gold color scheme
+- **Winamp**: 32-bar spectrum analyzer mapped to real sensors (power, temperature, humidity, lux), EQ-style vertical dimmer sliders, transport controls (play/pause/stop for spectrum, prev/next for tabs), LED marquee with scrolling live data, and rainbow graph mode for all charts
 
 ## Quick Start
 
@@ -79,7 +84,8 @@ Copy all `.html` files, `shared.js`, `washer.js`, and `config.js` to your Home A
 ├── c64-dashboard.html
 ├── matrix-dashboard.html
 ├── weyland-dashboard.html
-└── diablo-dashboard.html
+├── diablo-dashboard.html
+└── winamp-dashboard.html
 ```
 
 ### 3. Access the dashboards
@@ -387,6 +393,7 @@ All dashboards respond to `sun.sun` state. When the sun is below the horizon:
 - **Matrix**: Green palette dims, rain speed halves
 - **Weyland**: Header shows "NIGHT WATCH" instead of "DAY CYCLE"
 - **Diablo IV**: Gold and crimson tones dim to muted bronze
+- **Winamp**: Chrome bevels darken, spectrum analyzer dims
 
 ### "All Lights Off" Button
 
@@ -400,6 +407,7 @@ Each dashboard has a themed button on the Controls/Lights tab that turns off all
 | Matrix | DISCONNECT NODES |
 | Weyland | CREW HIBERNATION |
 | Diablo IV | ETERNAL DARKNESS |
+| Winamp | LIGHTS OUT |
 
 ### Power Distribution Panel
 
@@ -435,13 +443,30 @@ Each theme uses its own labels:
 | Matrix | CLEANSER | SENSE → PURIFY → FLUSH → EXTRACT → EXIT |
 | Weyland | DECON BAY 3 | WEIGH → DECON → RINSE → EXTRACT → SECURED |
 | Diablo IV | PURIFICATION | SENSE → CLEANSE → PURGE → WRING → SANCTIFIED |
+| Winamp | LAUNDRY | DETECT → WASH → RINSE → SPIN → DONE |
 
 Customize labels via `THEME.washer` in each dashboard's inline script.
+
+### Weather Forecast Popup
+
+Clicking any weather forecast card on any dashboard opens a detailed popup showing:
+- Hero display with temperature, condition icon, and time
+- Wind speed and direction, precipitation total, humidity, cloud coverage, temperature range
+- Hourly breakdown of all 24 forecast hours with condition, temperature, rain, and wind
+
+The popup inherits each dashboard's theme colors via CSS variables.
+
+### Chart Reference Grid Lines
+
+All dashboards display reference grid lines on charts for quick value reading:
+- **Nordpool 48h**: horizontal lines at 1, 2, 3 SEK
+- **Energy Consumption**: horizontal lines at 1, 2, 3 SEK
+- **Temperature 24h**: horizontal lines at 5°C intervals (5°, 10°, 15°, etc.)
 
 ### Theme Switcher & Fullscreen
 
 Press the **lower-left corner** of any dashboard to reveal a hidden menu:
-- **Theme switcher** — links to all 6 dashboards
+- **Theme switcher** — links to all 7 dashboards
 - **Fullscreen toggle** — uses the browser Fullscreen API
 
 The controls auto-hide after 20 seconds of inactivity.
@@ -489,6 +514,7 @@ All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 - `focus-visible` outlines on all interactive elements
 - `aria-live="polite"` on toast notifications
 - `prefers-reduced-motion` media query disables animations
+- **Winamp** keyboard shortcuts: Space (play/pause), S (stop), Arrow Left/Right (prev/next tab)
 
 ## Adapting for Your Home
 
@@ -526,6 +552,7 @@ All dashboards include `mobile-web-app-capable` meta tags. On mobile:
 ├── matrix-dashboard.html  ← Matrix digital rain theme
 ├── weyland-dashboard.html ← Alien Weyland-Yutani theme
 ├── diablo-dashboard.html  ← Diablo IV Sanctuary theme
+├── winamp-dashboard.html  ← Winamp 2.x media player theme
 └── README.md              ← This file
 ```
 
