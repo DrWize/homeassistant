@@ -63,7 +63,7 @@ const HA_TOKEN = 'YOUR_LONG_LIVED_ACCESS_TOKEN'; // Generate in HA → Profile �
 const DEV_MODE = true;                           // Cache busting (set false for production)
 ```
 
-> **mDNS warning**: Use your Home Assistant's **IP address**, not `homeassistant.local`. Android devices (Chrome, Fully Kiosk Browser, WebView) cannot reliably resolve mDNS `.local` hostnames — the WebSocket connection will silently fail and dashboards will show "Awaiting data..." with no error. Find your HA IP with `ping homeassistant.local` on a desktop.
+> **mDNS warning**: Use your Home Assistant's **IP address**, not `homeassistant.local`. Android 12+ added mDNS `.local` support, but it silently breaks if **Private DNS** is enabled (Settings → Network → Private DNS) — a common default on Samsung tablets. Older Android versions lack `.local` support entirely. The WebSocket connection will silently fail and dashboards will show "Awaiting data..." with no error. Find your HA IP with `ping homeassistant.local` on a desktop.
 
 ### 2. Copy files to Home Assistant
 

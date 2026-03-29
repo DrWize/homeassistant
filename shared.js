@@ -565,6 +565,36 @@ function renderWeather() {
     .wp-h-cond { flex: 1; color: var(--grey-mid, #666); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .wp-h-rain { width: 50px; text-align: right; color: var(--blue, #48c); flex-shrink: 0; }
     .wp-h-wind { width: 55px; text-align: right; color: var(--grey-mid, #666); flex-shrink: 0; }
+
+    /* Reference grid lines for charts */
+    .np48-grid-line {
+      position: absolute; left: 0; right: 0;
+      border-top: 1px dashed var(--grey-mid, #555);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .np48-grid-label {
+      position: absolute; right: 2px; top: -10px;
+      font-size: 0.55rem; letter-spacing: 0.5px;
+      color: var(--grey-mid, #666);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+    .lc-energy-grid-line {
+      position: absolute; left: 0; right: 0;
+      border-top: 1px dashed var(--grey-mid, #555);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .lc-energy-grid-label {
+      position: absolute; right: 2px; top: -10px;
+      font-size: 0.55rem; letter-spacing: 0.5px;
+      color: var(--grey-mid, #666);
+      opacity: 0.8;
+      pointer-events: none;
+    }
   `;
   document.head.appendChild(style);
 
@@ -685,7 +715,19 @@ function renderNordpool48h() {
     }
   }
 
-  let html = '';
+  // Reference grid lines at round SEK values
+  let gridHtml = '';
+  const gridLevels = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+  gridLevels.forEach(level => {
+    if (level >= min && level <= max) {
+      const pct = ((level - min) / range) * 100;
+      gridHtml += `<div class="np48-grid-line" style="bottom:${pct}%;">
+        <span class="np48-grid-label">${level.toFixed(1)}</span>
+      </div>`;
+    }
+  });
+
+  let html = gridHtml;
   prices.forEach((p, i) => {
     const d = new Date(p.start);
     const isCurrent = d.getHours() === now.getHours() && d.getDate() === now.getDate();
@@ -1042,7 +1084,18 @@ function renderLcEnergy() {
     const histMax = history.length ? Math.max(...history.map(h => h.watts)) : 0;
     const maxW = Math.max(histMax, watts * 1.2, 10);
     const maxP = Math.max(...prices.map(p => p.value), 0.01);
+    // Reference grid lines for price levels
     let barHtml = '';
+    const ePriceLevels = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+    ePriceLevels.forEach(level => {
+      const pct = (level / maxP) * 100;
+      if (pct > 0 && pct < 100) {
+        barHtml += `<div class="lc-energy-grid-line" style="bottom:${pct}%;">
+          <span class="lc-energy-grid-label">${level.toFixed(1)}</span>
+        </div>`;
+      }
+    });
+
     prices.slice(0, 24).forEach((p, i) => {
       const d = new Date(p.start);
       const isCurrent = d.getHours() === now.getHours() && d.getDate() === now.getDate();
