@@ -595,6 +595,20 @@ function renderWeather() {
       opacity: 0.8;
       pointer-events: none;
     }
+    .temp-grid-line {
+      position: absolute; left: 0; right: 0;
+      border-top: 1px dashed var(--grey-mid, #555);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .temp-grid-label {
+      position: absolute; right: 2px; top: -10px;
+      font-size: 0.55rem; letter-spacing: 0.5px;
+      color: var(--grey-mid, #666);
+      opacity: 0.8;
+      pointer-events: none;
+    }
   `;
   document.head.appendChild(style);
 
@@ -717,7 +731,7 @@ function renderNordpool48h() {
 
   // Reference grid lines at round SEK values
   let gridHtml = '';
-  const gridLevels = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+  const gridLevels = [1.0, 2.0, 3.0];
   gridLevels.forEach(level => {
     if (level >= min && level <= max) {
       const pct = ((level - min) / range) * 100;
@@ -782,6 +796,17 @@ function renderTempGraph() {
   const range = max - min || 1;
   const accentVar = (THEME.dimmerColors && THEME.dimmerColors.fill) || '--orange';
 
+  // Reference grid lines at 5°C intervals
+  let gridHtml = '';
+  const tempGridStep = 5;
+  const firstGrid = Math.ceil(min / tempGridStep) * tempGridStep;
+  for (let level = firstGrid; level <= max; level += tempGridStep) {
+    const pct = ((level - min) / range) * 80 + 10;
+    gridHtml += `<div class="temp-grid-line" style="bottom:${pct}%;">
+      <span class="temp-grid-label">${level}°</span>
+    </div>`;
+  }
+
   let html = '';
   temps.forEach((t, i) => {
     const h = ((t - min) / range) * 80 + 10;
@@ -789,7 +814,8 @@ function renderTempGraph() {
     html += `<div class="temp-bar" role="img" tabindex="0" style="height:${h}%;background:${col};"
       onmouseenter="showToast('H+${i}: ${t}°C')"></div>`;
   });
-  el.innerHTML = html;
+  el.style.position = 'relative';
+  el.innerHTML = gridHtml + html;
   if (mmEl) mmEl.textContent = `MIN: ${min}°C  —  MAX: ${max}°C`;
 }
 
