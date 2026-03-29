@@ -689,6 +689,11 @@
   .wa-transport-btn:active {
     border-style: inset;
   }
+  .wa-transport-btn.engaged {
+    border-style: inset;
+    background: linear-gradient(180deg, var(--chrome-dark) 0%, var(--chrome-light) 100%);
+    color: var(--green, #0f0);
+  }
   .wa-transport-spacer { flex: 1; }
   .wa-transport-text {
     font-size: 0.6rem;
@@ -1372,11 +1377,11 @@
 
   <!-- TRANSPORT CONTROLS -->
   <div class="wa-transport">
-    <button class="wa-transport-btn" title="Previous" aria-label="Previous">&#9198;</button>
-    <button class="wa-transport-btn" title="Play" aria-label="Play">&#9654;</button>
-    <button class="wa-transport-btn" title="Pause" aria-label="Pause">&#9208;</button>
-    <button class="wa-transport-btn" title="Stop" aria-label="Stop">&#9632;</button>
-    <button class="wa-transport-btn" title="Next" aria-label="Next">&#9197;</button>
+    <button class="wa-transport-btn" title="Previous tab" aria-label="Previous tab" onclick="transportPrev()">&#9198;</button>
+    <button class="wa-transport-btn" title="Play" aria-label="Play" id="btn-play" onclick="transportPlay()">&#9654;</button>
+    <button class="wa-transport-btn" title="Pause" aria-label="Pause" id="btn-pause" onclick="transportPause()">&#9208;</button>
+    <button class="wa-transport-btn" title="Stop" aria-label="Stop" id="btn-stop" onclick="transportStop()">&#9632;</button>
+    <button class="wa-transport-btn" title="Next tab" aria-label="Next tab" onclick="transportNext()">&#9197;</button>
     <div class="wa-transport-spacer"></div>
     <span class="wa-transport-text" id="footer-status">WINAMP HOME AUTOMATION // LLAMA GROUP</span>
   </div>
@@ -1427,6 +1432,7 @@ const THEME = {
   },
 
   onInit() {
+    initSpecSources();
     initSpectrum();
   },
   onStatesLoaded() {
@@ -1472,26 +1478,108 @@ function initSpectrum() {
   }
 }
 
+// Build spectrum bar data sources (32 bars mapped to real sensors)
+let SPEC_SOURCES = [];
+
+const SPEC_POWER_LABELS = {
+  'sensor.kitchenwindow_power':                  'Kitchen Window',
+  'sensor.livingroomwindow_power':               'Living Room Window',
+  'sensor.guestbedroomwindow_power':             'Guest Room Window',
+  'sensor.livingroomsofa_power':                 'Living Room Sofa',
+  'sensor.bedroomwinleft_power':                 'Bedroom Win Left',
+  'sensor.bedroomwinright_power_2':              'Bedroom Win Right',
+  'sensor.balconyonoff_power':                   'Balcony Deco Lights',
+  'sensor.guestbedroomroof_power':               'Guest Room Ceiling',
+  'sensor.bedroomroof_power':                    'Bedroom Ceiling',
+  'sensor.livingroomwallplugtelevision_power':   'Living Room Television',
+  'sensor.guestbedroomwallplugcomputer_power_2': 'Guest Room Computer',
+  'sensor.washer_power':                         'Bathroom Washer',
+};
+
+function initSpecSources() {
+  SPEC_SOURCES = [];
+  // Bars 0–11: Power sensors
+  LC_POWER_SENSORS.forEach(id => {
+    SPEC_SOURCES.push({
+      label: SPEC_POWER_LABELS[id] || LC_POWER_LABELS[id] || id.split('.')[1],
+      unit: 'W', max: 200,
+      value: () => liveData.power[id] ?? 0
+    });
+  });
+  // Bars 12–19: Room temperatures
+  rooms.forEach(room => {
+    if (room.sensors.temp) {
+      SPEC_SOURCES.push({
+        label: room.name + ' Temp',
+        unit: '°C', max: 35,
+        value: () => liveData.sensors[room.sensors.temp] ?? 0
+      });
+    }
+  });
+  // Bars 20–24: Humidity sensors
+  rooms.forEach(room => {
+    if (room.sensors.humidity) {
+      SPEC_SOURCES.push({
+        label: room.name + ' Humidity',
+        unit: '%', max: 100,
+        value: () => liveData.sensors[room.sensors.humidity] ?? 0
+      });
+    }
+  });
+  // Bars 25–27: Lux sensors
+  rooms.forEach(room => {
+    if (room.sensors.lux) {
+      SPEC_SOURCES.push({
+        label: room.name + ' Light',
+        unit: 'lx', max: 5000,
+        value: () => liveData.sensors[room.sensors.lux] ?? 0
+      });
+    }
+  });
+  // Bars 28–31: Aggregate values
+  SPEC_SOURCES.push({
+    label: 'Outside Temp',
+    unit: '°C', max: 40,
+    value: () => liveData.outsideTemp ?? 0
+  });
+  SPEC_SOURCES.push({
+    label: 'Electricity Price',
+    unit: 'SEK', max: 5,
+    value: () => liveData.elecNow ?? 0
+  });
+  SPEC_SOURCES.push({
+    label: 'Sun Elevation',
+    unit: '°', max: 60,
+    value: () => Math.max(0, liveData.sun.elevation ?? 0)
+  });
+  SPEC_SOURCES.push({
+    label: 'Total Power',
+    unit: 'W', max: 1000,
+    value: () => Object.values(liveData.power || {}).reduce((s, v) => s + (v || 0), 0)
+  });
+}
+
 function updateSpectrum() {
   const el = document.getElementById('wa-spectrum');
   if (!el) return;
   const bars = el.querySelectorAll('.wa-spec-bar');
   if (bars.length === 0) return;
 
-  // Map power sensors to bar heights
-  const powers = Object.values(liveData.power || {}).filter(v => v !== null);
-  const maxW = 200;
-
   bars.forEach((bar, i) => {
+    const src = SPEC_SOURCES[i];
     let val;
-    if (i < powers.length) {
-      val = Math.min(100, (powers[i] / maxW) * 100);
+    if (src) {
+      const raw = src.value();
+      val = Math.min(100, (Math.abs(raw) / src.max) * 100);
+      const tip = src.label + ': ' + (typeof raw === 'number' ? raw.toFixed(1) : raw) + ' ' + src.unit;
+      bar.title = tip;
+      bar.onclick = () => showToast(tip);
     } else {
-      // Ambient variation for empty bars — more dynamic
       val = Math.random() * 25 + 5;
+      bar.title = 'Ambient';
     }
     // Add organic jitter
-    val = Math.max(3, val + (Math.random() - 0.5) * 15);
+    val = Math.max(3, val + (Math.random() - 0.5) * 10);
 
     const fill = bar.querySelector('.wa-spec-bar-fill');
     const peak = bar.querySelector('.wa-spec-bar-peak');
@@ -1594,6 +1682,77 @@ function updateMarquee() {
 
   el.textContent = '*** ' + parts.join('  ***  ') + '  ***';
 }
+
+// ── WINAMP-SPECIFIC: Transport Controls ──
+let spectrumState = 'playing'; // 'playing' | 'paused' | 'stopped'
+
+function updateTransportButtons() {
+  const play = document.getElementById('btn-play');
+  const pause = document.getElementById('btn-pause');
+  const stop = document.getElementById('btn-stop');
+  if (play) play.classList.toggle('engaged', spectrumState === 'playing');
+  if (pause) pause.classList.toggle('engaged', spectrumState === 'paused');
+  if (stop) stop.classList.toggle('engaged', spectrumState === 'stopped');
+}
+
+function transportPlay() {
+  spectrumState = 'playing';
+  updateTransportButtons();
+  showToast('\u25B6 PLAYING');
+}
+
+function transportPause() {
+  spectrumState = 'paused';
+  updateTransportButtons();
+  showToast('\u23F8 PAUSED');
+}
+
+function transportStop() {
+  spectrumState = 'stopped';
+  // Flatten spectrum bars to zero
+  const el = document.getElementById('wa-spectrum');
+  if (el) {
+    el.querySelectorAll('.wa-spec-bar').forEach((bar, i) => {
+      const fill = bar.querySelector('.wa-spec-bar-fill');
+      const peak = bar.querySelector('.wa-spec-bar-peak');
+      if (fill) fill.style.height = '0%';
+      if (peak) peak.style.bottom = '0%';
+      specPeaks[i] = 0;
+    });
+  }
+  updateTransportButtons();
+  showToast('\u23F9 STOPPED');
+}
+
+function transportPrev() {
+  const tabIds = THEME.tabIds;
+  const active = document.querySelector('[role="tab"].active');
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  const idx = tabs.indexOf(active);
+  const prev = (idx - 1 + tabIds.length) % tabIds.length;
+  switchTab(tabIds[prev]);
+  showToast('\u23EE ' + THEME.tabs[prev]);
+}
+
+function transportNext() {
+  const tabIds = THEME.tabIds;
+  const active = document.querySelector('[role="tab"].active');
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  const idx = tabs.indexOf(active);
+  const next = (idx + 1) % tabIds.length;
+  switchTab(tabIds[next]);
+  showToast('\u23ED ' + THEME.tabs[next]);
+}
+
+// Gate spectrum updates on transport state
+const _origUpdateSpectrum = updateSpectrum;
+updateSpectrum = function() {
+  if (spectrumState !== 'playing') return;
+  _origUpdateSpectrum();
+};
+
+// Set initial button state after DOM ready
+document.addEventListener('DOMContentLoaded', () => updateTransportButtons());
 
 // ── TITLEBAR: Update playing state ──
 const origOnStatesLoaded = THEME.onStatesLoaded;
