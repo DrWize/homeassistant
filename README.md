@@ -655,6 +655,84 @@ Each dashboard defines a `THEME` object in an inline `<script>` before `shared.j
 - **Canvas animations** (LCARS radar, C64 scanlines): Disabled automatically when `prefers-reduced-motion` is set
 - All dashboards run entirely client-side with no external dependencies beyond Google Fonts
 
+## Setup Wizard
+
+Don't want to edit `entities.js` by hand? Use the setup wizard:
+
+1. Open `tools/setup.html` in your browser (locally or via `http://your-ha:8123/local/tools/setup.html`)
+2. Enter your HA host and token
+3. The wizard connects to HA, discovers all your entities, and auto-detects rooms from light names
+4. Configure rooms, sensors, media players, and integrations with dropdowns
+5. Click "Generate entities.js" — copy or download the result
+
+The wizard auto-detects Nordpool, Tautulli, washer, and weather integrations if they're installed.
+
+## Troubleshooting
+
+### "Missing config.js" or "Missing entities.js" error page
+
+You see a full-page error instead of the dashboard.
+
+**Fix**: Copy the example files and edit them:
+```bash
+cp config.js.example config.js
+cp entities.js.example entities.js
+```
+Or use the [Setup Wizard](#setup-wizard) to generate `entities.js` automatically.
+
+### Dashboard shows "OFFLINE" and never connects
+
+- **Check your IP**: Make sure `HA_HOST` in `config.js` uses an IP address, not `homeassistant.local` (Android devices can't resolve `.local` with Private DNS enabled)
+- **Check your token**: Regenerate your long-lived access token in HA → Profile → Security
+- **Check the port**: Default is `8123` — make sure it's included
+- **Check the browser console** (F12) for WebSocket errors
+
+### Room cards show dashes (--) for temperature/humidity
+
+Your sensor entity IDs in `entities.js` don't match what's in Home Assistant.
+
+**Fix**: Open HA → Developer Tools → States, search for your sensors, and copy the exact `entity_id` into `entities.js`. After loading, check the browser console — the dashboard logs any entities it couldn't find.
+
+### Electricity charts are empty
+
+You don't have Nordpool installed, or the entity names don't match.
+
+**Fix**: If you don't use Nordpool, set all three nordpool entries to `null` in `entities.js`:
+```js
+nordpool: null,
+nordpoolExtra: null,
+nordpool48h: null,
+```
+If you do use Nordpool, check your entity names in HA → Developer Tools → States → search "nordpool".
+
+### Media tab always says "No Active Transmissions"
+
+Either nothing is playing, or Tautulli/Plex isn't configured.
+
+**Fix**: If you don't use Plex/Tautulli, set `tautulli: null` in `entities.js`. Media players (Sonos, Apple TV) are configured separately in `mediaPlayers` and should still show "Now Playing" when active.
+
+### Washer panel is missing
+
+The washer integration is disabled or not detected.
+
+**Fix**: If you don't have a smart washer, set `washer: null` in `entities.js` — the panel hides gracefully. If you do have one, configure the entity IDs in `entities.js` under `integrations.washer` (see `entities.js.example` for the full list).
+
+### Weather forecast cards are empty
+
+The weather entity name doesn't match.
+
+**Fix**: Find your weather entity in HA → Developer Tools → States → search "weather." and update `integrations.weather` in `entities.js`.
+
+### Toast says "X entity ID(s) not found"
+
+After connecting, the dashboard checks all configured entities against what HA returned. Open the browser console (F12) to see exactly which entities are missing and why (e.g. typo, renamed entity, removed device).
+
+### Power Distribution shows 0 W for a room
+
+The power sensor entity IDs are wrong or the smart plug is offline.
+
+**Fix**: Check that the `sensor` field in each room's `power` array matches your actual Z-Wave/Zigbee plug entity ID. Also check the `kwh` field — the dashboard tries to auto-detect the pattern `*_power` → `*_electric_consumption_kwh`.
+
 ## License
 
 MIT

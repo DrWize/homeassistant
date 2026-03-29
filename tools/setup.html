@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeA Setup Wizard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; line-height: 1.5; }
+
+  .wizard { max-width: 900px; margin: 0 auto; padding: 24px; }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; color: #fff; }
+  h1 span { color: #00E000; }
+  .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 24px; }
+  h2 { font-size: 1.1rem; margin: 24px 0 12px; color: #ccc; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  h3 { font-size: 0.95rem; margin: 16px 0 8px; color: #aaa; }
+
+  /* Steps */
+  .step { display: none; }
+  .step.active { display: block; }
+  .step-indicator { display: flex; gap: 8px; margin-bottom: 24px; }
+  .step-dot { width: 32px; height: 32px; border-radius: 50%; background: #333; color: #666;
+    display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
+  .step-dot.active { background: #00E000; color: #000; }
+  .step-dot.done { background: #006600; color: #00E000; }
+
+  /* Forms */
+  label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 4px; margin-top: 12px; }
+  input[type="text"], input[type="password"], select {
+    width: 100%; padding: 8px 10px; background: #252525; border: 1px solid #444; border-radius: 4px;
+    color: #e0e0e0; font-family: 'Consolas', monospace; font-size: 0.85rem; }
+  input:focus, select:focus { border-color: #00E000; outline: none; }
+  .hint { font-size: 0.75rem; color: #666; margin-top: 2px; }
+
+  /* Buttons */
+  .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+  .btn-primary { background: #00E000; color: #000; }
+  .btn-primary:hover { background: #00ff00; }
+  .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
+  .btn-secondary { background: #333; color: #ccc; }
+  .btn-secondary:hover { background: #444; }
+  .btn-danger { background: #e05050; color: #fff; }
+  .btn-row { display: flex; gap: 8px; margin-top: 20px; }
+
+  /* Status */
+  .status { padding: 8px 12px; border-radius: 4px; margin: 12px 0; font-size: 0.85rem; }
+  .status-ok { background: rgba(0,224,0,0.1); border: 1px solid #006600; color: #00E000; }
+  .status-err { background: rgba(224,80,80,0.1); border: 1px solid #600; color: #e05050; }
+  .status-warn { background: rgba(234,236,35,0.1); border: 1px solid #663; color: #eaec23; }
+  .status-info { background: rgba(100,150,255,0.1); border: 1px solid #346; color: #8ab4f8; }
+
+  /* Entity lists */
+  .entity-count { font-size: 0.8rem; color: #888; }
+  .entity-grid { display: grid; gap: 12px; margin-top: 12px; }
+
+  /* Room card */
+  .room-card { background: #222; border: 1px solid #333; border-radius: 6px; padding: 16px; }
+  .room-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .room-header input { flex: 1; font-size: 0.95rem; }
+  .room-header .btn { padding: 4px 10px; font-size: 0.75rem; }
+  .sensor-row, .light-row, .power-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  .sensor-row select, .light-row select, .power-row select { flex: 1; }
+  .sensor-row label, .light-row label, .power-row label { margin: 0; min-width: 60px; flex-shrink: 0; }
+  .light-row input[type="text"] { width: 80px; flex: 0 0 80px; }
+  .light-row .chk-label { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #aaa; white-space: nowrap; }
+  .light-row .chk-label input { width: auto; }
+  .sub-section { margin-top: 10px; padding-top: 8px; border-top: 1px solid #333; }
+  .sub-title { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .add-btn { font-size: 0.75rem; color: #00E000; background: none; border: 1px dashed #006600;
+    padding: 4px 10px; border-radius: 4px; cursor: pointer; margin-top: 6px; }
+  .add-btn:hover { background: rgba(0,224,0,0.05); }
+  .remove-btn { font-size: 0.7rem; color: #e05050; background: none; border: none; cursor: pointer; padding: 2px 6px; }
+
+  /* Integration toggles */
+  .integration-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #2a2a2a; }
+  .integration-row label { margin: 0; flex: 1; font-size: 0.85rem; color: #ccc; }
+  .integration-row select { width: 300px; flex: none; }
+  .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider { position: absolute; inset: 0; background: #444; border-radius: 11px; cursor: pointer; transition: 0.2s; }
+  .toggle .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px;
+    background: #888; border-radius: 50%; transition: 0.2s; }
+  .toggle input:checked + .slider { background: #006600; }
+  .toggle input:checked + .slider:before { transform: translateX(18px); background: #00E000; }
+
+  /* Output */
+  .output-area { background: #111; border: 1px solid #333; border-radius: 6px; padding: 16px;
+    font-family: 'Consolas', monospace; font-size: 0.8rem; white-space: pre-wrap; overflow-x: auto;
+    max-height: 500px; overflow-y: auto; line-height: 1.4; color: #ccc; }
+  .copy-row { display: flex; gap: 8px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="wizard">
+  <h1>Home<span>A</span> Setup Wizard</h1>
+  <p class="subtitle">Connect to Home Assistant, discover your entities, and generate entities.js</p>
+
+  <div class="step-indicator" id="step-indicator">
+    <div class="step-dot active" data-step="1">1</div>
+    <div class="step-dot" data-step="2">2</div>
+    <div class="step-dot" data-step="3">3</div>
+    <div class="step-dot" data-step="4">4</div>
+    <div class="step-dot" data-step="5">5</div>
+  </div>
+
+  <!-- ═══ STEP 1: Connect ═══ -->
+  <div class="step active" id="step-1">
+    <h2>Step 1: Connect to Home Assistant</h2>
+    <label>Home Assistant Host (IP:port)</label>
+    <input type="text" id="ha-host" placeholder="192.168.1.30:8123" value="">
+    <div class="hint">Use IP address, not homeassistant.local (see README for why)</div>
+    <label>Long-Lived Access Token</label>
+    <input type="password" id="ha-token" placeholder="Paste your token here">
+    <div class="hint">Generate in HA: Profile > Security > Long-Lived Access Tokens</div>
+    <div id="conn-status"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="connectHA()">Connect</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 2: Rooms ═══ -->
+  <div class="step" id="step-2">
+    <h2>Step 2: Configure Rooms</h2>
+    <p class="entity-count" id="entity-summary"></p>
+    <div class="entity-grid" id="rooms-grid"></div>
+    <button class="add-btn" onclick="addRoom()" style="margin-top:12px">+ Add Room</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">Back</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Next: Media Players</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 3: Media Players ═══ -->
+  <div class="step" id="step-3">
+    <h2>Step 3: Media Players</h2>
+    <div id="media-grid"></div>
+    <button class="add-btn" onclick="addMediaPlayer()" style="margin-top:12px">+ Add Media Player</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(2)">Back</button>
+      <button class="btn btn-primary" onclick="goStep(4)">Next: Integrations</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4: Integrations ═══ -->
+  <div class="step" id="step-4">
+    <h2>Step 4: Integrations</h2>
+    <p style="font-size:0.85rem;color:#888;margin-bottom:16px">Enable integrations you use. Disabled ones are gracefully hidden in the dashboard.</p>
+    <div id="integrations-grid"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(3)">Back</button>
+      <button class="btn btn-primary" onclick="generateOutput()">Generate entities.js</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 5: Output ═══ -->
+  <div class="step" id="step-5">
+    <h2>Step 5: Save Your Config</h2>
+    <div class="status status-ok">entities.js generated. Save it to your HomeA folder next to config.js.</div>
+    <div class="output-area" id="output"></div>
+    <div class="copy-row">
+      <button class="btn btn-primary" onclick="copyOutput()">Copy to Clipboard</button>
+      <button class="btn btn-secondary" onclick="downloadOutput()">Download entities.js</button>
+      <button class="btn btn-secondary" onclick="goStep(2)">Edit Config</button>
+    </div>
+    <div id="copy-status" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let ws = null, msgId = 1;
+let allEntities = [];  // All HA entities after get_states
+let entityMap = {};    // entity_id -> state object
+
+// Discovered entity lists by domain
+let sensors = [], lights = [], mediaPlayers = [], switches = [], weatherEnts = [], selects = [], numbers = [];
+
+// User config being built
+let roomsConfig = [];
+let mediaConfig = [];
+let intConfig = {
+  sun: 'sun.sun',
+  outsideTemp: null,
+  outsideLux: null,
+  outsideTemp24h: null,
+  weather: null,
+  nordpool: null,
+  nordpoolExtra: null,
+  nordpool48h: null,
+  tautulli: null,
+  washer: null,
+};
+
+// ═══════════════════════════════════════════════════
+// STEP NAVIGATION
+// ═══════════════════════════════════════════════════
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.step-dot').forEach(d => {
+    const step = parseInt(d.dataset.step);
+    d.classList.toggle('active', step === n);
+    d.classList.toggle('done', step < n);
+  });
+  if (n === 2) renderRoomsUI();
+  if (n === 3) renderMediaUI();
+  if (n === 4) renderIntegrationsUI();
+}
+
+// ═══════════════════════════════════════════════════
+// STEP 1: CONNECT
+// ═══════════════════════════════════════════════════
+function connectHA() {
+  const host = document.getElementById('ha-host').value.trim();
+  const token = document.getElementById('ha-token').value.trim();
+  if (!host || !token) {
+    showStatus('conn-status', 'Please enter both host and token.', 'err');
+    return;
+  }
+  showStatus('conn-status', 'Connecting...', 'info');
+
+  try { if (ws) ws.close(); } catch(e) {}
+  ws = new WebSocket(`ws://${host}/api/websocket`);
+
+  ws.onopen = () => showStatus('conn-status', 'WebSocket opened, authenticating...', 'info');
+  ws.onerror = () => showStatus('conn-status', 'Connection failed. Check host IP and port.', 'err');
+  ws.onclose = () => {};
+
+  ws.onmessage = (ev) => {
+    const msg = JSON.parse(ev.data);
+    if (msg.type === 'auth_required') {
+      ws.send(JSON.stringify({ type: 'auth', access_token: token }));
+    } else if (msg.type === 'auth_ok') {
+      showStatus('conn-status', 'Authenticated! Fetching entities...', 'ok');
+      ws.send(JSON.stringify({ id: msgId++, type: 'get_states' }));
+    } else if (msg.type === 'auth_invalid') {
+      showStatus('conn-status', 'Authentication failed. Check your token.', 'err');
+    } else if (msg.type === 'result' && Array.isArray(msg.result)) {
+      allEntities = msg.result;
+      entityMap = {};
+      allEntities.forEach(e => entityMap[e.entity_id] = e);
+      categorizeEntities();
+      autoDetect();
+      showStatus('conn-status',
+        `Connected! Found ${allEntities.length} entities: ` +
+        `${sensors.length} sensors, ${lights.length} lights, ${mediaPlayers.length} media players`,
+        'ok');
+      setTimeout(() => goStep(2), 600);
+    }
+  };
+}
+
+function categorizeEntities() {
+  sensors = allEntities.filter(e => e.entity_id.startsWith('sensor.'));
+  lights = allEntities.filter(e => e.entity_id.startsWith('light.'));
+  mediaPlayers = allEntities.filter(e => e.entity_id.startsWith('media_player.'));
+  switches = allEntities.filter(e => e.entity_id.startsWith('switch.'));
+  weatherEnts = allEntities.filter(e => e.entity_id.startsWith('weather.'));
+  selects = allEntities.filter(e => e.entity_id.startsWith('select.'));
+  numbers = allEntities.filter(e => e.entity_id.startsWith('number.'));
+}
+
+function autoDetect() {
+  // Auto-detect common integrations
+  const ids = new Set(allEntities.map(e => e.entity_id));
+
+  // Sun
+  intConfig.sun = ids.has('sun.sun') ? 'sun.sun' : null;
+
+  // Weather — pick first weather entity
+  if (weatherEnts.length) intConfig.weather = weatherEnts[0].entity_id;
+
+  // Outside temp — look for common patterns
+  const tempSensors = sensors.filter(e => {
+    const id = e.entity_id.toLowerCase();
+    return (id.includes('outside') || id.includes('outdoor') || id.includes('exterior')) && id.includes('temp');
+  });
+  if (tempSensors.length) intConfig.outsideTemp = tempSensors[0].entity_id;
+
+  // Nordpool
+  const np = sensors.filter(e => e.entity_id.includes('nordpool'));
+  np.forEach(e => {
+    if (e.entity_id.includes('current_price') || e.entity_id.includes('15m')) intConfig.nordpool = e.entity_id;
+    if (e.entity_id.includes('last_this_next')) intConfig.nordpoolExtra = e.entity_id;
+    if (e.entity_id.includes('next_24h') || e.entity_id === 'sensor.nordpool') intConfig.nordpool48h = e.entity_id;
+  });
+
+  // Tautulli
+  const tau = sensors.filter(e => e.entity_id.includes('tautulli'));
+  if (tau.length) {
+    intConfig.tautulli = {
+      streamCount: findEntity(tau, 'stream_count', true),
+      directPlay: findEntity(tau, 'direct_play'),
+      transcode: findEntity(tau, 'transcode'),
+      totalBandwidth: findEntity(tau, 'total_bandwidth'),
+      lanBandwidth: findEntity(tau, 'lan_bandwidth'),
+      wanBandwidth: findEntity(tau, 'wan_bandwidth'),
+      sessionPrefix: 'sensor.plex_session_',
+      sessionSuffix: '_tautulli',
+    };
+  }
+
+  // Washer
+  const washerJob = sensors.find(e => e.entity_id.includes('washer_job_state'));
+  if (washerJob) {
+    intConfig.washer = {
+      enabled: true,
+      jobState: washerJob.entity_id,
+      machState: findEntity(sensors, 'washer_machine_state'),
+      completion: findEntity(sensors, 'washer_completion_time'),
+      power: findEntity(sensors, 'washer_power'),
+      energy: findEntity(sensors, 'washer_energy'),
+      water: findEntity(sensors, 'washer_water_consumption'),
+      cycles: findEntity(sensors, 'washer_cycle_count'),
+      waterTemp: findEntity(selects, 'washer_water_temperature'),
+      spinLevel: findEntity(selects, 'washer_spin_level'),
+      rinses: findEntity(numbers, 'washer_rinse_cycles'),
+    };
+  }
+
+  // Auto-detect rooms from light naming patterns
+  if (roomsConfig.length === 0) autoDetectRooms();
+  // Auto-detect media players
+  if (mediaConfig.length === 0) {
+    mediaConfig = mediaPlayers.map(e => ({
+      id: e.entity_id,
+      label: e.attributes?.friendly_name || e.entity_id.split('.')[1],
+      type: guessMediaType(e),
+    }));
+  }
+}
+
+function findEntity(list, substr, exact) {
+  const match = list.find(e => exact ? e.entity_id.endsWith(substr) : e.entity_id.includes(substr));
+  return match ? match.entity_id : null;
+}
+
+function guessMediaType(e) {
+  const id = e.entity_id.toLowerCase();
+  const name = (e.attributes?.friendly_name || '').toLowerCase();
+  if (id.includes('sonos') || name.includes('sonos')) return 'SONOS';
+  if (id.includes('apple_tv') || id.includes('atv') || name.includes('apple tv')) return 'ATV';
+  return 'SONOS';
+}
+
+function autoDetectRooms() {
+  // Group lights by common prefix to infer rooms
+  const roomMap = {};
+  lights.forEach(e => {
+    const id = e.entity_id.replace('light.', '');
+    const name = e.attributes?.friendly_name || id;
+    // Try to extract room from friendly name (e.g. "Living Room Ceiling" -> "Living Room")
+    const parts = name.split(/\s+/);
+    let roomName, lightLabel;
+    if (parts.length >= 2) {
+      // Heuristic: last word is the light name, rest is room
+      lightLabel = parts[parts.length - 1];
+      roomName = parts.slice(0, -1).join(' ');
+    } else {
+      roomName = name;
+      lightLabel = name;
+    }
+    const roomId = roomName.toLowerCase().replace(/\s+/g, '');
+    if (!roomMap[roomId]) roomMap[roomId] = { id: roomId, name: roomName, lights: [], sensors: { temp: null, humidity: null, lux: null }, power: [] };
+    const supportsBri = e.attributes?.supported_color_modes?.some(m => m === 'brightness' || m === 'color_temp' || m === 'xy' || m === 'hs' || m === 'rgb');
+    roomMap[roomId].lights.push({ id: e.entity_id, label: lightLabel, dimmable: !!supportsBri });
+  });
+  roomsConfig = Object.values(roomMap);
+}
+
+// ═══════════════════════════════════════════════════
+// STEP 2: ROOMS UI
+// ═══════════════════════════════════════════════════
+function renderRoomsUI() {
+  const grid = document.getElementById('rooms-grid');
+  document.getElementById('entity-summary').textContent =
+    `Discovered ${lights.length} lights, ${sensors.length} sensors. ` +
+    `${roomsConfig.length} room(s) auto-detected from light names.`;
+
+  grid.innerHTML = roomsConfig.map((room, ri) => `
+    <div class="room-card">
+      <div class="room-header">
+        <input type="text" value="${esc(room.name)}" onchange="roomsConfig[${ri}].name=this.value" placeholder="Room name">
+        <button class="btn btn-danger remove-btn" onclick="roomsConfig.splice(${ri},1);renderRoomsUI()">Remove</button>
+      </div>
+      <div class="sub-title">Sensors</div>
+      <div class="sensor-row">
+        <label>Temp</label>
+        <select onchange="roomsConfig[${ri}].sensors.temp=this.value||null">
+          <option value="">None</option>
+          ${sensorOptions(sensors.filter(s => s.entity_id.includes('temp')), room.sensors.temp)}
+          <optgroup label="All sensors">${sensorOptions(sensors, room.sensors.temp)}</optgroup>
+        </select>
+      </div>
+      <div class="sensor-row">
+        <label>Humidity</label>
+        <select onchange="roomsConfig[${ri}].sensors.humidity=this.value||null">
+          <option value="">None</option>
+          ${sensorOptions(sensors.filter(s => s.entity_id.includes('humid')), room.sensors.humidity)}
+          <optgroup label="All sensors">${sensorOptions(sensors, room.sensors.humidity)}</optgroup>
+        </select>
+      </div>
+      <div class="sensor-row">
+        <label>Lux</label>
+        <select onchange="roomsConfig[${ri}].sensors.lux=this.value||null">
+          <option value="">None</option>
+          ${sensorOptions(sensors.filter(s => s.entity_id.includes('lux') || s.entity_id.includes('illumin')), room.sensors.lux)}
+          <optgroup label="All sensors">${sensorOptions(sensors, room.sensors.lux)}</optgroup>
+        </select>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">Lights</div>
+        ${room.lights.map((l, li) => `
+          <div class="light-row">
+            <select onchange="roomsConfig[${ri}].lights[${li}].id=this.value" style="flex:2">
+              ${entityOptions(lights, l.id)}
+            </select>
+            <input type="text" value="${esc(l.label)}" onchange="roomsConfig[${ri}].lights[${li}].label=this.value" placeholder="Label">
+            <label class="chk-label"><input type="checkbox" ${l.dimmable ? 'checked' : ''} onchange="roomsConfig[${ri}].lights[${li}].dimmable=this.checked"> Dim</label>
+            <button class="remove-btn" onclick="roomsConfig[${ri}].lights.splice(${li},1);renderRoomsUI()">x</button>
+          </div>
+        `).join('')}
+        <button class="add-btn" onclick="roomsConfig[${ri}].lights.push({id:'',label:'',dimmable:false});renderRoomsUI()">+ Light</button>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">Power Monitors</div>
+        ${(room.power || []).map((p, pi) => `
+          <div class="power-row">
+            <select onchange="roomsConfig[${ri}].power[${pi}].sensor=this.value" style="flex:1">
+              <option value="">Select power sensor</option>
+              ${sensorOptions(sensors.filter(s => s.entity_id.includes('power')), p.sensor)}
+              <optgroup label="All sensors">${sensorOptions(sensors, p.sensor)}</optgroup>
+            </select>
+            <input type="text" value="${esc(p.label || '')}" onchange="roomsConfig[${ri}].power[${pi}].label=this.value" placeholder="Label" style="width:100px;flex:0 0 100px">
+            <button class="remove-btn" onclick="roomsConfig[${ri}].power.splice(${pi},1);renderRoomsUI()">x</button>
+          </div>
+        `).join('')}
+        <button class="add-btn" onclick="(roomsConfig[${ri}].power=roomsConfig[${ri}].power||[]).push({sensor:'',kwh:'',label:''});renderRoomsUI()">+ Power Monitor</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addRoom() {
+  roomsConfig.push({ id: 'room' + (roomsConfig.length + 1), name: 'New Room',
+    sensors: { temp: null, humidity: null, lux: null }, lights: [], power: [] });
+  renderRoomsUI();
+}
+
+// ═══════════════════════════════════════════════════
+// STEP 3: MEDIA PLAYERS UI
+// ═══════════════════════════════════════════════════
+function renderMediaUI() {
+  const grid = document.getElementById('media-grid');
+  grid.innerHTML = mediaConfig.map((m, i) => `
+    <div class="light-row" style="margin-bottom:6px">
+      <select onchange="mediaConfig[${i}].id=this.value" style="flex:2">
+        ${entityOptions(mediaPlayers, m.id)}
+      </select>
+      <input type="text" value="${esc(m.label)}" onchange="mediaConfig[${i}].label=this.value" placeholder="Label" style="flex:1">
+      <select onchange="mediaConfig[${i}].type=this.value" style="width:90px;flex:none">
+        <option value="SONOS" ${m.type==='SONOS'?'selected':''}>SONOS</option>
+        <option value="ATV" ${m.type==='ATV'?'selected':''}>ATV</option>
+      </select>
+      <button class="remove-btn" onclick="mediaConfig.splice(${i},1);renderMediaUI()">x</button>
+    </div>
+  `).join('') || '<p style="color:#666;font-size:0.85rem">No media players found. Click + to add manually.</p>';
+}
+
+function addMediaPlayer() {
+  mediaConfig.push({ id: '', label: '', type: 'SONOS' });
+  renderMediaUI();
+}
+
+// ═══════════════════════════════════════════════════
+// STEP 4: INTEGRATIONS UI
+// ═══════════════════════════════════════════════════
+function renderIntegrationsUI() {
+  const grid = document.getElementById('integrations-grid');
+  const intRows = [
+    { key: 'sun',         label: 'Sun (day/night mode)',          type: 'auto',   domain: null },
+    { key: 'outsideTemp', label: 'Outside temperature',           type: 'sensor', filter: 'temp' },
+    { key: 'weather',     label: 'Weather forecast',              type: 'weather' },
+    { key: 'nordpool',    label: 'Nordpool current price',        type: 'sensor', filter: 'nordpool' },
+    { key: 'nordpoolExtra', label: 'Nordpool composite sensor',   type: 'sensor', filter: 'nordpool' },
+    { key: 'nordpool48h', label: 'Nordpool 48h forecast',         type: 'sensor', filter: 'nordpool' },
+  ];
+
+  grid.innerHTML = intRows.map(r => {
+    let opts;
+    if (r.type === 'auto') {
+      opts = `<span style="font-size:0.8rem;color:#888">${intConfig[r.key] || 'Not found'}</span>`;
+    } else if (r.type === 'weather') {
+      opts = `<select onchange="intConfig['${r.key}']=this.value||null">
+        <option value="">Disabled</option>
+        ${entityOptions(weatherEnts, intConfig[r.key])}
+      </select>`;
+    } else {
+      const filtered = r.filter ? sensors.filter(s => s.entity_id.includes(r.filter)) : sensors;
+      opts = `<select onchange="intConfig['${r.key}']=this.value||null">
+        <option value="">Disabled</option>
+        ${sensorOptions(filtered, intConfig[r.key])}
+        <optgroup label="All sensors">${sensorOptions(sensors, intConfig[r.key])}</optgroup>
+      </select>`;
+    }
+    return `<div class="integration-row"><label>${r.label}</label>${opts}</div>`;
+  }).join('') +
+  `<div class="integration-row">
+    <label>Plex / Tautulli</label>
+    <span style="font-size:0.8rem;color:${intConfig.tautulli ? '#00E000' : '#666'}">${intConfig.tautulli ? 'Auto-detected' : 'Not found'}</span>
+  </div>
+  <div class="integration-row">
+    <label>Smart Washer</label>
+    <span style="font-size:0.8rem;color:${intConfig.washer ? '#00E000' : '#666'}">${intConfig.washer ? 'Auto-detected' : 'Not found'}</span>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// STEP 5: GENERATE OUTPUT
+// ═══════════════════════════════════════════════════
+function generateOutput() {
+  // Clean up room IDs
+  roomsConfig.forEach(r => {
+    r.id = r.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    // Attempt to find kWh sensors for power monitors
+    (r.power || []).forEach(p => {
+      if (p.sensor && !p.kwh) {
+        // Try common pattern: *_power -> *_electric_consumption_kwh
+        const base = p.sensor.replace(/_power(_\d+)?$/, '');
+        const suffix = p.sensor.match(/_(\d+)$/) ? '_' + p.sensor.match(/_(\d+)$/)[1] : '';
+        const guess = base + '_electric_consumption_kwh' + suffix;
+        if (entityMap[guess]) p.kwh = guess;
+        // Also try *_energy
+        const guess2 = base + '_energy';
+        if (!p.kwh && entityMap[guess2]) p.kwh = guess2;
+      }
+    });
+  });
+
+  const output = generateEntitiesJS();
+  document.getElementById('output').textContent = output;
+  goStep(5);
+}
+
+function generateEntitiesJS() {
+  const lines = [];
+  lines.push('// ====== entities.js — Generated by HomeA Setup Wizard ======');
+  lines.push('');
+  lines.push('const ENTITIES = {');
+  lines.push('');
+
+  // Rooms
+  lines.push('  rooms: [');
+  roomsConfig.forEach((r, ri) => {
+    lines.push('    {');
+    lines.push(`      id: ${q(r.id)}, name: ${q(r.name)},`);
+    lines.push(`      sensors: { temp: ${q(r.sensors.temp)}, humidity: ${q(r.sensors.humidity)}, lux: ${q(r.sensors.lux)} },`);
+    lines.push('      lights: [');
+    r.lights.forEach(l => {
+      lines.push(`        { id: ${q(l.id)}, label: ${q(l.label)}, dimmable: ${l.dimmable} },`);
+    });
+    lines.push('      ],');
+    lines.push('      power: [');
+    (r.power || []).forEach(p => {
+      if (p.sensor) lines.push(`        { sensor: ${q(p.sensor)}, kwh: ${q(p.kwh)}, label: ${q(p.label)} },`);
+    });
+    lines.push('      ],');
+    lines.push('    },');
+  });
+  lines.push('  ],');
+  lines.push('');
+
+  // Media players
+  lines.push('  mediaPlayers: [');
+  mediaConfig.forEach(m => {
+    if (m.id) lines.push(`    { id: ${q(m.id)}, label: ${q(m.label)}, type: ${q(m.type)} },`);
+  });
+  lines.push('  ],');
+  lines.push('');
+
+  // Integrations
+  lines.push('  integrations: {');
+  lines.push(`    sun: ${q(intConfig.sun)},`);
+  lines.push(`    outsideTemp: ${q(intConfig.outsideTemp)},`);
+  lines.push(`    outsideLux: ${q(intConfig.outsideLux)},`);
+  lines.push(`    outsideTemp24h: ${q(intConfig.outsideTemp24h)},`);
+  lines.push(`    weather: ${q(intConfig.weather)},`);
+  lines.push(`    nordpool: ${q(intConfig.nordpool)},`);
+  lines.push(`    nordpoolExtra: ${q(intConfig.nordpoolExtra)},`);
+  lines.push(`    nordpool48h: ${q(intConfig.nordpool48h)},`);
+
+  if (intConfig.tautulli) {
+    lines.push('    tautulli: {');
+    Object.entries(intConfig.tautulli).forEach(([k, v]) => {
+      lines.push(`      ${k}: ${q(v)},`);
+    });
+    lines.push('    },');
+  } else {
+    lines.push('    tautulli: null,');
+  }
+
+  if (intConfig.washer) {
+    lines.push('    washer: {');
+    Object.entries(intConfig.washer).forEach(([k, v]) => {
+      lines.push(`      ${k}: ${typeof v === 'boolean' ? v : q(v)},`);
+    });
+    lines.push('    },');
+  } else {
+    lines.push('    washer: null,');
+  }
+
+  lines.push('  },');
+  lines.push('};');
+  return lines.join('\n');
+}
+
+function copyOutput() {
+  const text = document.getElementById('output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showStatus('copy-status', 'Copied to clipboard!', 'ok');
+  }).catch(() => {
+    showStatus('copy-status', 'Copy failed. Select the text manually.', 'err');
+  });
+}
+
+function downloadOutput() {
+  const text = document.getElementById('output').textContent;
+  const blob = new Blob([text], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'entities.js'; a.click();
+  URL.revokeObjectURL(url);
+  showStatus('copy-status', 'Downloaded entities.js', 'ok');
+}
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+function showStatus(elId, msg, type) {
+  const el = document.getElementById(elId);
+  el.className = 'status status-' + type;
+  el.textContent = msg;
+}
+
+function esc(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function q(v) { return v === null || v === undefined ? 'null' : `'${v}'`; }
+
+function sensorOptions(list, selected) {
+  return list.map(e => {
+    const name = e.attributes?.friendly_name || e.entity_id;
+    const sel = e.entity_id === selected ? ' selected' : '';
+    return `<option value="${e.entity_id}"${sel}>${name} (${e.entity_id})</option>`;
+  }).join('');
+}
+
+function entityOptions(list, selected) {
+  return list.map(e => {
+    const name = e.attributes?.friendly_name || e.entity_id;
+    const sel = e.entity_id === selected ? ' selected' : '';
+    return `<option value="${e.entity_id}"${sel}>${name}</option>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
