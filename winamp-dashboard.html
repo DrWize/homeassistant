@@ -545,6 +545,70 @@
     text-align: right;
     flex-shrink: 0;
   }
+  /* ── EQ Vertical Sliders ── */
+  .wa-eq-panel {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 12px 8px;
+    background: var(--bg);
+    border: 1px inset #333;
+    margin-bottom: 16px;
+    justify-content: center;
+  }
+  .wa-eq-channel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 40px;
+  }
+  .wa-eq-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    writing-mode: vertical-lr;
+    direction: rtl;
+    width: 8px;
+    height: 80px;
+    background: linear-gradient(to top, var(--green-dim) 0%, var(--green) 100%);
+    border: 1px inset #333;
+    outline: none;
+    cursor: pointer;
+  }
+  .wa-eq-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 8px;
+    background: linear-gradient(180deg, var(--chrome-light), var(--chrome-dark));
+    border: 1px outset var(--chrome);
+    cursor: pointer;
+  }
+  .wa-eq-slider::-moz-range-thumb {
+    width: 20px;
+    height: 8px;
+    background: linear-gradient(180deg, var(--chrome-light), var(--chrome-dark));
+    border: 1px outset var(--chrome);
+    cursor: pointer;
+  }
+  .wa-eq-label {
+    font-size: 0.5rem;
+    letter-spacing: 0.5px;
+    color: var(--grey-mid);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50px;
+  }
+  .wa-eq-val {
+    font-size: 0.55rem;
+    color: var(--green);
+  }
+  .wa-eq-channel.off .wa-eq-slider { opacity: 0.3; }
+  .wa-eq-channel.off .wa-eq-label { color: var(--grey); }
+  .wa-eq-channel.off .wa-eq-val { color: var(--grey); }
+  }
 
   /* ── LOAD BARS ── */
   .load-bar-wrap { margin-top: 8px; }
@@ -1228,6 +1292,11 @@
     <!-- ═══════════════ EQ TAB ═══════════════ -->
     <div class="page" id="page-eq">
 
+      <div class="section-title">EQUALIZER — LIGHT DIMMERS</div>
+      <div class="wa-eq-panel" id="wa-eq-panel">
+        <!-- populated by JS -->
+      </div>
+
       <div class="section-title">SOLAR EVENTS</div>
       <div class="weather-strip" style="gap:28px;">
         <div class="w-item">
@@ -1597,7 +1666,7 @@ function updateSpectrum() {
 
 // ── WINAMP-SPECIFIC: Rainbow Graph Overrides ──
 function applyRainbow() {
-  if (!THEME.rainbowBars) return;
+  if (!THEME.rainbowBars || spectrumState === 'stopped') return;
   rainbowNordpool();
   rainbowTempGraph();
   rainbowNordpoolBars();
@@ -1698,6 +1767,7 @@ function updateTransportButtons() {
 function transportPlay() {
   spectrumState = 'playing';
   updateTransportButtons();
+  _origUpdateSpectrum(); // Immediate update, no wait for interval
   showToast('\u25B6 PLAYING');
 }
 
@@ -1753,6 +1823,63 @@ updateSpectrum = function() {
 
 // Set initial button state after DOM ready
 document.addEventListener('DOMContentLoaded', () => updateTransportButtons());
+
+// ── WINAMP-SPECIFIC: EQ Dimmer Sliders ──
+function renderEqPanel() {
+  const panel = document.getElementById('wa-eq-panel');
+  if (!panel) return;
+  let html = '';
+  rooms.forEach(room => {
+    room.lights.forEach(light => {
+      const on = liveData.lights[light.id] || false;
+      const isDimmable = DIMMABLE.has(light.id);
+      const bri = isDimmable ? (liveData.brightness[light.id] ?? 255) : (on ? 255 : 0);
+      const pct = Math.round((bri / 255) * 100);
+      const safeId = light.id.replace(/\./g, '_');
+      html += `<div class="wa-eq-channel ${on ? '' : 'off'}">
+        <span class="wa-eq-val" id="eq-val-${safeId}">${pct}%</span>
+        <input type="range" class="wa-eq-slider" min="0" max="255" value="${bri}"
+          ${isDimmable ? `oninput="eqDim('${light.id}', this.value)"` : ''}
+          ${!isDimmable ? 'disabled' : ''}
+          aria-label="${room.name} ${light.label}">
+        <span class="wa-eq-label">${light.label}</span>
+      </div>`;
+    });
+  });
+  panel.innerHTML = html;
+}
+
+function eqDim(id, val) {
+  dimLight(id, val);
+  const safeId = id.replace(/\./g, '_');
+  const pct = Math.round((val / 255) * 100);
+  const valEl = document.getElementById('eq-val-' + safeId);
+  if (valEl) valEl.textContent = pct + '%';
+}
+
+// Hook into statesLoaded and stateChanged to keep EQ panel in sync
+const _origOnStatesLoaded2 = THEME.onStatesLoaded;
+THEME.onStatesLoaded = function() {
+  _origOnStatesLoaded2();
+  renderEqPanel();
+};
+const _origOnStateChanged = THEME.onStateChanged;
+THEME.onStateChanged = function(id, s) {
+  _origOnStateChanged(id, s);
+  if (id.startsWith('light.')) renderEqPanel();
+};
+
+// ── WINAMP-SPECIFIC: Keyboard Shortcuts ──
+document.addEventListener('keydown', e => {
+  // Ignore when typing in inputs
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  switch (e.key) {
+    case ' ':       e.preventDefault(); spectrumState === 'playing' ? transportPause() : transportPlay(); break;
+    case 's':       transportStop(); break;
+    case 'ArrowLeft':  e.preventDefault(); transportPrev(); break;
+    case 'ArrowRight': e.preventDefault(); transportNext(); break;
+  }
+});
 
 // ── TITLEBAR: Update playing state ──
 const origOnStatesLoaded = THEME.onStatesLoaded;
