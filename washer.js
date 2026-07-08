@@ -34,6 +34,11 @@ const washerState = {
 };
 
 let washerStatsMsgId = null;  // tracks which WS message ID is our statistics request
+const WASHER_INACTIVE_STATES = new Set(['none', 'finish', 'unavailable', 'unknown', '']);
+
+function washerIsActiveJob(state) {
+  return !WASHER_INACTIVE_STATES.has(String(state || '').toLowerCase());
+}
 
 // ═══════════════════════════════════════════════════
 // WASHER INGEST
@@ -46,7 +51,7 @@ let washerStatsMsgId = null;  // tracks which WS message ID is our statistics re
 function washerIngest(id, s) {
   if (_wCfg.jobState && id === _wCfg.jobState) {
     washerState.jobState = s.state || 'none';
-    washerState.isActive = s.state !== 'none' && s.state !== 'finish';
+    washerState.isActive = washerIsActiveJob(s.state);
     renderWasher();
   }
   if (_wCfg.machState && id === _wCfg.machState) {
@@ -205,12 +210,14 @@ function renderWasher() {
   let etaHtml = '';
   if (running && washerState.completionTime) {
     const eta = new Date(washerState.completionTime);
-    const now = new Date();
-    const diffMin = Math.max(0, Math.round((eta - now) / 60000));
-    const h = Math.floor(diffMin / 60);
-    const m = diffMin % 60;
-    const timeStr = eta.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-    etaHtml = `<span class="washer-eta">${h > 0 ? h + 'h ' : ''}${m}min ${etaLabel} (ETA ${timeStr})</span>`;
+    if (!Number.isNaN(eta.getTime())) {
+      const now = new Date();
+      const diffMin = Math.max(0, Math.round((eta - now) / 60000));
+      const h = Math.floor(diffMin / 60);
+      const m = diffMin % 60;
+      const timeStr = eta.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+      etaHtml = `<span class="washer-eta">${h > 0 ? h + 'h ' : ''}${m}min ${etaLabel} (ETA ${timeStr})</span>`;
+    }
   }
 
   // ── Phase progress ──

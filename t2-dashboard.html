@@ -6,27 +6,27 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<title>THE MATRIX // SYSTEM CONTROL</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='3' y='12' font-family='monospace' font-size='10' fill='%230F0' opacity='.6'>01</text><text x='15' y='8' font-family='monospace' font-size='10' fill='%230F0' opacity='.4'>11</text><text x='9' y='20' font-family='monospace' font-size='10' fill='%230F0' opacity='.8'>10</text><text x='21' y='17' font-family='monospace' font-size='10' fill='%230F0'>01</text><text x='3' y='28' font-family='monospace' font-size='10' fill='%230F0' opacity='.5'>11</text><text x='15' y='26' font-family='monospace' font-size='10' fill='%230F0' opacity='.7'>00</text></svg>">
+<title>SKYNET // CYBERDYNE SYSTEMS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23080b10'/><circle cx='16' cy='16' r='11' fill='none' stroke='%23e9f4ff' stroke-width='2'/><path d='M16 5v22M5 16h22M8 8l16 16M24 8L8 24' stroke='%237fb8ff' stroke-width='1'/><circle cx='16' cy='16' r='3' fill='%23e9f4ff'/></svg>">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
-  --green: #00FF41;
-  --green-dim: #008F11;
-  --green-dark: #003B00;
-  --green-glow: rgba(0,255,65,0.3);
-  --bg: #0D0208;
-  --bg2: #0a0a0a;
-  --panel-bg: rgba(0,20,0,0.7);
-  --red: #ff4444;
-  --orange: #00FF41;
-  --yellow: #00cc33;
-  --teal: #00cc33;
-  --blue: #008F11;
-  --white: #00FF41;
-  --grey-mid: #00aa22;
-  --grey: #003B00;
+  --green: #e9f4ff;
+  --green-dim: #7fb8ff;
+  --green-dark: #20364f;
+  --green-glow: rgba(127,184,255,0.38);
+  --bg: #080b10;
+  --bg2: #151b24;
+  --panel-bg: rgba(18,24,33,0.82);
+  --red: #f8fbff;
+  --orange: #e9f4ff;
+  --yellow: #9dceff;
+  --teal: #5f9ed9;
+  --blue: #5aa7ff;
+  --white: #f2f4f8;
+  --grey-mid: #7f8790;
+  --grey: #272b31;
   --radius: 4px;
   --bar-h: 48px;
 }
@@ -34,38 +34,14 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
-  background: var(--bg);
+  background:
+    linear-gradient(135deg, #06090e 0%, #121a25 42%, #26384d 43%, #0b1119 58%, #182332 100%);
   color: var(--green);
   font-family: 'Share Tech Mono', monospace;
   height: 100%;
   overflow: hidden;
   cursor: default;
   letter-spacing: 1px;
-}
-
-/* CANVAS RAIN */
-#rain-canvas {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* SCANLINES */
-.scanlines {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0,0,0,0.15) 2px,
-    rgba(0,0,0,0.15) 4px
-  );
 }
 
 /* SKIP LINK */
@@ -100,17 +76,19 @@ html, body {
   align-items: center;
   height: var(--bar-h);
   flex-shrink: 0;
-  background: rgba(0,20,0,0.85);
+  background:
+    linear-gradient(180deg, rgba(232,242,255,0.12), rgba(127,184,255,0.05) 46%, rgba(4,9,16,0.94) 47%),
+    linear-gradient(90deg, rgba(8,14,22,0.98), rgba(24,38,55,0.94), rgba(9,15,24,0.98));
   border-bottom: 1px solid var(--green-dark);
   padding: 0 20px;
   gap: 16px;
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 .matrix-title {
   font-size: 1.3rem;
   letter-spacing: 4px;
   color: var(--green);
-  text-shadow: 0 0 10px rgba(0,255,65,0.7);
+  text-shadow: 0 0 10px rgba(233,244,255,0.72);
 }
 .matrix-header-status {
   display: flex;
@@ -139,7 +117,9 @@ html, body {
 .matrix-tabs {
   display: flex;
   gap: 2px;
-  background: rgba(0,10,0,0.9);
+  background:
+    linear-gradient(180deg, rgba(233,244,255,0.08), rgba(8,14,22,0.96)),
+    rgba(7,12,20,0.94);
   border-bottom: 1px solid var(--green-dark);
   flex-shrink: 0;
   padding: 0 20px;
@@ -159,13 +139,13 @@ html, body {
 }
 .matrix-tab:hover {
   color: var(--green);
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 .matrix-tab.active {
   color: var(--green);
   border-bottom-color: var(--green);
-  text-shadow: 0 0 8px rgba(0,255,65,0.6);
-  background: rgba(0,255,65,0.05);
+  text-shadow: 0 0 8px rgba(233,244,255,0.62);
+  background: rgba(127,184,255,0.08);
 }
 
 /* CONTENT */
@@ -190,7 +170,9 @@ html, body {
   align-items: center;
   height: 32px;
   flex-shrink: 0;
-  background: rgba(0,20,0,0.85);
+  background:
+    linear-gradient(180deg, rgba(233,244,255,0.08), rgba(8,14,22,0.96)),
+    rgba(10,17,27,0.9);
   border-top: 1px solid var(--green-dark);
   padding: 0 20px;
   font-size: 0.65rem;
@@ -214,7 +196,7 @@ html, body {
 }
 .lc-section:first-child { margin-top: 0; }
 .lc-section-pill {
-  background: var(--green-dark);
+  background: linear-gradient(180deg, #385672, #17283c 52%, #0c1624);
   color: var(--green);
   font-size: 0.72rem;
   letter-spacing: 3px;
@@ -222,7 +204,7 @@ html, body {
   padding: 4px 16px;
   border-radius: 2px 0 0 2px;
   white-space: nowrap;
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 .lc-section-line {
   flex: 1;
@@ -244,7 +226,9 @@ html, body {
 
 .room-card {
   border: 1px solid var(--green-dark);
-  background: var(--panel-bg);
+  background:
+    linear-gradient(135deg, rgba(233,244,255,0.08), transparent 28%, rgba(127,184,255,0.06) 72%, rgba(233,244,255,0.04)),
+    var(--panel-bg);
   position: relative;
   overflow: hidden;
   transition: border-color 0.2s;
@@ -272,7 +256,7 @@ html, body {
   text-transform: uppercase;
   color: var(--green);
   flex: 1;
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 .room-lit-badge {
   font-size: 0.6rem;
@@ -301,13 +285,13 @@ html, body {
   font-size: 0.7rem;
   padding: 3px 10px;
   border-radius: 2px;
-  background: rgba(0,20,0,0.5);
+  background: rgba(17,27,40,0.62);
   color: var(--green-dark);
   transition: all 0.3s;
   border: 1px solid transparent;
 }
 .sensor-chip.active {
-  background: rgba(0,40,0,0.5);
+  background: rgba(20,43,68,0.62);
   color: var(--green);
   border: 1px solid var(--green-dark);
 }
@@ -322,7 +306,7 @@ html, body {
   align-items: center;
   gap: 8px;
   padding: 5px 0;
-  border-bottom: 1px solid rgba(0,59,0,0.3);
+  border-bottom: 1px solid rgba(127,184,255,0.18);
   font-size: 0.72rem;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -374,7 +358,7 @@ html, body {
   transition: all 0.2s;
 }
 .lc-toggle input:checked ~ .lc-toggle-track {
-  background: rgba(0,255,65,0.2);
+  background: rgba(127,184,255,0.22);
 }
 .lc-toggle input:checked ~ .lc-toggle-thumb {
   left: 24px;
@@ -453,7 +437,9 @@ html, body {
 .status-block {
   flex: 1;
   min-width: 120px;
-  background: var(--panel-bg);
+  background:
+    linear-gradient(145deg, rgba(233,244,255,0.08), rgba(18,24,33,0.7) 45%, rgba(127,184,255,0.05)),
+    var(--panel-bg);
   border: 1px solid var(--green-dark);
   padding: 10px 14px;
   border-left: 3px solid var(--green-dim);
@@ -473,7 +459,7 @@ html, body {
   font-size: 1.1rem;
   color: var(--green);
   letter-spacing: 1px;
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 .status-block.orange .val { color: var(--green); }
 .status-block.purple .val { color: var(--green); }
@@ -485,7 +471,7 @@ html, body {
   align-items: center;
   gap: 10px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(0,59,0,0.3);
+  border-bottom: 1px solid rgba(127,184,255,0.18);
   font-size: 0.72rem;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -494,7 +480,8 @@ html, body {
 .data-bar-wrap {
   flex: 1;
   height: 10px;
-  background: rgba(0,20,0,0.5);
+  background: rgba(17,27,40,0.72);
+  border: 1px solid rgba(127,184,255,0.18);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -503,9 +490,9 @@ html, body {
   border-radius: 2px;
   transition: width 0.8s;
 }
-.data-bar-fill.low    { background: var(--green-dim); box-shadow: 0 0 4px var(--green-dim); }
-.data-bar-fill.mid    { background: var(--green);     box-shadow: 0 0 4px var(--green);     }
-.data-bar-fill.high   { background: #00ff41;          box-shadow: 0 0 8px var(--green);     }
+.data-bar-fill.low    { background: linear-gradient(90deg, #2f5f8c, var(--teal)); box-shadow: 0 0 4px var(--teal); }
+.data-bar-fill.mid    { background: linear-gradient(90deg, #5f9ed9, var(--yellow)); box-shadow: 0 0 5px var(--yellow); }
+.data-bar-fill.high   { background: linear-gradient(90deg, #9dceff, #ffffff); box-shadow: 0 0 8px var(--green); }
 .data-val { width: 80px; text-align: right; color: var(--green); font-size: 0.7rem; }
 .data-val.low  { color: var(--green-dim); }
 .data-val.mid  { color: var(--green);     }
@@ -521,7 +508,9 @@ html, body {
 .solar-block {
   flex: 1;
   min-width: 110px;
-  background: var(--panel-bg);
+  background:
+    linear-gradient(145deg, rgba(233,244,255,0.08), rgba(18,24,33,0.7) 45%, rgba(127,184,255,0.05)),
+    var(--panel-bg);
   border: 1px solid var(--green-dark);
   border-top: 2px solid var(--green-dim);
   padding: 8px 14px;
@@ -539,7 +528,7 @@ html, body {
   font-size: 1rem;
   color: var(--green);
   letter-spacing: 1px;
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 
 /* Weather forecast cards */
@@ -553,7 +542,9 @@ html, body {
 .weather-card {
   flex-shrink: 0;
   min-width: 70px;
-  background: var(--panel-bg);
+  background:
+    linear-gradient(145deg, rgba(233,244,255,0.08), rgba(18,24,33,0.7) 45%, rgba(127,184,255,0.05)),
+    var(--panel-bg);
   border: 1px solid var(--green-dark);
   padding: 8px 6px;
   text-align: center;
@@ -563,7 +554,7 @@ html, body {
 .weather-card.now { border-color: var(--green); }
 .weather-card .wc-time { font-size: 0.65rem; color: var(--green-dark); letter-spacing: 1px; margin-bottom: 4px; }
 .weather-card .wc-icon { font-size: 1.1rem; margin: 2px 0; }
-.weather-card .wc-temp { font-size: 0.85rem; color: var(--green); text-shadow: 0 0 5px rgba(0,255,65,0.5); }
+.weather-card .wc-temp { font-size: 0.85rem; color: var(--green); text-shadow: 0 0 5px rgba(233,244,255,0.52); }
 .weather-card .wc-detail { font-size: 0.65rem; color: var(--green-dim); margin-top: 2px; }
 .weather-card .wc-wind  { font-size: 0.65rem; color: var(--green-dark); margin-top: 1px; }
 
@@ -575,6 +566,13 @@ html, body {
   align-items: flex-end;
   gap: 1px;
   margin-bottom: 4px;
+  background:
+    linear-gradient(145deg, rgba(233,244,255,0.07), rgba(17,27,40,0.72) 48%, rgba(127,184,255,0.04)),
+    rgba(17,27,40,0.62);
+  border: 1px solid var(--green-dark);
+  border-left: 3px solid var(--green-dim);
+  padding: 5px;
+  border-radius: 3px;
 }
 .np48-bar-wrap {
   flex: 1;
@@ -589,6 +587,7 @@ html, body {
   border-radius: 1px 1px 0 0;
   transition: height 0.5s;
   position: relative;
+  border-top: 1px solid rgba(233,244,255,0.35);
 }
 .np48-bar.current {
   box-shadow: 0 0 8px var(--green);
@@ -629,12 +628,20 @@ html, body {
   align-items: flex-end;
   gap: 2px;
   margin-bottom: 4px;
+  background:
+    linear-gradient(145deg, rgba(233,244,255,0.07), rgba(17,27,40,0.72) 48%, rgba(127,184,255,0.04)),
+    rgba(17,27,40,0.62);
+  border: 1px solid var(--green-dark);
+  border-left: 3px solid var(--green-dim);
+  padding: 5px;
+  border-radius: 3px;
 }
 .temp-bar {
   flex: 1;
   border-radius: 1px 1px 0 0;
   cursor: pointer;
   transition: height 0.5s;
+  border-top: 1px solid rgba(233,244,255,0.35);
 }
 .temp-xaxis {
   display: flex;
@@ -658,7 +665,7 @@ html, body {
   display: flex;
   justify-content: space-between;
   padding: 7px 0;
-  border-bottom: 1px solid rgba(0,59,0,0.3);
+  border-bottom: 1px solid rgba(127,184,255,0.18);
   font-size: 0.72rem;
   letter-spacing: 1px;
 }
@@ -670,7 +677,7 @@ html, body {
 .toast {
   position: fixed;
   bottom: 50px; right: 20px;
-  background: rgba(0,20,0,0.95);
+  background: rgba(8,14,22,0.96);
   border: 1px solid var(--green);
   border-left: 3px solid var(--green);
   color: var(--green);
@@ -685,7 +692,7 @@ html, body {
   z-index: 9999;
   text-transform: uppercase;
   max-width: 300px;
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 .toast.show { opacity: 1; transform: none; }
 
@@ -720,7 +727,7 @@ html, body {
   display: block; font-size: 0.65rem;
   letter-spacing: 2px; text-transform: uppercase; color: var(--green-dark); margin-bottom: 3px;
 }
-.media-stat-block .val { font-size: 1rem; color: var(--green); text-shadow: 0 0 5px rgba(0,255,65,0.5); }
+.media-stat-block .val { font-size: 1rem; color: var(--green); text-shadow: 0 0 5px rgba(233,244,255,0.52); }
 
 .sessions-grid { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
 
@@ -736,7 +743,7 @@ html, body {
 
 .session-poster {
   width: 90px; flex-shrink: 0; aspect-ratio: 2/3;
-  background: rgba(0,20,0,0.5); border: 1px solid var(--green-dark); overflow: hidden;
+  background: rgba(17,27,40,0.62); border: 1px solid var(--green-dark); overflow: hidden;
 }
 .session-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .session-poster-ph {
@@ -752,16 +759,16 @@ html, body {
 .session-title {
   font-size: 1rem; color: var(--green); letter-spacing: 1px; line-height: 1.2;
   overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 .session-badges { display: flex; flex-wrap: wrap; gap: 4px; }
 .sbadge {
   font-size: 0.65rem; letter-spacing: 1px; padding: 1px 6px;
-  border-radius: 2px; background: rgba(0,20,0,0.5); color: var(--green-dark); text-transform: uppercase;
+  border-radius: 2px; background: rgba(17,27,40,0.62); color: var(--green-dark); text-transform: uppercase;
 }
-.sbadge.hi     { background: rgba(0,40,0,0.5); color: var(--green);     border: 1px solid var(--green-dark); }
-.sbadge.amber  { background: rgba(0,30,0,0.5); color: var(--green-dim); border: 1px solid var(--green-dim); }
-.sbadge.orange { background: rgba(0,40,0,0.5); color: var(--green);     border: 1px solid var(--green);     }
+.sbadge.hi     { background: rgba(20,43,68,0.62); color: var(--green);     border: 1px solid var(--green-dark); }
+.sbadge.amber  { background: rgba(18,36,56,0.62); color: var(--green-dim); border: 1px solid var(--green-dim); }
+.sbadge.orange { background: rgba(20,43,68,0.62); color: var(--green);     border: 1px solid var(--green);     }
 
 .session-summary {
   font-size: 0.65rem; color: var(--green-dark); line-height: 1.6; margin-top: 2px;
@@ -782,7 +789,7 @@ html, body {
   display: flex; justify-content: space-between;
   font-size: 0.65rem; color: var(--green-dark); letter-spacing: 1px; margin-bottom: 3px;
 }
-.session-progress-bar { height: 5px; background: rgba(0,20,0,0.5); border-radius: 2px; overflow: hidden; }
+.session-progress-bar { height: 5px; background: rgba(17,27,40,0.62); border-radius: 2px; overflow: hidden; }
 .session-progress-fill {
   height: 100%; background: var(--green); border-radius: 2px;
   box-shadow: 0 0 4px var(--green); transition: width 2s ease;
@@ -810,7 +817,7 @@ html, body {
 .mp-card.paused  { border-left-color: var(--green-dim); opacity: 0.75; }
 .mp-art {
   width: 60px; height: 60px; flex-shrink: 0;
-  background: rgba(0,20,0,0.5); border: 1px solid var(--green-dark); overflow: hidden;
+  background: rgba(17,27,40,0.62); border: 1px solid var(--green-dark); overflow: hidden;
 }
 .mp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .mp-art-ph {
@@ -824,14 +831,14 @@ html, body {
 }
 .mp-type {
   font-size: 0.6rem; padding: 0 5px;
-  border-radius: 2px; background: rgba(0,20,0,0.5); color: var(--green-dark);
+  border-radius: 2px; background: rgba(17,27,40,0.62); color: var(--green-dark);
   text-transform: uppercase; letter-spacing: 1px;
 }
-.mp-card.playing .mp-type { background: rgba(0,40,0,0.5); color: var(--green); border: 1px solid var(--green-dark); }
+.mp-card.playing .mp-type { background: rgba(20,43,68,0.62); color: var(--green); border: 1px solid var(--green-dark); }
 .mp-title {
   font-size: 1rem; color: var(--green); letter-spacing: 1px; line-height: 1.2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 0 5px rgba(0,255,65,0.5);
+  text-shadow: 0 0 5px rgba(233,244,255,0.52);
 }
 .mp-artist {
   font-size: 0.7rem; color: var(--green-dim); letter-spacing: 1px;
@@ -845,7 +852,7 @@ html, body {
 }
 .mp-vol-label { font-size: 0.6rem; color: var(--green-dark); letter-spacing: 1px; }
 .mp-vol-bar {
-  flex: 1; height: 4px; background: rgba(0,20,0,0.5); border-radius: 2px; overflow: hidden;
+  flex: 1; height: 4px; background: rgba(17,27,40,0.62); border-radius: 2px; overflow: hidden;
 }
 .mp-vol-fill {
   height: 100%; background: var(--green-dim); border-radius: 2px;
@@ -863,7 +870,7 @@ html, body {
 }
 .mp-progress-wrap { margin-top: 3px; }
 .mp-progress-bar {
-  height: 4px; background: rgba(0,20,0,0.5); border-radius: 2px; overflow: hidden;
+  height: 4px; background: rgba(17,27,40,0.62); border-radius: 2px; overflow: hidden;
 }
 .mp-progress-fill {
   height: 100%; background: var(--green); border-radius: 2px;
@@ -878,7 +885,7 @@ html, body {
 }
 .mp-badge {
   display: inline-block; font-size: 0.55rem; letter-spacing: 1px; padding: 0 5px;
-  border-radius: 2px; background: rgba(0,20,0,0.5); color: var(--green-dark); margin-left: 4px;
+  border-radius: 2px; background: rgba(17,27,40,0.62); color: var(--green-dark); margin-left: 4px;
   vertical-align: middle;
 }
 .mp-badge.muted { background: rgba(60,0,0,0.5); color: #ff0000; border: 1px solid #ff0000; }
@@ -894,7 +901,10 @@ html, body {
   display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;
 }
 .lc-energy-stat {
-  flex: 1; min-width: 100px; background: var(--panel-bg);
+  flex: 1; min-width: 100px;
+  background:
+    linear-gradient(145deg, rgba(233,244,255,0.08), rgba(18,24,33,0.7) 45%, rgba(127,184,255,0.05)),
+    var(--panel-bg);
   border: 1px solid var(--green-dark); border-left: 3px solid var(--green);
   padding: 8px 12px;
 }
@@ -902,11 +912,17 @@ html, body {
   display: block; font-size: 0.65rem;
   letter-spacing: 2px; color: var(--green-dark); text-transform: uppercase; margin-bottom: 3px;
 }
-.lc-energy-stat .val { font-size: 1rem; color: var(--green); text-shadow: 0 0 5px rgba(0,255,65,0.5); }
+.lc-energy-stat .val { font-size: 1rem; color: var(--green); text-shadow: 0 0 5px rgba(233,244,255,0.52); }
 .lc-energy-chart {
   position: relative; height: 80px;
-  display: flex; align-items: flex-end; gap: 1px; background: rgba(0,20,0,0.5);
-  border: 1px solid var(--green-dark); padding: 4px;
+  display: flex; align-items: flex-end; gap: 1px;
+  background:
+    linear-gradient(145deg, rgba(233,244,255,0.07), rgba(17,27,40,0.72) 48%, rgba(127,184,255,0.04)),
+    rgba(17,27,40,0.62);
+  border: 1px solid var(--green-dark);
+  border-left: 3px solid var(--green-dim);
+  padding: 5px;
+  border-radius: 3px;
 }
 .lc-energy-bar {
   flex: 1; position: relative; height: 100%;
@@ -914,16 +930,20 @@ html, body {
 }
 .lc-energy-bar-price {
   position: absolute; bottom: 0; left: 0; right: 0;
-  opacity: 0.3; transition: height 1s ease;
+  opacity: 0.36; transition: height 1s ease;
+  border-top: 1px solid rgba(233,244,255,0.2);
 }
 .lc-energy-bar-power {
   position: absolute; bottom: 0; left: 0; right: 0;
-  background: var(--green); opacity: 0.9;
-  box-shadow: 0 0 4px var(--green);
+  background: linear-gradient(180deg, #ffffff, #9dceff 58%, #5f9ed9);
+  opacity: 0.95;
+  box-shadow: 0 0 6px rgba(127,184,255,0.55);
   transition: height 1s ease;
+  border-top: 1px solid rgba(255,255,255,0.8);
 }
 .lc-energy-bar.current .lc-energy-bar-power {
-  background: var(--green); box-shadow: 0 0 8px var(--green);
+  background: linear-gradient(180deg, #ffffff, #d9ecff 40%, #7fb8ff);
+  box-shadow: 0 0 10px var(--green);
 }
 .lc-energy-xaxis {
   display: flex; justify-content: space-between;
@@ -948,25 +968,25 @@ html, body {
 .washer-phase { padding: 2px 8px; border-radius: 3px; color: var(--green-dark); }
 .washer-phase.active { background: var(--green); color: #000; font-weight: bold; }
 .washer-phase.done { color: var(--green); }
-.washer-phase-sep { color: #1a3a1a; }
+.washer-phase-sep { color: #233a55; }
 .washer-phase-sep.done { color: var(--green); }
 .washer-eta { font-size: 0.75rem; color: var(--green); letter-spacing: 1px; display: block; margin: 6px 0; }
 .washer-settings { font-size: 0.7rem; color: var(--green-dark); letter-spacing: 1px; margin: 6px 0; }
 .washer-stats { margin-top: 12px; }
-.washer-year-header { font-size: 0.7rem; letter-spacing: 2px; color: var(--green); margin: 10px 0 6px; border-bottom: 1px solid #1a3a1a; padding-bottom: 4px; }
+.washer-year-header { font-size: 0.7rem; letter-spacing: 2px; color: var(--green); margin: 10px 0 6px; border-bottom: 1px solid #233a55; padding-bottom: 4px; }
 .washer-month-grid { display: flex; flex-direction: column; gap: 3px; }
 .washer-month-row { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; letter-spacing: 1px; }
 .washer-month-label { width: 30px; color: var(--green-dark); }
-.washer-month-bar-wrap { flex: 1; height: 8px; background: #1a3a1a; border-radius: 3px; overflow: hidden; }
+.washer-month-bar-wrap { flex: 1; height: 8px; background: #233a55; border-radius: 3px; overflow: hidden; }
 .washer-month-bar { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.3s; }
 .washer-month-val { width: 65px; text-align: right; color: var(--green-dark); }
-.washer-lifetime { font-size: 0.65rem; letter-spacing: 2px; color: var(--green-dark); margin-top: 10px; text-align: center; border-top: 1px solid #1a3a1a; padding-top: 6px; }
+.washer-lifetime { font-size: 0.65rem; letter-spacing: 2px; color: var(--green-dark); margin-top: 10px; text-align: center; border-top: 1px solid #233a55; padding-top: 6px; }
 
 /* WCAG FOCUS */
 :focus-visible {
   outline: 2px solid var(--green);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(0,255,65,0.25);
+  box-shadow: 0 0 0 4px rgba(127,184,255,0.26);
 }
 .matrix-tab:focus-visible {
   outline: 2px solid var(--green);
@@ -981,20 +1001,18 @@ html, body {
   outline-offset: 4px;
 }
 
-/* NIGHT MODE — dimmer, deeper green, more subdued */
+/* NIGHT MODE — dimmer, deeper blue steel, more subdued */
 body.night-mode {
-  --green: #00cc33;
-  --green-dim: #005518;
-  --green-dark: #001a08;
-  --green-glow: rgba(0, 160, 40, 0.15);
+  --green: #d9ecff;
+  --green-dim: #5e93cf;
+  --green-dark: #14283d;
+  --green-glow: rgba(94, 147, 207, 0.2);
 }
 body.night-mode .matrix-header { opacity: 0.8; }
 body.night-mode .matrix-panel { border-color: var(--green-dim); }
 
 /* REDUCED MOTION */
 @media (prefers-reduced-motion: reduce) {
-  #rain-canvas { display: none !important; }
-  .scanlines { display: none !important; }
   * { animation: none !important; transition: none !important; }
 }
 
@@ -1008,7 +1026,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 .theme-switcher.visible { opacity: 1; pointer-events: auto; }
 .theme-switcher-btn {
   width: 40px; height: 40px; border: 2px solid var(--green); border-radius: 50%;
-  background: rgba(0,20,0,0.8); color: var(--green); font-size: 20px; cursor: pointer;
+  background: rgba(10,17,27,0.86); color: var(--green); font-size: 20px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
@@ -1016,8 +1034,8 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 .theme-switcher-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 .theme-menu {
   display: none; position: absolute; bottom: 48px; left: 0;
-  background: rgba(5,10,5,0.95); border: 2px solid var(--green-dim); border-radius: 4px;
-  padding: 6px 0; min-width: 180px; box-shadow: 0 4px 20px rgba(0,255,65,0.1);
+  background: rgba(8,14,22,0.96); border: 2px solid var(--green-dim); border-radius: 4px;
+  padding: 6px 0; min-width: 180px; box-shadow: 0 4px 20px rgba(127,184,255,0.13);
 }
 .theme-menu.open { display: block; }
 .theme-menu a {
@@ -1025,7 +1043,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
   color: var(--green-dim); text-decoration: none; font-size: 0.75rem; font-family: inherit;
   letter-spacing: 1px; white-space: nowrap;
 }
-.theme-menu a:hover { background: rgba(0,255,65,0.08); color: var(--green); }
+.theme-menu a:hover { background: rgba(127,184,255,0.10); color: var(--green); }
 .theme-menu a.active { color: var(--green); text-shadow: 0 0 6px var(--green-glow); }
 .theme-menu a .tm-icon { width: 22px; text-align: center; font-size: 14px; }
 
@@ -1036,15 +1054,25 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
   color: var(--green); font-family: inherit; font-size: 0.75rem;
   letter-spacing: 2px; cursor: pointer; transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
-.night-protocol-btn:hover { background: rgba(0,255,65,0.1); border-color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+.night-protocol-btn:hover { background: rgba(127,184,255,0.13); border-color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
 .night-protocol-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 
-  .lc-power-panel { margin-top: 10px; }
+  .lc-power-panel {
+    margin-top: 10px;
+    background:
+      linear-gradient(145deg, rgba(233,244,255,0.08), rgba(18,24,33,0.76) 45%, rgba(127,184,255,0.05)),
+      var(--panel-bg);
+    border: 1px solid var(--green-dark);
+    border-left: 3px solid var(--green-dim);
+    border-radius: 3px;
+    padding: 12px 14px;
+  }
   .lc-power-hero {
     display: flex; align-items: baseline; gap: 18px; margin-bottom: 12px; flex-wrap: wrap;
   }
   .lc-power-hero-main {
-    font-size: 2.2rem; font-weight: 700; color: var(--orange); line-height: 1;
+    font-size: 2.2rem; font-weight: 700; color: var(--green); line-height: 1;
+    text-shadow: 0 0 10px rgba(127,184,255,0.42);
   }
   .lc-power-hero-stats { display: flex; gap: 18px; flex-wrap: wrap; }
   .lc-power-hero-stat label {
@@ -1052,7 +1080,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     color: var(--grey-mid); display: block;
   }
   .lc-power-hero-stat .val { font-size: 0.9rem; font-weight: 600; color: var(--green); }
-  .lc-power-hero-stat .val.blue { color: var(--blue); }
+  .lc-power-hero-stat .val.blue { color: var(--green-dim); }
 
   .lc-device-table {
     width: 100%; border-collapse: collapse; font-size: 0.75rem;
@@ -1073,37 +1101,27 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     border-bottom: 1px solid rgba(255,255,255,0.1);
   }
   .room-group-header td.right { font-variant-numeric: tabular-nums; }
-  .room-total-w { color: var(--orange); font-weight: 700; font-size: 0.65rem; }
-  .room-total-kwh { color: var(--blue); font-weight: 600; font-size: 0.65rem; }
+  .room-total-w { color: var(--green); font-weight: 700; font-size: 0.65rem; }
+  .room-total-kwh { color: var(--green-dim); font-weight: 600; font-size: 0.65rem; }
 
-  .watts-val { color: var(--orange); font-weight: 600; }
+  .watts-val { color: var(--green); font-weight: 600; }
   .watts-val.off { color: var(--grey); font-weight: 400; }
-  .kwh-val { color: var(--blue); font-weight: 400; }
+  .kwh-val { color: var(--green-dim); font-weight: 400; }
 
   .power-bar-cell { width: 90px; }
   .power-bar-bg {
-    width: 100%; height: 6px; background: rgba(255,255,255,0.08);
+    width: 100%; height: 6px; background: rgba(17,27,40,0.72);
+    border: 1px solid rgba(127,184,255,0.18);
     border-radius: 3px; overflow: hidden;
   }
   .power-bar-fill {
-    height: 100%; background: var(--orange); border-radius: 3px;
+    height: 100%;
+    background: linear-gradient(90deg, #5f9ed9, #9dceff 55%, #ffffff);
+    border-radius: 3px;
+    box-shadow: 0 0 6px rgba(127,184,255,0.55);
     transition: width 0.4s;
   }
 
-/* THEME COHESION OVERRIDES: shared power/data widgets */
-.lc-power-panel, .np48-chart, .temp-graph-wrap, .lc-energy-chart {
-  background: rgba(0,20,0,0.52);
-  border: 1px solid var(--green-dark);
-  border-left: 3px solid var(--green);
-  box-shadow: inset 0 0 18px rgba(0,255,65,0.08);
-  padding: 10px 14px;
-}
-.np48-chart, .temp-graph-wrap, .lc-energy-chart { padding: 6px; }
-.lc-power-hero-main, .room-total-w, .watts-val { color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
-.room-total-kwh, .kwh-val, .lc-power-hero-stat .val.blue { color: var(--green-dim); }
-.power-bar-bg { background: rgba(0,0,0,0.38); border: 1px solid var(--green-dark); overflow: hidden; }
-.power-bar-fill, .lc-energy-bar-power { background: var(--green); box-shadow: 0 0 8px var(--green); }
-.np48-bar, .temp-bar { box-shadow: inset 0 1px rgba(0,255,65,0.45); }
 .shared-status-compat {
   position: absolute;
   width: 1px;
@@ -1116,19 +1134,16 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 </head>
 <body>
 
-<canvas id="rain-canvas"></canvas>
-<div class="scanlines"></div>
-
 <a href="#main-content" class="skip-link">Skip to Content</a>
 
 <div class="matrix-frame" role="application" aria-label="Matrix Home Automation System">
 
   <!-- HEADER -->
   <div class="matrix-header">
-    <span class="matrix-title">THE MATRIX</span>
+    <span class="matrix-title">SKYNET T-800</span>
     <div class="matrix-header-status">
       <span id="conn-dot" class="status-dot connecting"></span>
-      <span id="conn-label">TRACING...</span>
+      <span id="conn-label">ACQUIRING SIGNAL...</span>
       <span style="opacity:0.3;">|</span>
       <span id="clock-matrix">--:--:--</span>
       <span id="date-matrix" style="opacity:0.7;">--- -- ----</span>
@@ -1137,11 +1152,11 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 
   <!-- TABS -->
   <div class="matrix-tabs" role="tablist">
-    <button class="matrix-tab active" onclick="switchTab('systems')" role="tab" aria-selected="true">NODES</button>
-    <button class="matrix-tab" onclick="switchTab('controls')" role="tab" aria-selected="false">ACCESS</button>
-    <button class="matrix-tab" onclick="switchTab('data')" role="tab" aria-selected="false">STREAM</button>
-    <button class="matrix-tab" onclick="switchTab('media')" role="tab" aria-selected="false">SIGNAL</button>
-    <button class="matrix-tab" onclick="switchTab('sensors')" role="tab" aria-selected="false">SENTINEL</button>
+    <button class="matrix-tab active" onclick="switchTab('systems')" role="tab" aria-selected="true">SYSTEMS</button>
+    <button class="matrix-tab" onclick="switchTab('controls')" role="tab" aria-selected="false">OVERRIDE</button>
+    <button class="matrix-tab" onclick="switchTab('data')" role="tab" aria-selected="false">TIMELINE</button>
+    <button class="matrix-tab" onclick="switchTab('media')" role="tab" aria-selected="false">SURVEILLANCE</button>
+    <button class="matrix-tab" onclick="switchTab('sensors')" role="tab" aria-selected="false">DIAGNOSTICS</button>
   </div>
 
   <!-- CONTENT -->
@@ -1151,36 +1166,36 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     <div class="page active" id="page-systems">
       <div class="status-strip">
         <div class="status-block orange">
-          <label>Outside Temp</label>
+          <label>External Thermal</label>
           <div class="val" id="stat-temp">-- °C</div>
         </div>
         <div class="status-block">
-          <label>Electricity Now</label>
+          <label>Grid Cost</label>
           <div class="val" id="stat-elec">-- SEK/kWh</div>
         </div>
         <div class="status-block purple">
-          <label>Active Lights</label>
+          <label>Active Circuits</label>
           <div class="val" id="stat-lights">--</div>
         </div>
         <div class="status-block teal" data-feature="washer">
-          <label>Washer</label>
+          <label>Wash Unit</label>
           <div class="val"><span id="stat-washer" class="washer-badge">IDLE</span></div>
         </div>
         <div class="status-block">
-          <label>Sun State</label>
+          <label>Solar Position</label>
           <div class="val" id="stat-sun">--</div>
         </div>
       </div>
 
       <div class="lc-section">
-        <div class="lc-section-pill">Construct Status</div>
+        <div class="lc-section-pill">Unit Status</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
       <div class="room-grid" id="rooms-systems"></div>
 
       <div class="lc-section" style="margin-top:8px;">
-        <div class="lc-section-pill">Mainframe Power</div>
+        <div class="lc-section-pill">Auxiliary Power</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1190,11 +1205,11 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
           <div class="lc-power-hero-main" id="power-hero-watts">-- W</div>
           <div class="lc-power-hero-stats">
             <div class="lc-power-hero-stat">
-              <label>Est. Cost/Hour</label>
+              <label>Projected Burn</label>
               <div class="val" id="power-hero-cost">-- SEK/h</div>
             </div>
             <div class="lc-power-hero-stat">
-              <label>All-Time Tracked</label>
+              <label>Archive Total</label>
               <div class="val blue" id="power-hero-kwh">-- kWh</div>
             </div>
           </div>
@@ -1203,8 +1218,8 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
         <table class="lc-device-table">
           <thead>
             <tr>
-              <th>Device</th>
-              <th class="right">Now</th>
+              <th>Subsystem</th>
+              <th class="right">Load</th>
               <th style="width:90px"></th>
               <th class="right">kWh</th>
             </tr>
@@ -1220,18 +1235,18 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     <!-- CONTROLS TAB -->
     <div class="page" id="page-controls">
       <div class="lc-section">
-        <div class="lc-section-pill">Access Override</div>
+        <div class="lc-section-pill">Manual Override</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
-      <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">DISCONNECT NODES</button>
+      <button class="night-protocol-btn" onclick="nightProtocol()" title="Turn off all lights except Balcony">TERMINATE LIGHTS</button>
       <div class="room-grid" id="rooms-controls"></div>
     </div>
 
     <!-- DATA TAB -->
     <div class="page" id="page-data">
       <div class="lc-section">
-        <div class="lc-section-pill">Solar Events</div>
+        <div class="lc-section-pill">Daylight Scan</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1259,7 +1274,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       </div>
 
       <div class="lc-section">
-        <div class="lc-section-pill">Weather Forecast 24H</div>
+        <div class="lc-section-pill">Atmospheric Readout</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1268,7 +1283,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       </div>
 
       <div class="lc-section">
-        <div class="lc-section-pill">Nordpool Prices 48H</div>
+        <div class="lc-section-pill">Energy Market Feed</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1285,7 +1300,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       </div>
 
       <div class="lc-section" style="margin-top:20px;">
-        <div class="lc-section-pill">Price Summary</div>
+        <div class="lc-section-pill">Cost Projection</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1295,7 +1310,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
         <span class="data-val" id="np-last-val">--</span>
       </div>
       <div class="data-row">
-        <span class="data-label">Now</span>
+        <span class="data-label">Current</span>
         <div class="data-bar-wrap"><div class="data-bar-fill" id="np-now-bar" style="width:0%"></div></div>
         <span class="data-val" id="np-now-val">--</span>
       </div>
@@ -1306,7 +1321,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       </div>
 
       <div class="lc-section" style="margin-top:20px;">
-        <div class="lc-section-pill">Temperature Forecast 24H</div>
+        <div class="lc-section-pill">Thermal Forecast</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1317,11 +1332,11 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       <div class="temp-minmax" id="d-tempminmax"></div>
 
       <div class="lc-section" style="margin-top:20px;">
-        <div class="lc-section-pill">Operator Diagnostics</div>
+        <div class="lc-section-pill">Neural Net Diagnostics</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
-      <div class="diag-row"><span class="diag-key">Designation</span><span class="diag-val">ZION MAINFRAME v2.0</span></div>
+      <div class="diag-row"><span class="diag-key">Designation</span><span class="diag-val">SKYNET DEFENSE NETWORK v2.0</span></div>
       <div class="diag-row"><span class="diag-key">Location</span><span class="diag-val">SOLNA, SECTOR 7</span></div>
       <div class="diag-row"><span class="diag-key">Entities</span><span class="diag-val">9 LIGHTS · 16 SENSORS</span></div>
       <div class="diag-row"><span class="diag-key">Integrations</span><span class="diag-val">Z-WAVE · NORDPOOL · MET.NO · TMDB</span></div>
@@ -1333,7 +1348,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     <!-- MEDIA TAB -->
     <div class="page" id="page-media">
       <div class="lc-section">
-        <div class="lc-section-pill">Signal Transmission Status</div>
+        <div class="lc-section-pill">Surveillance Feed</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1361,11 +1376,11 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       </div>
 
       <div class="lc-section">
-        <div class="lc-section-pill">Now Playing</div>
+        <div class="lc-section-pill">Active Transmissions</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
-      <div id="no-media-msg" class="no-streams">// NO SIGNAL DETECTED //</div>
+      <div id="no-media-msg" class="no-streams">// NO TARGET LOCK //</div>
       <div class="sessions-grid" id="sessions-grid"></div>
       <div class="mp-grid" id="mp-grid"></div>
     </div>
@@ -1373,7 +1388,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     <!-- SENSORS TAB -->
     <div class="page" id="page-sensors">
       <div class="lc-section">
-        <div class="lc-section-pill">System Monitor</div>
+        <div class="lc-section-pill">Threat Monitor</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1384,11 +1399,11 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
           <div class="val" id="sys-total-power">-- W</div>
         </div>
         <div class="status-block">
-          <label>Outside Temp</label>
+          <label>External Thermal</label>
           <div class="val" id="sys-temp">-- °C</div>
         </div>
         <div class="status-block purple">
-          <label>Sun State</label>
+          <label>Solar Position</label>
           <div class="val" id="sys-sun">--</div>
         </div>
         <div class="status-block teal">
@@ -1398,7 +1413,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       </div>
 
       <div class="lc-section" style="margin-top:8px;">
-        <div class="lc-section-pill">Grid Load vs Signal Cost</div>
+        <div class="lc-section-pill">Power Load vs Cost</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1410,11 +1425,11 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
             <div class="val" id="lc-energy-total">-- W</div>
           </div>
           <div class="lc-energy-stat">
-            <label>Est. Cost/Hour</label>
+            <label>Projected Burn</label>
             <div class="val" id="lc-energy-cost">-- SEK/h</div>
           </div>
           <div class="lc-energy-stat">
-            <label>Price Now</label>
+            <label>Grid Cost Now</label>
             <div class="val" id="lc-energy-price">-- SEK/kWh</div>
           </div>
         </div>
@@ -1431,7 +1446,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 
       <div data-feature="washer">
         <div class="lc-section" style="margin-top:8px;">
-          <div class="lc-section-pill">Purification Cycle</div>
+          <div class="lc-section-pill">Wash Subsystem</div>
         </div>
         <div id="washer-panel"></div>
       </div>
@@ -1441,9 +1456,9 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 
   <!-- FOOTER -->
   <div class="matrix-footer">
-    <span>ZION MAINFRAME v2.0</span>
+    <span>CYBERDYNE SYSTEMS // MODEL 101</span>
     <span style="opacity:0.3;">|</span>
-    <span id="footer-status">SYSTEM INITIALIZING</span>
+    <span id="footer-status">NEURAL NET BOOT SEQUENCE</span>
   </div>
 
 </div><!-- /frame -->
@@ -1452,7 +1467,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 <div class="shared-status-compat" aria-hidden="true">
   <span id="sb-temp">--</span>
   <span id="sb-elec">--</span>
-  <button id="washer-btn" data-feature="washer" type="button">WASHER: IDLE</button>
+  <button id="washer-btn" data-feature="washer" type="button">WASH UNIT: IDLE</button>
 </div>
 
 <div class="theme-zone" onclick="showSwitcher()"></div>
@@ -1472,36 +1487,35 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 // THEME CONFIG
 // ═══════════════════════════════════════════════════
 const THEME = {
-  title: 'THE MATRIX',
-  subtitle: 'SYSTEM CONTROL INTERFACE',
-  footer: 'ZION MAINFRAME v2.0',
-  tabs: ['NODES', 'ACCESS', 'STREAM', 'SIGNAL', 'SENTINEL'],
+  title: 'SKYNET T-800',
+  subtitle: 'CYBERDYNE SYSTEMS // MODEL 101',
+  footer: 'CYBERDYNE SYSTEMS // MODEL 101',
+  tabs: ['SYSTEMS', 'OVERRIDE', 'TIMELINE', 'SURVEILLANCE', 'DIAGNOSTICS'],
   tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
   emptyMedia: '// NO SIGNAL DETECTED //',
-  connOnline: 'SIGNAL LOCKED',
+  connOnline: 'CONNECTION LOCKED',
   connOffline: 'SIGNAL LOST',
-  connConnecting: 'TRACING...',
-  connToast: 'MATRIX UPLINK ESTABLISHED',
-  footerOnline: 'ALL SYSTEMS NOMINAL',
-  footerConnecting: 'ESTABLISHING UPLINK...',
-  footerOffline: 'UPLINK FAILURE — RETRYING',
+  connConnecting: 'ACQUIRING SIGNAL...',
+  connToast: 'SKYNET UPLINK LOCKED',
+  footerOnline: 'SKYNET ONLINE',
+  footerConnecting: 'LOADING NEURAL NET...',
+  footerOffline: 'SIGNAL LOST — REACQUIRING',
 
   sensors: { temp: {icon:'T: ', unit:' C'}, hum: {icon:'H: ', unit:'%'}, lux: {icon:'L: ', unit:' lx'} },
   dimmerColors: { fill: '--green', bg: '--green-dark' },
   clockEl: 'clock-matrix',
   dateEl: 'date-matrix',
   lightCountEls: ['stat-lights'],
-  nightToast: 'NODES DISCONNECTED',
+  nightToast: 'TERMINATE LIGHTS PROTOCOL SENT',
   toastArrow: '>',
   washer: {
-    title: 'CLEANSER', icon: '◉',
-    phaseLabels: { weight_sensing:'SENSE', wash:'PURIFY', rinse:'FLUSH', spin:'EXTRACT', finish:'EXIT' },
-    statusLabels: { idle:'DORMANT', running:'ACTIVE', paused:'FROZEN', complete:'PURIFIED' },
-    lifetimeLabel: 'TOTAL CYCLES', etaLabel: 'to exit',
+    title: 'WASH UNIT', icon: '◎',
+    phaseLabels: { weight_sensing:'SCAN', wash:'WASH', rinse:'RINSE', spin:'SPIN', finish:'COMPLETE' },
+    statusLabels: { idle:'STANDBY', running:'ACTIVE', paused:'PAUSED', complete:'COMPLETE' },
+    lifetimeLabel: 'TOTAL RUNS', etaLabel: 'remaining',
   },
 
   onIngest(id, s) {
-    if (id === 'sun.sun') updateRainSpeed();
     renderMonitor();
   },
   onStatesLoaded() {
@@ -1521,47 +1535,10 @@ const THEME = {
 };
 
 // ═══════════════════════════════════════════════════
-// DIGITAL RAIN (Matrix-specific)
+// BACKGROUND EFFECTS DISABLED
 // ═══════════════════════════════════════════════════
-const rainCanvas = document.getElementById('rain-canvas');
-const rainCtx = rainCanvas.getContext('2d');
-let rainColumns = [];
-let rainSpeed = 1;
-let rainTimerId = null;
-const RAIN_INTERVAL_MS = 150;
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function initRain() {
-  rainCanvas.width = window.innerWidth;
-  rainCanvas.height = window.innerHeight;
-  const cols = Math.floor(rainCanvas.width / 20);
-  rainColumns = Array(cols).fill(0).map(() => Math.random() * rainCanvas.height);
-  window.addEventListener('resize', initRain);
-}
-
-const RAIN_CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
-
-function drawRain() {
-  if (prefersReducedMotion) return;
-  rainCtx.fillStyle = 'rgba(13, 2, 8, 0.06)';
-  rainCtx.fillRect(0, 0, rainCanvas.width, rainCanvas.height);
-  rainCtx.fillStyle = '#00FF41';
-  rainCtx.font = '14px monospace';
-  const colW = 20;
-  for (let i = 0, len = rainColumns.length; i < len; i++) {
-    const y = rainColumns[i];
-    const char = RAIN_CHARS[(Math.random() * RAIN_CHARS.length) | 0];
-    rainCtx.globalAlpha = 0.25 + Math.random() * 0.25;
-    rainCtx.fillText(char, i * colW, y);
-    if (y > rainCanvas.height && Math.random() > 0.975) {
-      rainColumns[i] = 0;
-    } else {
-      rainColumns[i] = y + 14 * rainSpeed;
-    }
-  }
-  rainCtx.globalAlpha = 1;
-  rainTimerId = setTimeout(drawRain, RAIN_INTERVAL_MS);
-}
+function initRain() {}
+function drawRain() {}
 
 function renderMonitor() {
   const totalW = LC_POWER_SENSORS.reduce((s, id) => s + (liveData.power[id] ?? 0), 0);
@@ -1580,14 +1557,10 @@ function renderMonitor() {
   const el4 = document.getElementById('sys-nodes');
   const allIds = Array.from(ALL_SENSOR_IDS);
   const online = allIds.filter(sid => liveData.sensors[sid] !== null && liveData.sensors[sid] !== undefined).length;
-  if (el4) el4.textContent = online + '/' + allIds.length;
+  if (el4) el4.textContent = online + '/' + allIds.length + ' LOCKS';
 }
 
 function updateRainSpeed() {
-  const totalWatts = LC_POWER_SENSORS.reduce((s, id) => s + (liveData.power[id] ?? 0), 0);
-  const baseFactor = Math.max(0.3, Math.min(2, totalWatts / 100));
-  const nightFactor = liveData.sun.state === 'below_horizon' ? 0.5 : 1.0;
-  rainSpeed = baseFactor * nightFactor;
 }
 </script>
 <script src="shared.js"></script>

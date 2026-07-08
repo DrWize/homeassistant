@@ -177,7 +177,8 @@ const THEMES = [
   { file: 'matrix-dashboard.html',  icon: '\u25CF', label: 'MATRIX' },
   { file: 'weyland-dashboard.html', icon: 'W-Y',    label: 'WEYLAND' },
   { file: 'diablo-dashboard.html',  icon: '\u2620', label: 'DIABLO' },
-  { file: 'winamp-dashboard.html', icon: '\uD83E\uDD99', label: 'WINAMP' },
+  { file: 'winamp-dashboard.html',  icon: '\uD83E\uDD99', label: 'WINAMP' },
+  { file: 't2-dashboard.html',      icon: 'T2',     label: 'SKYNET' },
 ];
 
 

@@ -1229,6 +1229,29 @@ html, body {
 }
 .night-protocol-btn:hover { background: var(--orange); color: var(--dark); }
 .night-protocol-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+/* THEME COHESION OVERRIDES: shared power/data widgets */
+.lc-power-panel, .np48-chart, .temp-graph-wrap, .lc-energy-chart {
+  background: rgba(0,0,0,0.42);
+  border: 1px solid var(--orange);
+  border-left: 18px solid var(--orange);
+  border-radius: 0 12px 12px 0;
+  padding: 10px 14px;
+}
+.np48-chart, .temp-graph-wrap, .lc-energy-chart { padding: 6px; }
+.lc-power-hero-main, .room-total-w, .watts-val { color: var(--orange); text-shadow: 0 0 8px rgba(255,153,0,0.35); }
+.room-total-kwh, .kwh-val, .lc-power-hero-stat .val.blue { color: var(--blue); }
+.power-bar-bg { background: rgba(0,0,0,0.35); border-radius: 8px; overflow: hidden; }
+.power-bar-fill, .lc-energy-bar-power { background: linear-gradient(90deg, var(--orange), var(--yellow)); box-shadow: 0 0 8px rgba(255,153,0,0.45); }
+.np48-bar, .temp-bar { box-shadow: inset 0 1px rgba(255,255,255,0.35); }
+.shared-status-compat {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 </style>
 </head>
 <body>
@@ -1325,7 +1348,7 @@ html, body {
         <div class="room-grid" id="rooms-systems"></div>
 
         <div class="lc-section" style="margin-top:8px;">
-          <div class="lc-section-pill">Power Distribution</div>
+          <div class="lc-section-pill">EPS Power Grid</div>
           <div class="lc-section-line"></div>
           <div class="lc-section-end"></div>
         </div>
@@ -1463,7 +1486,7 @@ html, body {
         <div class="temp-minmax" id="d-tempminmax"></div>
 
         <div class="lc-section" style="margin-top:20px;">
-          <div class="lc-section-pill">System Diagnostics</div>
+          <div class="lc-section-pill">Starfleet Diagnostics</div>
           <div class="lc-section-line"></div>
           <div class="lc-section-end"></div>
         </div>
@@ -1571,7 +1594,7 @@ html, body {
         </div>
 
         <div class="lc-section" style="margin-top:8px;">
-          <div class="lc-section-pill">Energy Consumption vs Price</div>
+          <div class="lc-section-pill">EPS Load vs Cost</div>
           <div class="lc-section-line"></div>
           <div class="lc-section-end"></div>
         </div>
@@ -1696,6 +1719,13 @@ const THEME = {
   intervals: [
     [() => renderLrs(), 60000]
   ]
+,
+  onStateChanged() {},
+  onAuthOk() {},
+  onAuthFail() {},
+  onToggleLight() {},
+  onNightProtocol() {},
+  onWsError() {}
 };
 
 // LCARS-specific state

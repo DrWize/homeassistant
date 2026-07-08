@@ -1115,6 +1115,29 @@ body.night-mode .wy-header { opacity: 0.9; }
     transition: width 0.4s;
   }
 
+
+/* THEME COHESION OVERRIDES: shared power/data widgets */
+.lc-power-panel, .np48-chart, .temp-graph-wrap, .lc-energy-chart {
+  background: linear-gradient(180deg, rgba(18,22,22,0.92), rgba(4,7,7,0.96));
+  border: 1px solid var(--green);
+  border-left: 4px solid var(--amber);
+  box-shadow: inset 0 0 18px rgba(51,255,51,0.08);
+  padding: 10px 14px;
+}
+.np48-chart, .temp-graph-wrap, .lc-energy-chart { padding: 6px; }
+.lc-power-hero-main, .room-total-w, .watts-val { color: var(--amber); text-shadow: 0 0 8px rgba(255,153,0,0.32); }
+.room-total-kwh, .kwh-val, .lc-power-hero-stat .val.blue { color: var(--green); }
+.power-bar-bg { background: rgba(0,0,0,0.45); border: 1px solid rgba(51,255,51,0.22); overflow: hidden; }
+.power-bar-fill, .lc-energy-bar-power { background: linear-gradient(90deg, var(--amber), var(--green)); box-shadow: 0 0 8px rgba(51,255,51,0.3); }
+.np48-bar, .temp-bar { box-shadow: inset 0 1px rgba(51,255,51,0.35); }
+.shared-status-compat {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 </style>
 </head>
 <body class="crt-flicker">
@@ -1186,7 +1209,7 @@ body.night-mode .wy-header { opacity: 0.9; }
       <div class="room-grid" id="rooms-systems"></div>
 
       <div class="lc-section" style="margin-top:8px;">
-        <div class="lc-section-pill">Power Distribution</div>
+        <div class="lc-section-pill">Auxiliary Grid</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1324,7 +1347,7 @@ body.night-mode .wy-header { opacity: 0.9; }
       <div class="temp-minmax" id="d-tempminmax"></div>
 
       <div class="lc-section" style="margin-top:20px;">
-        <div class="lc-section-pill">System Diagnostics</div>
+        <div class="lc-section-pill">MU/TH/UR Diagnostics</div>
         <div class="lc-section-line"></div>
         <div class="lc-section-end"></div>
       </div>
@@ -1454,6 +1477,12 @@ HULL INTEGRITY: 100%</div>
 </div><!-- /frame -->
 
 <!-- THEME SWITCHER -->
+<div class="shared-status-compat" aria-hidden="true">
+  <span id="sb-temp">--</span>
+  <span id="sb-elec">--</span>
+  <button id="washer-btn" data-feature="washer" type="button">WASHER: IDLE</button>
+</div>
+
 <div class="theme-zone" onclick="showSwitcher()"></div>
 <div class="theme-switcher" id="theme-switcher">
   <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme"></button>
@@ -1506,6 +1535,13 @@ const THEME = {
   intervals: [
     [() => renderMother(), 30000]
   ]
+,
+  onIngest() {},
+  onAuthOk() {},
+  onAuthFail() {},
+  onToggleLight() {},
+  onNightProtocol() {},
+  onWsError() {}
 };
 
 function renderMother() {

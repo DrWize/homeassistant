@@ -1,4 +1,4 @@
-"""Capture screenshots of each tab for every theme and create demo GIFs."""
+"""Capture screenshots of each tab for every dashboard theme and create demo GIFs."""
 import asyncio
 import os
 from pathlib import Path
@@ -17,6 +17,7 @@ THEMES = {
     "weyland": "weyland-dashboard.html",
     "diablo":  "diablo-dashboard.html",
     "winamp":  "winamp-dashboard.html",
+    "t2":      "t2-dashboard.html",
 }
 FRAME_DURATION_MS = 2000  # 2 seconds per tab
 

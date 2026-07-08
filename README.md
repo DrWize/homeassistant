@@ -1,6 +1,6 @@
 # Home Assistant Themed Dashboards
 
-Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
+Themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
 ## Table of Contents
 
@@ -42,7 +42,7 @@ Seven themed HTML dashboards for Home Assistant, sharing a common JavaScript cor
 config.js, entities.js, shared.js, washer.js,
 lcars-dashboard.html, pipboy-dashboard.html, c64-dashboard.html,
 matrix-dashboard.html, weyland-dashboard.html, diablo-dashboard.html,
-winamp-dashboard.html, tools/setup.html (optional, for the wizard)
+winamp-dashboard.html, t2-dashboard.html, tools/setup.html (optional, for the wizard)
 ```
 
 ## Themes
@@ -56,6 +56,7 @@ winamp-dashboard.html, tools/setup.html (optional, for the wizard)
 | **Weyland-Yutani** | `weyland-dashboard.html` | Alien franchise MU/TH/UR 6000 |
 | **Diablo IV** | `diablo-dashboard.html` | Diablo IV Sanctuary / Horadric UI |
 | **Winamp** | `winamp-dashboard.html` | Winamp 2.x media player |
+| **Skynet** | `t2-dashboard.html` | Terminator 2 Cyberdyne / Skynet tactical HUD |
 
 ### LCARS — Star Trek
 ![LCARS Dashboard](screenshots/lcars-systems.png)
@@ -85,6 +86,10 @@ winamp-dashboard.html, tools/setup.html (optional, for the wizard)
 ![Winamp Dashboard](screenshots/winamp-systems.png)
 ![Winamp Tabs Demo](screenshots/winamp-demo.gif)
 
+### Skynet — Terminator 2
+![Skynet Dashboard](screenshots/t2-systems.png)
+![Skynet Tabs Demo](screenshots/t2-demo.gif)
+
 ### Theme-Specific Extras
 - **LCARS**: Animated radar sweep on the Sensors tab with randomized blip contacts
 - **Pip-Boy**: Geiger counter that ticks based on ambient lux, plus a threat assessment panel
@@ -93,6 +98,7 @@ winamp-dashboard.html, tools/setup.html (optional, for the wizard)
 - **Weyland**: MOTHER AI status readout panel showing atmospheric, life support, and power diagnostics
 - **Diablo IV**: Worldstone terminal readout with Cinzel Decorative font and blood-red/gold color scheme
 - **Winamp**: 32-bar spectrum analyzer mapped to real sensors (power, temperature, humidity, lux), EQ-style vertical dimmer sliders, transport controls (play/pause/stop for spectrum, prev/next for tabs), LED marquee with scrolling live data, and rainbow graph mode for all charts
+- **Skynet**: Terminator 2 / Cyberdyne tactical HUD with blue metallic panels, white readouts, T-800/Cyberdyne naming, and theme-matched power/data charts
 
 ## Quick Start
 
@@ -160,7 +166,8 @@ Copy all `.html` files, `.js` files, and your config to your Home Assistant `www
 ├── matrix-dashboard.html
 ├── weyland-dashboard.html
 ├── diablo-dashboard.html
-└── winamp-dashboard.html
+├── winamp-dashboard.html
+└── t2-dashboard.html
 ```
 
 ### 3. Access the dashboards
@@ -428,17 +435,18 @@ Each dashboard has a themed button on the Controls/Lights tab that turns off all
 | Weyland | CREW HIBERNATION |
 | Diablo IV | ETERNAL DARKNESS |
 | Winamp | LIGHTS OUT |
+| Skynet | TERMINATE LIGHTS |
 
-### Power Distribution Panel
+### Power / Energy Panels
 
-The Systems tab includes a Power Distribution panel showing real-time power consumption across all monitored devices. It displays:
+The Systems tab includes a theme-styled power panel showing real-time power consumption across all monitored devices. Each dashboard can rename and style this panel to match its theme. It displays:
 
 - **Total watts**: Live aggregate power draw across all rooms
 - **Estimated cost/hour**: Based on current Nordpool electricity price
 - **All-time tracked kWh**: Cumulative energy from all device kWh sensors
 - **Device table**: Grouped by room, showing per-device watts with power bars, room totals, and cumulative kWh
 
-Power data comes from Z-Wave smart plug sensors (`sensor.*_power` for live watts, `sensor.*_electric_consumption_kwh` for cumulative energy). The panel updates in real-time via WebSocket state changes.
+Power data comes from Z-Wave smart plug sensors (`sensor.*_power` for live watts, `sensor.*_electric_consumption_kwh` for cumulative energy). The panel updates in real-time via WebSocket state changes. The Timeline/Data and diagnostics-style tabs also theme the Nordpool, temperature, and load-vs-cost graph containers so shared charts feel native to each skin.
 
 ### Washer Panel
 
@@ -572,7 +580,7 @@ All dashboards display reference grid lines on charts for quick value reading:
 ### Theme Switcher & Fullscreen
 
 Press the **lower-left corner** of any dashboard to reveal a hidden menu:
-- **Theme switcher** — links to all 7 dashboards
+- **Theme switcher** — links to every dashboard
 - **Fullscreen toggle** — uses the browser Fullscreen API
 
 The controls auto-hide after 20 seconds of inactivity.
@@ -710,10 +718,11 @@ Repeat steps 1-3 for each theme dashboard you want the tab in. The tab ID must m
 ├── weyland-dashboard.html ← Alien Weyland-Yutani theme
 ├── diablo-dashboard.html  ← Diablo IV Sanctuary theme
 ├── winamp-dashboard.html  ← Winamp 2.x media player theme
+├── t2-dashboard.html      ← Terminator 2 Skynet tactical HUD theme
 ├── tools/
 │   ├── setup.html             ← Setup wizard (generates entities.js via browser UI)
-│   ├── capture-gifs.py        ← Retake all 7 demo GIFs (requires Playwright)
-│   └── capture-screenshots.py ← Retake all 7 system screenshots (requires Playwright)
+│   ├── capture-gifs.py        ← Retake demo GIFs for every dashboard (requires Playwright)
+│   └── capture-screenshots.py ← Retake system screenshots for every dashboard (requires Playwright)
 └── README.md              ← This file
 ```
 

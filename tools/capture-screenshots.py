@@ -1,4 +1,4 @@
-"""Retake all 7 system screenshots using headless Playwright."""
+"""Retake system screenshots for every dashboard using headless Playwright."""
 import asyncio
 from pathlib import Path
 from playwright.async_api import async_playwright
@@ -14,6 +14,7 @@ THEMES = {
     "weyland": "weyland-dashboard.html",
     "diablo":  "diablo-dashboard.html",
     "winamp":  "winamp-dashboard.html",
+    "t2":      "t2-dashboard.html",
 }
 
 
