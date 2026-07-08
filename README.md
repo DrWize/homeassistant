@@ -96,9 +96,9 @@ winamp-dashboard.html, t2-dashboard.html, tools/setup.html (optional, for the wi
 - **C64**: BASIC-style system log on the Security tab that logs events as numbered BASIC lines
 - **Matrix**: Digital rain canvas background that responds to total power usage and slows at night
 - **Weyland**: MOTHER AI status readout panel showing atmospheric, life support, and power diagnostics
-- **Diablo IV**: Worldstone terminal readout with Cinzel Decorative font and blood-red/gold color scheme
+- **Diablo IV**: Worldstone terminal readout with Cinzel Decorative font, black-cathedral panels, marrow text, tarnished brass hierarchy, soulfire blue data accents, and restrained oxblood danger states
 - **Winamp**: 32-bar spectrum analyzer mapped to real sensors (power, temperature, humidity, lux), EQ-style vertical dimmer sliders, transport controls (play/pause/stop for spectrum, prev/next for tabs), LED marquee with scrolling live data, and rainbow graph mode for all charts
-- **Skynet**: Terminator 2 / Cyberdyne tactical HUD with blue metallic panels, white readouts, T-800/Cyberdyne naming, and theme-matched power/data charts
+- **Skynet**: Terminator 2 / Cyberdyne tactical HUD with blue metallic panels, white readouts, T-800/Cyberdyne naming, theme-matched power/data charts, and responsive mobile header/tabs for narrow wall-panel screens
 
 ## Quick Start
 

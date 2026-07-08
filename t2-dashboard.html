@@ -1016,6 +1016,55 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
   * { animation: none !important; transition: none !important; }
 }
 
+/* NARROW VIEWPORTS */
+@media (max-width: 640px) {
+  .matrix-header {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .matrix-title {
+    flex: 0 0 auto;
+    max-width: 52vw;
+    font-size: 1rem;
+    letter-spacing: 4px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .matrix-header-status {
+    min-width: 0;
+    gap: 8px;
+    font-size: 0.7rem;
+  }
+  #conn-label,
+  #date-matrix,
+  .matrix-header-status span:nth-child(3) {
+    display: none;
+  }
+  .matrix-tabs {
+    padding: 0 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .matrix-tabs::-webkit-scrollbar { display: none; }
+  .matrix-tab {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+  }
+  .matrix-content { padding: 16px 12px; }
+  .matrix-footer {
+    padding: 0 12px;
+    gap: 10px;
+    overflow: hidden;
+  }
+  .matrix-footer span:first-child {
+    max-width: 48vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 /* THEME SWITCHER */
 .theme-zone { position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998; cursor: pointer; }
 .theme-switcher {
@@ -1524,8 +1573,7 @@ const THEME = {
   onInit() {
     initRain();
     drawRain();
-  }
-,
+  },
   onStateChanged() {},
   onAuthOk() {},
   onAuthFail() {},
