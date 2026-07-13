@@ -58,6 +58,8 @@ winamp-dashboard.html, t2-dashboard.html, tools/setup.html (optional, for the wi
 | **Winamp** | `winamp-dashboard.html` | Winamp 2.x media player |
 | **Skynet** | `t2-dashboard.html` | Terminator 2 Cyberdyne / Skynet tactical HUD |
 
+The previews below were refreshed after a cross-theme readability and contrast pass. Dashboard headings, secondary labels, and status text now remain legible across the full tab set, including the Matrix and Skynet washer states.
+
 ### LCARS — Star Trek
 ![LCARS Dashboard](screenshots/lcars-systems.png)
 ![LCARS Tabs Demo](screenshots/lcars-demo.gif)
@@ -98,7 +100,7 @@ winamp-dashboard.html, t2-dashboard.html, tools/setup.html (optional, for the wi
 - **Weyland**: MOTHER AI status readout panel showing atmospheric, life support, and power diagnostics
 - **Diablo IV**: Worldstone terminal readout with Cinzel Decorative font, black-cathedral panels, marrow text, tarnished brass hierarchy, soulfire blue data accents, and restrained oxblood danger states
 - **Winamp**: 32-bar spectrum analyzer mapped to real sensors (power, temperature, humidity, lux), EQ-style vertical dimmer sliders, transport controls (play/pause/stop for spectrum, prev/next for tabs), LED marquee with scrolling live data, and rainbow graph mode for all charts
-- **Skynet**: Terminator 2 / Cyberdyne tactical HUD with blue metallic panels, white readouts, T-800/Cyberdyne naming, theme-matched power/data charts, and responsive mobile header/tabs for narrow wall-panel screens
+- **Skynet**: Terminator 2 / Cyberdyne tactical HUD with blue metallic panels, white readouts, T-800/Cyberdyne naming, theme-matched power/data charts, responsive mobile header/tabs, and the same hidden lower-left theme-menu hotspot used by the other dashboards
 
 ## Quick Start
 

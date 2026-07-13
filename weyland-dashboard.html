@@ -481,7 +481,8 @@ html, body {
 .status-block.teal   { border-left-color: var(--green); }
 .status-block label {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--grey-mid);
@@ -1138,6 +1139,15 @@ body.night-mode .wy-header { opacity: 0.9; }
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* RENDERED CONTRAST SAFEGUARDS */
+.wy-title,
+.wy-footer,
+.wy-tab { color: #ffad24; }
+.sensor-chip:not(.active),
+.mp-type,
+.mp-badge { background: #292929; color: #f2f2f2; }
+.watts-val.off { color: #b8b8b8; }
 </style>
 </head>
 <body class="crt-flicker">
@@ -1534,8 +1544,7 @@ const THEME = {
   },
   intervals: [
     [() => renderMother(), 30000]
-  ]
-,
+  ],
   onIngest() {},
   onAuthOk() {},
   onAuthFail() {},

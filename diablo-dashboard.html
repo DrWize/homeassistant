@@ -1463,6 +1463,24 @@ body.night-mode {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* RENDERED CONTRAST SAFEGUARDS */
+.status-block.orange .val,
+.sensor-chip.active.temp,
+.data-val.mid,
+.room-total-w,
+.watts-val,
+#np-last-val,
+#np-now-val,
+#np-next-val { color: #e09a6b; }
+.watts-val.off { color: #aaa49a; }
+.washer-time-full { color: #d6c8ad; }
+.washer-year-header { color: #d6c8ad; }
+.washer-phase-sep { color: #9f9582; opacity: 1; }
+.mp-type,
+.mp-badge { background: #22262e; color: #d6c8ad; }
+.skip-link { background: #c69b58; color: #050608; }
+#daynight-btn { background: #0c0d10 !important; color: #e7c779 !important; }
 </style>
 </head>
 <body class="crt-flicker">
@@ -1858,8 +1876,7 @@ const THEME = {
   },
   intervals: [
     [() => renderWorldstone(), 30000]
-  ]
-,
+  ],
   onIngest() {},
   onAuthOk() {},
   onAuthFail() {},
