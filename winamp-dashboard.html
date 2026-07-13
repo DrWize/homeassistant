@@ -653,7 +653,7 @@
     margin-bottom: 14px;
   }
   .w-item { font-size: 0.7rem; letter-spacing: 1px; }
-  .w-item label { color: var(--grey-mid); display: block; font-size: 0.63rem; margin-bottom: 2px; }
+  .w-item label { color: var(--grey-mid); display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 2px; }
   .w-item .w-val {
     color: var(--green);
     font-size: 1rem;
@@ -1198,6 +1198,23 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* RENDERED CONTRAST SAFEGUARDS */
+.tab:not(.active),
+.wa-titlebar-btn,
+.wa-transport-btn,
+.theme-switcher-btn {
+  background-color: #91a0af;
+  color: #050505;
+}
+#footer-status,
+.mp-source,
+.washer-phase-sep { color: #9eafc1; opacity: 1; }
+.lc-device-table td { color: #00c83a; }
+#conn-label { color: #00c83a; }
+.wa-eq-channel.off .wa-eq-val { color: #ff7777; }
+body.night-mode { --green: #00c83a; }
+#toast { color: #ffffff; }
 </style>
 </head>
 <body>
@@ -1557,8 +1574,7 @@ const THEME = {
     [() => updateSpectrum(), 2000],
     [() => updateMarquee(), 15000],
     [() => applyRainbow(), 5000],
-  ]
-,
+  ],
   onIngest() {},
   onAuthOk() {},
   onAuthFail() {},

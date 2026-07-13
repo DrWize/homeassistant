@@ -449,10 +449,12 @@ html, body {
 .status-block.teal   { border-left-color: var(--green-dim); }
 .status-block label {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--green-dark);
+  color: var(--green-dim);
+  text-shadow: 0 0 4px rgba(127,184,255,0.28);
   margin-bottom: 4px;
 }
 .status-block .val {
@@ -702,8 +704,8 @@ html, body {
   letter-spacing: 2px;
   padding: 1px 10px;
   border-radius: 2px;
-  border: 1px solid var(--green-dark);
-  color: var(--green-dark);
+  border: 1px solid var(--green);
+  color: var(--green);
   text-transform: uppercase;
   display: inline-block;
 }
@@ -963,7 +965,7 @@ html, body {
 .washer-status { margin-left: auto; font-size: 0.75rem; letter-spacing: 2px; padding: 2px 10px; border-radius: 4px; }
 .washer-status.running { background: var(--green); color: #000; }
 .washer-status.complete { background: var(--green-dark); color: #000; }
-.washer-status.idle { color: var(--green-dark); }
+.washer-status.idle { background: var(--green); color: #000; }
 .washer-phases { display: flex; align-items: center; gap: 4px; margin: 8px 0; font-size: 0.7rem; letter-spacing: 1px; }
 .washer-phase { padding: 2px 8px; border-radius: 3px; color: var(--green-dark); }
 .washer-phase.active { background: var(--green); color: #000; font-weight: bold; }
@@ -1010,6 +1012,37 @@ body.night-mode {
 }
 body.night-mode .matrix-header { opacity: 0.8; }
 body.night-mode .matrix-panel { border-color: var(--green-dim); }
+
+/* SECRET THEME SWITCHER — invisible lower-left activation zone */
+.theme-zone { position: fixed; bottom: 0; left: 0; width: 60px; height: 60px; z-index: 9998; cursor: pointer; }
+.theme-switcher {
+  position: fixed; bottom: 12px; left: 12px; z-index: 9999;
+  display: flex; gap: 6px; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.theme-switcher.visible { opacity: 1; pointer-events: auto; }
+.theme-switcher-btn {
+  width: 40px; height: 40px; border: 2px solid var(--green); border-radius: 50%;
+  background: rgba(10,17,27,0.96); color: var(--green); font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.theme-switcher-btn:hover { background: var(--green); color: var(--bg); transform: scale(1.1); box-shadow: 0 0 12px var(--green-glow); }
+.theme-switcher-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+.theme-menu {
+  display: none; position: absolute; bottom: 48px; left: 0;
+  background: rgba(8,14,22,0.98); border: 2px solid var(--green-dim); border-radius: 4px;
+  padding: 6px 0; min-width: 180px; box-shadow: 0 4px 20px rgba(127,184,255,0.13);
+}
+.theme-menu.open { display: block; }
+.theme-menu a {
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+  color: var(--green-dim); text-decoration: none; font-size: 0.75rem; font-family: inherit;
+  letter-spacing: 1px; white-space: nowrap;
+}
+.theme-menu a:hover { background: rgba(127,184,255,0.10); color: var(--green); }
+.theme-menu a.active { color: var(--green); text-shadow: 0 0 6px var(--green-glow); }
+.theme-menu a .tm-icon { width: 22px; text-align: center; font-size: 14px; }
 
 /* REDUCED MOTION */
 @media (prefers-reduced-motion: reduce) {
@@ -1064,45 +1097,6 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     text-overflow: ellipsis;
   }
 }
-
-/* THEME SWITCHER */
-.theme-zone { position: fixed; bottom: 0; left: 0; width: 72px; height: 72px; z-index: 10002; cursor: pointer; }
-.theme-zone::after {
-  content: '☰'; position: absolute; left: 10px; bottom: 10px; width: 26px; height: 26px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--green); background: rgba(0,0,0,0.35); border: 1px solid currentColor;
-  border-radius: 3px; opacity: 0.34; font: 700 14px/1 system-ui, sans-serif;
-  pointer-events: none; transition: opacity 0.2s, transform 0.2s;
-}
-.theme-zone:hover::after { opacity: 0.82; transform: scale(1.04); }
-.theme-switcher {
-  position: fixed; bottom: 12px; left: 12px; z-index: 10003;
-  display: flex; gap: 6px; align-items: flex-end;
-  opacity: 0; pointer-events: none; transition: opacity 0.3s;
-}
-.theme-switcher.visible { opacity: 1; pointer-events: auto; }
-.theme-switcher-btn {
-  width: 40px; height: 40px; border: 2px solid var(--green); border-radius: 50%;
-  background: rgba(10,17,27,0.86); color: var(--green); font-size: 20px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-}
-.theme-switcher-btn:hover { background: var(--green); color: var(--bg); transform: scale(1.1); box-shadow: 0 0 12px var(--green-glow); }
-.theme-switcher-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
-.theme-menu {
-  display: none; position: absolute; bottom: 48px; left: 0;
-  background: rgba(8,14,22,0.96); border: 2px solid var(--green-dim); border-radius: 4px;
-  padding: 6px 0; min-width: 180px; box-shadow: 0 4px 20px rgba(127,184,255,0.13);
-}
-.theme-menu.open { display: block; }
-.theme-menu a {
-  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
-  color: var(--green-dim); text-decoration: none; font-size: 0.75rem; font-family: inherit;
-  letter-spacing: 1px; white-space: nowrap;
-}
-.theme-menu a:hover { background: rgba(127,184,255,0.10); color: var(--green); }
-.theme-menu a.active { color: var(--green); text-shadow: 0 0 6px var(--green-glow); }
-.theme-menu a .tm-icon { width: 22px; text-align: center; font-size: 14px; }
 
 /* NIGHT PROTOCOL BUTTON */
 .night-protocol-btn {
@@ -1187,6 +1181,50 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* RENDERED CONTRAST SAFEGUARDS */
+.sensor-chip:not(.active),
+.light-label,
+.light-state,
+.room-lights-count,
+.dimmer-label,
+.load-bar-label,
+.solar-block label,
+.data-label,
+.weather-card .wc-time,
+.weather-card .wc-wind,
+.np48-xaxis,
+.np48-legend,
+.temp-xaxis,
+.temp-minmax,
+.diag-key,
+.media-stat-block label,
+.session-show,
+.session-badge,
+.session-summary,
+.session-meta,
+.session-progress-label,
+.no-streams,
+.mp-name,
+.mp-type,
+.mp-source,
+.mp-vol-label,
+.mp-progress-label,
+.mp-badge,
+.no-mp,
+.lc-energy-stat label,
+.lc-energy-xaxis,
+.lc-energy-legend,
+.washer-status.idle,
+.washer-phase,
+.washer-settings,
+.washer-month-label,
+.washer-month-val,
+.washer-lifetime,
+.matrix-footer { color: #79bfff; }
+.watts-val.off { color: #8d98a5; }
+#d-np48-minmax { color: #79bfff !important; }
+.washer-phase-sep { color: #79bfff; opacity: 1; }
 </style>
 </head>
 <body>
@@ -1520,14 +1558,13 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 
 </div><!-- /frame -->
 
-<!-- THEME SWITCHER -->
 <div class="shared-status-compat" aria-hidden="true">
   <span id="sb-temp">--</span>
   <span id="sb-elec">--</span>
   <button id="washer-btn" data-feature="washer" type="button">WASH UNIT: IDLE</button>
 </div>
 
-<div class="theme-zone" onclick="showSwitcher()"></div>
+<div class="theme-zone" onclick="showSwitcher()" aria-label="Open secret controls"></div>
 <div class="theme-switcher" id="theme-switcher">
   <button class="theme-switcher-btn" onclick="document.getElementById('theme-menu').classList.toggle('open')" aria-label="Switch theme" title="Switch theme"></button>
   <div class="theme-menu" id="theme-menu"></div>
@@ -1581,8 +1618,7 @@ const THEME = {
   onInit() {
     initRain();
     drawRain();
-  }
-,
+  },
   onStateChanged() {},
   onAuthOk() {},
   onAuthFail() {},

@@ -532,7 +532,7 @@ html, body {
 .status-block.teal   { border-left-color: var(--teal);   }
 .status-block label {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -1252,6 +1252,14 @@ html, body {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* RENDERED CONTRAST SAFEGUARDS */
+.stardate-label,
+.stardate-val { color: #050505; }
+.sensor-chip:not(.active),
+.mp-type,
+.mp-badge { background: #30303c; color: #f2f2f5; }
+.watts-val.off { color: #aaaabc; }
 </style>
 </head>
 <body>
@@ -1718,8 +1726,7 @@ const THEME = {
   },
   intervals: [
     [() => renderLrs(), 60000]
-  ]
-,
+  ],
   onStateChanged() {},
   onAuthOk() {},
   onAuthFail() {},

@@ -452,7 +452,8 @@ body.night-mode::before {
 .status-block.teal   { border-left-color: var(--c64-cyan);   }
 .status-block label {
   display: block;
-  font-size: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
   color: var(--grey-mid);
   margin-bottom: 3px;
 }
@@ -1129,7 +1130,7 @@ body::after {
 .light-state { color: var(--grey-mid); }
 
 .status-block { padding: 10px 12px; min-width: 150px; }
-.status-block label { font-size: 0.6rem; color: var(--grey-mid); }
+.status-block label { font-size: 0.65rem; color: var(--grey-mid); }
 .status-block .val { font-size: 0.8rem; }
 .washer-badge { font-size: 0.625rem; }
 .washer-badge.running {
@@ -1172,6 +1173,14 @@ body::after {
   .lc-power-panel { overflow-x: auto; }
   .lc-device-table { min-width: 620px; }
 }
+
+/* RENDERED CONTRAST SAFEGUARDS */
+.sensor-chip:not(.active),
+.mp-type,
+.mp-badge { background: #28185f; color: #f7f4ff; }
+.watts-val.off { color: #c8c0f4; }
+#stat-lights,
+.media-stat-block .val { color: #ffb0ff; }
 </style>
 </head>
 <body>
@@ -1552,8 +1561,7 @@ const THEME = {
       const v = parseFloat(s.state);
       if (!isNaN(v)) addBasicLogEntry(`TEMP ${id.split('.')[1].substring(0,8).toUpperCase()} = ${v.toFixed(1)}C`);
     }
-  }
-,
+  },
   onInit() {},
   onStatesLoaded() {},
   onStateChanged() {},
