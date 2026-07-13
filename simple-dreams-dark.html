@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Dreams — Dark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+/* ══════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════ */
+:root {
+  --bg:           #0b0f15;
+  --card:         rgba(255,255,255,0.052);
+  --card-hover:   rgba(255,255,255,0.082);
+  --card-active:  rgba(78,205,196,0.08);
+  --bdr:          rgba(255,255,255,0.075);
+  --bdr-h:        rgba(255,255,255,0.14);
+  --bdr-lit:      rgba(78,205,196,0.22);
+  --teal:         #4ecdc4;
+  --amber:        #e79064;
+  --lav:          #b8b0ff;
+  --sage:         #7bc98a;
+  --red:          #ff7b7b;
+  --sky:          #89c4e1;
+  --txt:          rgba(255,255,255,0.88);
+  --txt-2:        rgba(255,255,255,0.52);
+  --txt-3:        rgba(255,255,255,0.3);
+  --blur:         saturate(160%) blur(20px);
+  --shadow:       0 2px 20px rgba(0,0,0,0.45);
+  --r-sm:         10px;
+  --r:            16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); }
+body { font-family: 'DM Sans', sans-serif; color: var(--txt); font-size: 14px; line-height: 1.4; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 4px; }
+
+/* ══════════════════════════════════════
+   BACKGROUND
+══════════════════════════════════════ */
+.bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.bg-sky {
+  position: absolute; inset: 0;
+  background: linear-gradient(175deg, #05080f 0%, #080d18 28%, #0a1020 50%, #0c1a14 75%, #0a1610 100%);
+}
+.bg-stars {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.82) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255,255,255,.6)  1px, transparent 1px),
+    radial-gradient(circle, rgba(255,255,255,.45) 1px, transparent 1px);
+  background-size: 400px 300px, 250px 200px, 180px 150px;
+  background-position: 0 0, 60px 40px, 120px 90px;
+  opacity: .6;
+}
+.bg-moon {
+  position: absolute; top: 7%; right: 11%;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 34%, #fffee8 0%, #f5d77a 55%, #dba726 100%);
+  box-shadow: 0 0 28px 10px rgba(245,210,90,.16), 0 0 70px 28px rgba(210,165,40,.07);
+}
+.bg-moon::before {
+  content:''; position: absolute; top: 28%; left: 52%;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: rgba(160,120,30,.22);
+  box-shadow: -14px 8px 0 4px rgba(140,100,20,.16), 8px -4px 0 3px rgba(150,110,25,.18);
+}
+.bg-mist {
+  position: absolute; bottom: 18%; left: 0; right: 0; height: 8%;
+  background: linear-gradient(0deg, rgba(78,205,196,.025) 0%, transparent 100%);
+  filter: blur(8px);
+}
+.bg-ground { position: absolute; bottom: 0; left: 0; right: 0; height: 5%; background: #050b07; }
+
+/* ══════════════════════════════════════
+   SKIP LINK
+══════════════════════════════════════ */
+.skip-link {
+  position: absolute; top:-40px; left:16px;
+  background: var(--teal); color: #0b0f15;
+  padding: 7px 14px; border-radius: 8px;
+  font-weight: 600; font-size:.8rem; z-index:9999;
+  text-decoration: none; transition: top .2s;
+}
+.skip-link:focus { top: 10px; }
+
+/* ══════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════ */
+.layout {
+  position: relative; z-index: 1;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 14px 18px 0;
+  gap: 10px;
+  overflow: hidden;
+}
+.topbar { display: flex; align-items: flex-start; gap: 14px; flex-shrink: 0; }
+.content {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1.5fr;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+.atmosphere {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; padding: 6px 0 10px; flex-shrink: 0;
+}
+.atm-line { flex: 1; max-width: 80px; height: 1px; background: var(--bdr); }
+.atm-word { font-size: .62rem; color: var(--txt-3); letter-spacing: .12em; }
+
+/* ══════════════════════════════════════
+   GLASS CARD
+══════════════════════════════════════ */
+.card {
+  background: var(--card);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--bdr); border-radius: var(--r);
+  box-shadow: var(--shadow);
+  transition: border-color .25s, background .25s; overflow: hidden;
+}
+.card-p { padding: 13px 15px; }
+.card.lit   { border-color: var(--bdr-lit); background: var(--card-active); }
+.card.warn  { border-color: rgba(231,144,100,.28); }
+.card.alert { border-color: rgba(255,123,123,.28); }
+.label {
+  font-size: .65rem; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--txt-3); margin-bottom: 5px;
+}
+
+/* ══════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════ */
+.wx-block { flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
+.wx-main  { display: flex; align-items: center; gap: 10px; }
+.wx-icon  { font-size: 2rem; line-height: 1; }
+.wx-temp  { font-family: 'DM Serif Display', serif; font-size: 2.3rem; line-height: 1; }
+.wx-cond  { font-size: .72rem; color: var(--txt-2); text-transform: capitalize; margin-top: 1px; }
+.wx-sub   { display: flex; gap: 10px; font-size: .7rem; color: var(--txt-3); flex-wrap: wrap; }
+.wx-sub span { display: flex; align-items: center; gap: 3px; }
+
+.chips-wrap {
+  flex: 1; display: flex; gap: 6px; flex-wrap: wrap;
+  align-items: center; justify-content: center;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 50px;
+  border: 1px solid var(--bdr); background: var(--card);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  font-size: .74rem; color: var(--txt-2); white-space: nowrap;
+  transition: all .25s; cursor: default;
+}
+.chip .pip { width: 6px; height: 6px; border-radius: 50%; background: var(--txt-3); transition: background .3s, box-shadow .3s; }
+.chip.on       { color: var(--txt); border-color: rgba(255,255,255,.14); }
+.chip.on .pip  { background: var(--teal); box-shadow: 0 0 5px var(--teal); }
+.chip.warn .pip{ background: var(--amber); box-shadow: 0 0 5px var(--amber); }
+.chip.bad  .pip{ background: var(--red);   box-shadow: 0 0 5px var(--red); }
+
+.clock-wrap { flex-shrink: 0; text-align: right; display: flex; flex-direction: column; gap: 1px; }
+.clock-time { font-family: 'DM Serif Display', serif; font-size: 2.1rem; line-height: 1; letter-spacing: -.01em; }
+.clock-date { font-size: .72rem; color: var(--txt-2); margin-top: 2px; }
+.conn-row   { display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 3px; }
+.conn-pip   { width: 6px; height: 6px; border-radius: 50%; background: var(--txt-3); }
+.conn-pip.online  { background: var(--sage); box-shadow: 0 0 4px var(--sage); }
+.conn-pip.offline { background: var(--red); }
+.conn-lbl { font-size: .65rem; color: var(--txt-3); }
+
+/* ══════════════════════════════════════
+   LEFT COL — ROOMS
+══════════════════════════════════════ */
+.col-rooms { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+.rooms-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; flex: 1; overflow-y: auto; scrollbar-width: none;
+}
+.rooms-grid::-webkit-scrollbar { display: none; }
+.room-card {
+  padding: 11px 13px; display: flex; flex-direction: column; gap: 7px; position: relative;
+}
+.room-card::before {
+  content:''; position: absolute; inset: 0; border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,.03) 0%, transparent 55%);
+  pointer-events: none;
+}
+.room-title { font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--txt-2); }
+.room-sensors { display: flex; gap: 8px; flex-wrap: wrap; }
+.room-sensor  { display: flex; align-items: center; gap: 3px; font-size: .78rem; color: var(--txt); }
+.room-sensor .si { font-size: .7rem; opacity: .55; }
+.room-lights { display: flex; flex-direction: column; gap: 5px; margin-top: 1px; }
+.light-row   { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.light-lbl   { font-size: .7rem; color: var(--txt-2); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tog { position: relative; width: 30px; height: 17px; flex-shrink: 0; }
+.tog input { opacity: 0; position: absolute; width: 0; height: 0; }
+.tog-track {
+  position: absolute; inset: 0; border-radius: 17px;
+  background: rgba(255,255,255,.1); border: 1px solid var(--bdr);
+  cursor: pointer; transition: background .22s, border-color .22s;
+}
+.tog-thumb {
+  position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%;
+  background: var(--txt-3); pointer-events: none;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), background .22s;
+}
+.tog input:checked ~ .tog-track { background: rgba(78,205,196,.2); border-color: rgba(78,205,196,.45); }
+.tog input:checked ~ .tog-track .tog-thumb { transform: translateX(13px); background: var(--teal); box-shadow: 0 0 5px var(--teal); }
+.tog input:focus-visible ~ .tog-track { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+.dimmer-wrap { display: flex; align-items: center; gap: 6px; margin-top: 1px; }
+.dimmer-val  { font-size: .62rem; color: var(--txt-3); min-width: 22px; }
+input[type=range].dimmer {
+  flex: 1; height: 3px; appearance: none; -webkit-appearance: none;
+  background: rgba(255,255,255,.12); border-radius: 3px; cursor: pointer; outline: none;
+}
+input[type=range].dimmer::-webkit-slider-thumb {
+  appearance: none; -webkit-appearance: none; width: 11px; height: 11px;
+  border-radius: 50%; background: var(--teal); box-shadow: 0 0 4px var(--teal);
+}
+input[type=range].dimmer:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 3px; }
+
+/* ══════════════════════════════════════
+   MIDDLE COL
+══════════════════════════════════════ */
+.col-mid { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+
+.fc-strip { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.fc-strip::-webkit-scrollbar { display: none; }
+.fc-slot {
+  flex: 1; min-width: 48px; display: flex; flex-direction: column;
+  align-items: center; gap: 2px; padding: 7px 4px;
+  border-radius: var(--r-sm); border: 1px solid var(--bdr); transition: background .2s;
+}
+.fc-slot.now { background: rgba(78,205,196,.1); border-color: rgba(78,205,196,.3); }
+.fc-time { font-size: .62rem; color: var(--txt-3); }
+.fc-ico  { font-size: 1.05rem; }
+.fc-t    { font-size: .8rem; font-weight: 600; color: var(--amber); }
+.fc-p    { font-size: .6rem; color: var(--sky); }
+
+.sun-card {
+  flex-shrink: 0; padding: 12px 15px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.sun-item { display: flex; flex-direction: column; gap: 2px; }
+.sun-val  { font-family: 'DM Serif Display', serif; font-size: 1.45rem; line-height: 1; }
+.sun-meta { font-size: .68rem; color: var(--txt-3); }
+
+.sec-card   { padding: 12px 15px; flex-shrink: 0; }
+.sec-row    { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.sec-state  { font-family: 'DM Serif Display', serif; font-size: 1.3rem; }
+.sec-detail { font-size: .7rem; color: var(--txt-3); }
+.sec-sensors{ display: flex; gap: 5px; flex-wrap: wrap; }
+.sec-pip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .65rem; color: var(--txt-3); padding: 3px 8px;
+  border-radius: 50px; border: 1px solid var(--bdr); transition: all .25s;
+}
+.sec-pip.active { color: var(--red); border-color: rgba(255,123,123,.3); }
+
+.washer-card { padding: 11px 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.washer-val  { font-family: 'DM Serif Display', serif; font-size: 1.3rem; white-space: nowrap; }
+.washer-time-compact { display: none; }
+
+@media (max-width: 700px) {
+  .washer-time-full { display: none; }
+  .washer-time-compact { display: inline; }
+  .washer-val { font-size: 1.05rem; }
+  .washer-card { padding-inline: 10px; }
+}
+
+/* ══════════════════════════════════════
+   RIGHT COL
+══════════════════════════════════════ */
+.col-right { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+
+.np-wrap  { padding: 12px 14px; flex-shrink: 0; }
+.np-head  { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.np-now-val { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--teal); }
+.np-unit    { font-size: .68rem; color: var(--txt-3); }
+.np-bars    { display: flex; align-items: flex-end; gap: 1.5px; height: 44px; }
+.np-bar     { flex: 1; border-radius: 2px 2px 0 0; transition: height .5s; cursor: default; min-width: 2px; }
+.np-bar.cur { box-shadow: 0 0 6px currentColor; }
+.np-xaxis   { display: flex; justify-content: space-between; font-size: .6rem; color: var(--txt-3); margin-top: 4px; }
+
+.energy-wrap  { padding: 12px 14px; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.energy-hero  { display: flex; align-items: baseline; gap: 8px; }
+.energy-w     { font-family: 'DM Serif Display', serif; font-size: 1.9rem; color: var(--teal); }
+.energy-cost  { font-size: .72rem; color: var(--txt-3); }
+.energy-chart { flex: 1; min-height: 0; display: flex; align-items: flex-end; gap: 1.5px; overflow: hidden; }
+.eb-wrap  { flex: 1; position: relative; height: 100%; cursor: default; }
+.eb-price { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 2px 2px 0 0; opacity: .35; transition: height .5s; }
+.eb-power { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 2px 2px 0 0; transition: height .5s; }
+.eb-wrap.cur .eb-power { box-shadow: 0 0 4px var(--teal); }
+
+.elec-wrap { padding: 12px 14px; flex-shrink: 0; }
+.elec-bars { display: flex; gap: 5px; margin-top: 6px; }
+.elec-item { flex: 1; }
+.elec-track { height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
+.elec-fill  { height: 100%; border-radius: 2px; transition: width .8s; }
+.elec-lbl   { font-size: .6rem; color: var(--txt-3); text-align: center; }
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 18px; left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(15,22,32,.92); backdrop-filter: blur(14px);
+  border: 1px solid var(--bdr-h); border-radius: 50px;
+  padding: 7px 18px; font-size: .78rem; color: var(--txt);
+  opacity: 0; pointer-events: none; z-index: 999;
+  transition: opacity .22s, transform .22s; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg" aria-hidden="true">
+  <div class="bg-sky"></div>
+  <div class="bg-stars"></div>
+  <div class="bg-moon"></div>
+
+  <!-- Far mountains -->
+  <svg style="position:absolute;bottom:0;left:0;right:0;height:52%;" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#101e18"/><stop offset="100%" stop-color="#0a1610"/></linearGradient></defs>
+    <path d="M0,320 L0,210 L60,165 L120,195 L200,130 L290,175 L380,105 L470,160 L540,88 L630,140 L710,72 L800,125 L880,60 L970,118 L1060,80 L1150,135 L1240,95 L1330,148 L1440,110 L1440,320 Z" fill="url(#g1)"/>
+  </svg>
+
+  <!-- Near mountains -->
+  <svg style="position:absolute;bottom:0;left:0;right:0;height:40%;" viewBox="0 0 1440 280" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0c1a12"/><stop offset="100%" stop-color="#080f09"/></linearGradient></defs>
+    <path d="M0,280 L0,190 L50,175 L110,190 L170,158 L240,178 L310,145 L390,170 L460,130 L540,165 L610,118 L700,155 L775,100 L860,142 L950,108 L1050,150 L1140,120 L1230,158 L1320,128 L1440,160 L1440,280 Z" fill="url(#g2)"/>
+  </svg>
+
+  <!-- Treeline -->
+  <svg style="position:absolute;bottom:0;left:0;right:0;height:22%;" viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#060e08" d="M0,180 L0,95 L18,95 L18,68 L10,68 L26,42 L16,42 L32,18 L48,42 L38,42 L54,68 L46,68 L46,95 L55,95 L55,72 L47,72 L61,48 L52,48 L66,26 L80,48 L71,48 L85,72 L77,72 L77,95 L95,95 L95,68 L87,68 L101,42 L91,42 L107,18 L123,42 L113,42 L129,68 L121,68 L121,95 L138,95 L138,76 L131,76 L143,58 L136,58 L148,40 L160,58 L153,58 L165,76 L158,76 L158,95 L175,95 L175,68 L167,68 L181,44 L172,44 L186,20 L200,44 L191,44 L205,68 L197,68 L197,95 L215,95 L215,76 L208,76 L220,58 L213,58 L225,40 L237,58 L230,58 L242,76 L235,76 L235,95 L252,95 L252,70 L244,70 L258,46 L248,46 L263,22 L278,46 L268,46 L283,70 L275,70 L275,95 L292,95 L292,76 L285,76 L297,58 L290,58 L302,40 L314,58 L307,58 L319,76 L312,76 L312,95 L330,95 L330,68 L322,68 L336,44 L327,44 L341,20 L355,44 L346,44 L360,68 L352,68 L352,95 L370,95 L370,76 L363,76 L375,58 L368,58 L380,40 L392,58 L385,58 L397,76 L390,76 L390,95 L408,95 L408,68 L400,68 L414,44 L405,44 L419,20 L433,44 L424,44 L438,68 L430,68 L430,95 L447,95 L447,76 L440,76 L452,58 L445,58 L457,40 L469,58 L462,58 L474,76 L467,76 L467,95 L485,95 L485,70 L477,70 L491,46 L481,46 L496,22 L511,46 L501,46 L516,70 L508,70 L508,95 L526,95 L526,76 L519,76 L531,58 L524,58 L536,40 L548,58 L541,58 L553,76 L546,76 L546,95 L563,95 L563,68 L555,68 L569,44 L560,44 L574,20 L588,44 L579,44 L593,68 L585,68 L585,95 L603,95 L603,76 L596,76 L608,58 L601,58 L613,40 L625,58 L618,58 L630,76 L623,76 L623,95 L640,95 L640,68 L632,68 L646,44 L637,44 L651,20 L665,44 L656,44 L670,68 L662,68 L662,95 L680,95 L680,76 L673,76 L685,58 L678,58 L690,40 L702,58 L695,58 L707,76 L700,76 L700,95 L717,95 L717,70 L709,70 L723,46 L714,46 L728,22 L742,46 L733,46 L747,70 L739,70 L739,95 L756,95 L756,76 L749,76 L761,58 L754,58 L766,40 L778,58 L771,58 L783,76 L776,76 L776,95 L793,95 L793,68 L785,68 L799,44 L790,44 L804,20 L818,44 L809,44 L823,68 L815,68 L815,95 L833,95 L833,76 L826,76 L838,58 L831,58 L843,40 L855,58 L848,58 L860,76 L853,76 L853,95 L870,95 L870,68 L862,68 L876,44 L867,44 L881,20 L895,44 L886,44 L900,68 L892,68 L892,95 L910,95 L910,76 L903,76 L915,58 L908,58 L920,40 L932,58 L925,58 L937,76 L930,76 L930,95 L947,95 L947,70 L939,70 L953,46 L944,46 L958,22 L972,46 L963,46 L977,70 L969,70 L969,95 L987,95 L987,76 L980,76 L992,58 L985,58 L997,40 L1009,58 L1002,58 L1014,76 L1007,76 L1007,95 L1024,95 L1024,68 L1016,68 L1030,44 L1021,44 L1035,20 L1049,44 L1040,44 L1054,68 L1046,68 L1046,95 L1064,95 L1064,76 L1057,76 L1069,58 L1062,58 L1074,40 L1086,58 L1079,58 L1091,76 L1084,76 L1084,95 L1101,95 L1101,68 L1093,68 L1107,44 L1098,44 L1112,20 L1126,44 L1117,44 L1131,68 L1123,68 L1123,95 L1141,95 L1141,76 L1134,76 L1146,58 L1139,58 L1151,40 L1163,58 L1156,58 L1168,76 L1161,76 L1161,95 L1178,95 L1178,70 L1170,70 L1184,46 L1175,46 L1189,22 L1203,46 L1194,46 L1208,70 L1200,70 L1200,95 L1218,95 L1218,76 L1211,76 L1223,58 L1216,58 L1228,40 L1240,58 L1233,58 L1245,76 L1238,76 L1238,95 L1255,95 L1255,68 L1247,68 L1261,44 L1252,44 L1266,20 L1280,44 L1271,44 L1285,68 L1277,68 L1277,95 L1295,95 L1295,76 L1288,76 L1300,58 L1293,58 L1305,40 L1317,58 L1310,58 L1322,76 L1315,76 L1315,95 L1332,95 L1332,68 L1324,68 L1338,44 L1329,44 L1343,20 L1357,44 L1348,44 L1362,68 L1354,68 L1354,95 L1372,95 L1372,76 L1365,76 L1377,58 L1370,58 L1382,40 L1394,58 L1387,58 L1399,76 L1392,76 L1392,95 L1410,95 L1440,95 L1440,180 Z"/>
+  </svg>
+
+  <div class="bg-mist"></div>
+  <div class="bg-ground"></div>
+</div>
+
+<a href="#content" class="skip-link">Skip to content</a>
+
+<!-- APP -->
+<div class="layout" role="application" aria-label="Simple Dreams Home Dashboard">
+
+  <header class="topbar">
+    <div class="wx-block">
+      <div class="wx-main">
+        <span class="wx-icon" id="wx-icon" aria-hidden="true">🌙</span>
+        <div>
+          <div class="wx-temp" id="wx-temp">--°</div>
+          <div class="wx-cond" id="wx-cond">—</div>
+        </div>
+      </div>
+      <div class="wx-sub">
+        <span>💧 <span id="wx-hum">--%</span></span>
+        <span>💨 <span id="wx-wind">--</span></span>
+        <span>🌅 <span id="wx-rise">--:--</span></span>
+        <span>🌇 <span id="wx-set">--:--</span></span>
+      </div>
+    </div>
+
+    <div class="chips-wrap" id="chips" role="status" aria-live="polite" aria-label="Home status"></div>
+
+    <div class="clock-wrap">
+      <div class="clock-time" id="clock">--:--</div>
+      <div class="clock-date" id="cdate">---</div>
+      <div class="conn-row">
+        <div class="conn-pip" id="conn-pip"></div>
+        <span class="conn-lbl" id="conn-lbl">connecting…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="content" id="content" tabindex="-1">
+
+    <!-- LEFT: Rooms -->
+    <div class="col-rooms">
+      <div class="label">Rooms</div>
+      <div class="rooms-grid" id="rooms-grid"></div>
+    </div>
+
+    <!-- MIDDLE -->
+    <div class="col-mid">
+      <div class="label">Forecast</div>
+      <div class="card card-p" style="flex-shrink:0;padding-top:10px;padding-bottom:10px;">
+        <div class="fc-strip" id="fc-strip" role="list" aria-label="Hourly forecast"></div>
+      </div>
+
+      <div class="label">Sun</div>
+      <div class="card sun-card">
+        <div class="sun-item">
+          <div class="sun-val" id="sun-elev" style="color:var(--amber)">--°</div>
+          <div class="sun-meta">elevation</div>
+        </div>
+        <div class="sun-item">
+          <div class="sun-val" id="sun-state" style="color:var(--amber)">--</div>
+          <div class="sun-meta">horizon</div>
+        </div>
+        <div class="sun-item">
+          <div class="sun-val" id="sun-rise" style="font-size:1.1rem;color:var(--sky)">--:--</div>
+          <div class="sun-meta">sunrise</div>
+        </div>
+        <div class="sun-item">
+          <div class="sun-val" id="sun-set" style="font-size:1.1rem;color:var(--lav)">--:--</div>
+          <div class="sun-meta">sunset</div>
+        </div>
+      </div>
+
+      <div class="label">Security</div>
+      <div class="card sec-card" id="sec-card">
+        <div class="sec-row">
+          <div class="sec-state" id="sec-state" style="color:var(--sage)">SECURE</div>
+          <div class="sec-detail" id="sec-detail">All clear</div>
+        </div>
+        <div class="sec-sensors" id="sec-sensors"></div>
+      </div>
+
+      <div class="label">Washer</div>
+      <div class="card washer-card">
+        <div>
+          <div class="washer-val" id="washer-val" style="color:var(--lav)">IDLE</div>
+          <div style="font-size:.68rem;color:var(--txt-3);">estimated completion</div>
+        </div>
+        <span style="font-size:1.6rem;" id="washer-ico">🧺</span>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-right">
+      <div class="label">Electricity price</div>
+      <div class="card np-wrap">
+        <div class="np-head">
+          <div>
+            <div class="np-now-val" id="np-now">--</div>
+            <div class="np-unit">SEK / kWh now</div>
+          </div>
+          <div style="font-size:.68rem;color:var(--txt-3);text-align:right;line-height:1.6;" id="np-lnn"></div>
+        </div>
+        <div class="np-bars" id="np-bars" aria-label="24h Nordpool prices"></div>
+        <div class="np-xaxis" id="np-xaxis"></div>
+      </div>
+
+      <div class="label">Energy</div>
+      <div class="card energy-wrap">
+        <div class="energy-hero">
+          <div class="energy-w" id="e-watts">-- W</div>
+          <div class="energy-cost" id="e-cost">-- SEK/h</div>
+        </div>
+        <div class="energy-chart" id="e-chart" aria-label="24h energy overview"></div>
+      </div>
+
+      <div class="label">Last · Now · Next hour</div>
+      <div class="card elec-wrap" style="flex-shrink:0;">
+        <div class="elec-bars" id="elec-bars"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="atmosphere" aria-hidden="true">
+    <div class="atm-line"></div>
+    <div class="atm-word">simple dreams</div>
+    <div class="atm-line"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="config.js"></script>
+<script>
+const ROOMS = [
+  { id:'living',   label:'Living Room',
+    temp:'sensor.livingroomtemphum_air_temperature_2', hum:'sensor.livingroomtemphum_humidity_2', lux:null,
+    lights:[{id:'light.livingroomwindow',lbl:'Window'},{id:'light.livingroomsofa',lbl:'Sofa'}] },
+  { id:'kitchen',  label:'Kitchen',
+    temp:'sensor.kitchenmotiondetector_air_temperature', hum:null, lux:'sensor.kitchenmotiondetector_illuminance',
+    lights:[{id:'light.kitchenwindow',lbl:'Window'}] },
+  { id:'bedroom',  label:'Bedroom',
+    temp:'sensor.bedroomtemphum_air_temperature', hum:'sensor.bedroomtemphum_humidity', lux:null,
+    lights:[{id:'light.bedroomroof',lbl:'Roof',dim:true},{id:'light.bedroomwinleft',lbl:'Win L'},{id:'light.bedroomwinright',lbl:'Win R'}] },
+  { id:'guest',    label:'Guest Room',
+    temp:'sensor.guestbedroomtemphum_air_temperature', hum:'sensor.guestbedroomtemphum_humidity', lux:null,
+    lights:[{id:'light.guestbedroomroof',lbl:'Roof',dim:true},{id:'light.guestbedroomwindow',lbl:'Window'}] },
+  { id:'balcony',  label:'Balcony',
+    temp:'sensor.balconyluxtemp_air_temperature', hum:null, lux:'sensor.balconyluxtemp_illuminance',
+    lights:[{id:'light.balconyonoff',lbl:'Light'}] },
+  { id:'bathroom', label:'Bathroom',
+    temp:'sensor.bathroomtemphum_air_temperature', hum:'sensor.bathroomtemphum_humidity', lux:null, lights:[] },
+  { id:'hall',     label:'Hall',
+    temp:'sensor.motion_sensor_air_temperature', hum:null, lux:'sensor.motion_sensor_illuminance', lights:[] },
+  { id:'wardrobe', label:'Wardrobe',
+    temp:'sensor.wardrobetemphum_air_temperature', hum:'sensor.wardrobetemphum_humidity', lux:null, lights:[] },
+];
+
+const ALL_LIGHT_IDS = ROOMS.flatMap(r => r.lights.map(l => l.id));
+const ALL_SENS_IDS  = new Set(ROOMS.flatMap(r => [r.temp,r.hum,r.lux].filter(Boolean)));
+const POWER_IDS = [
+  'sensor.kitchenwindow_power','sensor.livingroomwindow_power',
+  'sensor.guestbedroomwindow_power','sensor.livingroomsofa_power',
+  'sensor.bedroomwinleft_power','sensor.bedroomwinright_power_2',
+  'sensor.balconyonoff_power','sensor.guestbedroomroof_power','sensor.bedroomroof_power',
+  'sensor.livingroomwallplugtelevision_power','sensor.guestbedroomwallplugcomputer_power_2',
+];
+
+const S = {
+  lights: Object.fromEntries(ALL_LIGHT_IDS.map(id=>[id,false])),
+  bri:    Object.fromEntries(ALL_LIGHT_IDS.map(id=>[id,255])),
+  sens:   {},
+  power:  Object.fromEntries(POWER_IDS.map(id=>[id,null])),
+  np48: [], elecNow:null, elecLast:null, elecNext:null,
+  sun:{rise:null,set:null,elev:null,state:null},
+  wxFc:[], washer:false, washerCompletion:null,
+  doorOpen:false, mKitch:false, mHall:false, mBalc:false, mEntr:false,
+};
+
+// Clock
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function tickClock(){
+  const n=new Date();
+  document.getElementById('clock').textContent=n.toTimeString().slice(0,5);
+  document.getElementById('cdate').textContent=`${DAYS[n.getDay()]}, ${n.getDate()} ${MONS[n.getMonth()]}`;
+}
+setInterval(tickClock,1000); tickClock();
+
+// Toast
+let _t;
+function toast(m){ const e=document.getElementById('toast'); e.textContent=m; e.classList.add('show'); clearTimeout(_t); _t=setTimeout(()=>e.classList.remove('show'),2200); }
+
+// Weather icon
+function wxIco(c){
+  if(!c) return '—'; c=c.toLowerCase();
+  if(c.includes('clear')||c.includes('sunny')) return '☀️';
+  if(c.includes('partly')) return '⛅';
+  if(c.includes('overcast')||c.includes('cloud')) return '☁️';
+  if(c.includes('rain')||c.includes('drizzle')) return '🌧️';
+  if(c.includes('snow')) return '❄️';
+  if(c.includes('thunder')||c.includes('storm')) return '⚡';
+  if(c.includes('fog')||c.includes('mist')) return '🌫️';
+  return '🌤️';
+}
+
+// Render rooms
+function renderRooms(){
+  const g=document.getElementById('rooms-grid'); g.innerHTML='';
+  ROOMS.forEach(room=>{
+    const anyOn=room.lights.some(l=>S.lights[l.id]);
+    const temp=S.sens[room.temp]??null, hum=S.sens[room.hum]??null, lux=S.sens[room.lux]??null;
+    const el=document.createElement('div');
+    el.className=`card room-card${anyOn?' lit':''}`;
+    let h=`<div class="room-title">${room.label}</div><div class="room-sensors">`;
+    if(temp!==null) h+=`<span class="room-sensor"><span class="si">🌡</span>${temp.toFixed(1)}°</span>`;
+    if(hum !==null) h+=`<span class="room-sensor"><span class="si">💧</span>${hum.toFixed(0)}%</span>`;
+    if(lux !==null) h+=`<span class="room-sensor"><span class="si">☀</span>${lux.toFixed(0)}lx</span>`;
+    h+=`</div>`;
+    if(room.lights.length){
+      h+=`<div class="room-lights">`;
+      room.lights.forEach(lt=>{
+        const on=S.lights[lt.id], bri=S.bri[lt.id]??255, pct=Math.round(bri/255*100);
+        h+=`<div class="light-row"><span class="light-lbl">${lt.lbl}</span>
+          <label class="tog"><input type="checkbox" ${on?'checked':''} onchange="haToggle('${lt.id}',this.checked)" aria-label="${lt.lbl} ${room.label}">
+          <span class="tog-track"><span class="tog-thumb"></span></span></label></div>`;
+        if(lt.dim&&on) h+=`<div class="dimmer-wrap"><span class="dimmer-val">${pct}%</span>
+          <input type="range" class="dimmer" min="1" max="255" value="${bri}" aria-label="Brightness ${lt.lbl}" oninput="haDim('${lt.id}',this.value)"></div>`;
+      });
+      h+=`</div>`;
+    }
+    el.innerHTML=h; g.appendChild(el);
+  });
+  renderChips();
+}
+
+// Render chips
+function renderChips(){
+  const litN=ALL_LIGHT_IDS.filter(id=>S.lights[id]).length;
+  const anyM=S.mKitch||S.mHall||S.mBalc||S.mEntr;
+  const chips=[
+    {lbl:`${litN} light${litN!==1?'s':''} on`, cls:litN>0?'on':''},
+    {lbl:S.washer?`Washer ${washerRemainingText(true)}`:'Washer idle', cls:S.washer?'warn':''},
+    {lbl:S.doorOpen?'Balcony open':'All doors closed', cls:S.doorOpen?'bad':'on'},
+    {lbl:anyM?'Motion detected':'No motion', cls:anyM?'warn':''},
+    {lbl:S.elecNow!=null?`${S.elecNow.toFixed(3)} SEK/kWh`:'-- price', cls:'on'},
+  ];
+  document.getElementById('chips').innerHTML=chips.map(c=>`<div class="chip ${c.cls}"><span class="pip"></span>${c.lbl}</div>`).join('');
+}
+
+// Render forecast
+function renderFc(){
+  const el=document.getElementById('fc-strip');
+  if(!S.wxFc.length){el.innerHTML='<div style="color:var(--txt-3);font-size:.72rem;padding:6px;">Awaiting…</div>';return;}
+  const slots=S.wxFc.filter((_,i)=>i%2===0).slice(0,9);
+  el.innerHTML=slots.map((s,i)=>{
+    const d=new Date(s.datetime), hh=d.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="fc-slot${i===0?' now':''}" role="listitem" aria-label="${hh} ${s.condition} ${s.temperature}°">
+      <span class="fc-time">${hh}</span><span class="fc-ico">${wxIco(s.condition)}</span>
+      <span class="fc-t">${s.temperature??'--'}°</span>
+      <span class="fc-p">${(s.precipitation||0)>0?s.precipitation+'mm':''}</span></div>`;
+  }).join('');
+  const cur=S.wxFc[0];
+  document.getElementById('wx-icon').textContent=wxIco(cur.condition);
+  document.getElementById('wx-cond').textContent=(cur.condition||'').replace(/-/g,' ');
+  if(cur.humidity!=null) document.getElementById('wx-hum').textContent=cur.humidity+'%';
+  if(cur.wind_speed!=null) document.getElementById('wx-wind').textContent=cur.wind_speed+' m/s';
+}
+
+// Render sun
+function renderSun(){
+  const fmt=dt=>dt?new Date(dt).toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'}):'--:--';
+  document.getElementById('sun-elev').textContent=S.sun.elev!=null?S.sun.elev.toFixed(1)+'°':'--°';
+  const above=S.sun.state==='above_horizon';
+  const sv=document.getElementById('sun-state');
+  sv.textContent=above?'ABOVE':'BELOW'; sv.style.color=above?'var(--amber)':'var(--lav)';
+  document.getElementById('sun-rise').textContent=fmt(S.sun.rise);
+  document.getElementById('sun-set').textContent=fmt(S.sun.set);
+  document.getElementById('wx-rise').textContent=fmt(S.sun.rise);
+  document.getElementById('wx-set').textContent=fmt(S.sun.set);
+}
+
+// Render security
+function renderSec(){
+  const door=S.doorOpen, anyM=S.mKitch||S.mHall||S.mBalc||S.mEntr;
+  const night=(()=>{const h=new Date().getHours();return h<6||h>22;})();
+  const card=document.getElementById('sec-card');
+  const sv=document.getElementById('sec-state'), sd=document.getElementById('sec-detail');
+  card.className='card sec-card';
+  if(door&&anyM)    {sv.textContent='BREACH';   sv.style.color='var(--red)';   sd.textContent='Door open + motion';  card.classList.add('alert');}
+  else if(door&&night){sv.textContent='ELEVATED';sv.style.color='var(--amber)';sd.textContent='Door open at night';  card.classList.add('warn');}
+  else if(door)     {sv.textContent='CAUTION';  sv.style.color='var(--amber)'; sd.textContent='Balcony door open';   card.classList.add('warn');}
+  else if(anyM)     {sv.textContent='MOTION';   sv.style.color='var(--lav)';   sd.textContent='Motion detected';}
+  else              {sv.textContent='SECURE';   sv.style.color='var(--sage)';  sd.textContent='All clear';}
+  document.getElementById('sec-sensors').innerHTML=
+    [{lbl:'Balcony door',on:door},{lbl:'Kitchen',on:S.mKitch},{lbl:'Hall',on:S.mHall},{lbl:'Balcony',on:S.mBalc}]
+    .map(p=>`<span class="sec-pip${p.on?' active':''}">${p.lbl}</span>`).join('');
+}
+
+// Render washer
+function washerRemainingText(compact=false){
+  if(!S.washerCompletion)return 'running';
+  const eta=new Date(S.washerCompletion);
+  if(Number.isNaN(eta.getTime()))return 'running';
+  const diffMin=Math.max(0,Math.ceil((eta.getTime()-Date.now())/60000));
+  if(diffMin===0)return 'finishing';
+  if(compact)return `${diffMin} min`;
+  const h=Math.floor(diffMin/60),m=diffMin%60;
+  return h>0?`${h} h${m>0?` ${m} min`:''} left`:`${m} min left`;
+}
+function renderWasher(){
+  const el=document.getElementById('washer-val'), ico=document.getElementById('washer-ico');
+  el.innerHTML=S.washer
+    ? `<span class="washer-time-full">${washerRemainingText().toUpperCase()}</span><span class="washer-time-compact">${washerRemainingText(true).toUpperCase()}</span>`
+    : 'IDLE';
+  el.style.color=S.washer?'var(--amber)':'var(--lav)';
+  if(S.washer&&S.washerCompletion){
+    const eta=new Date(S.washerCompletion);
+    el.title=Number.isNaN(eta.getTime())?'':`Estimated finish ${eta.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'})}`;
+  }else el.title='';
+  ico.textContent=S.washer?'🔄':'🧺';
+}
+
+// Render outside temp
+function renderOutside(){
+  const ot=S.sens['sensor.outside_temperature_met_no']??S.sens['sensor.balconyluxtemp_air_temperature'];
+  if(ot!=null) document.getElementById('wx-temp').textContent=ot.toFixed(1)+'°';
+}
+
+// Render nordpool
+function renderNP(){
+  const prices=S.np48.slice(0,24); if(!prices.length) return;
+  const max=Math.max(...prices.map(p=>p.v),0.01), now=new Date();
+  if(S.elecNow!=null) document.getElementById('np-now').textContent=S.elecNow.toFixed(3);
+  const parts=[];
+  if(S.elecLast!=null) parts.push('Last: '+S.elecLast.toFixed(3));
+  if(S.elecNow !=null) parts.push('Now: '+S.elecNow.toFixed(3));
+  if(S.elecNext!=null) parts.push('Next: '+S.elecNext.toFixed(3));
+  document.getElementById('np-lnn').innerHTML=parts.join('<br>');
+  document.getElementById('np-bars').innerHTML=prices.map(p=>{
+    const d=new Date(p.s), cur=d.getHours()===now.getHours()&&d.getDate()===now.getDate();
+    const h=Math.max(4,(p.v/max)*100), col=p.v>1.5?'var(--red)':p.v>0.8?'var(--amber)':'var(--teal)';
+    return `<div class="np-bar${cur?' cur':''}" style="height:${h}%;background:${col};color:${col};"
+      role="img" tabindex="0" aria-label="${d.getHours()}:00 ${p.v.toFixed(3)} SEK"
+      onmouseenter="toast('${d.getHours().toString().padStart(2,'0')}:00 — ${p.v.toFixed(3)} SEK/kWh')"></div>`;
+  }).join('');
+  let x=''; for(let i=0;i<24;i+=6){if(prices[i])x+=`<span>${new Date(prices[i].s).getHours().toString().padStart(2,'0')}h</span>`;}
+  document.getElementById('np-xaxis').innerHTML=x;
+}
+
+// Render energy
+function totalW(){ return POWER_IDS.reduce((s,id)=>s+(S.power[id]??0),0); }
+function renderEnergy(){
+  const w=totalW(), p=S.elecNow||0;
+  document.getElementById('e-watts').textContent=w.toFixed(1)+' W';
+  document.getElementById('e-cost').textContent=((w/1000)*p).toFixed(3)+' SEK/h';
+  const chart=document.getElementById('e-chart'), prices=S.np48.slice(0,24);
+  if(!prices.length){chart.innerHTML='<div style="color:var(--txt-3);font-size:.72rem;">Awaiting Nordpool…</div>';return;}
+  const maxP=Math.max(...prices.map(p=>p.v),0.01), maxW=Math.max(w*1.2,10), now=new Date();
+  chart.innerHTML=prices.map(p=>{
+    const d=new Date(p.s), cur=d.getHours()===now.getHours()&&d.getDate()===now.getDate();
+    const ph=(p.v/maxP)*100, wh=cur?(w/maxW)*100:0;
+    const col=p.v>1.5?'var(--red)':p.v>0.8?'var(--amber)':'var(--teal)';
+    const tip=`${d.getHours().toString().padStart(2,'0')}:00 — ${p.v.toFixed(3)} SEK${cur?' · '+w.toFixed(1)+'W':''}`;
+    return `<div class="eb-wrap${cur?' cur':''}" role="img" tabindex="0" aria-label="${tip}" onmouseenter="toast('${tip}')">
+      <div class="eb-price" style="height:${ph}%;background:${col};"></div>
+      ${wh>0?`<div class="eb-power" style="height:${wh}%;background:var(--teal);"></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// Render elec bars
+function renderElec(){
+  const vals=[{lbl:'Last',v:S.elecLast},{lbl:'Now',v:S.elecNow},{lbl:'Next',v:S.elecNext}];
+  const max=Math.max(...vals.map(x=>x.v||0),0.01);
+  document.getElementById('elec-bars').innerHTML=vals.map(x=>{
+    const pct=x.v!=null?(x.v/max)*100:0;
+    const col=(x.v||0)>1.5?'var(--red)':(x.v||0)>0.8?'var(--amber)':'var(--teal)';
+    return `<div class="elec-item"><div class="elec-track"><div class="elec-fill" style="width:${pct}%;background:${col};"></div></div>
+      <div class="elec-lbl">${x.lbl}<br>${x.v!=null?x.v.toFixed(3):'--'}</div></div>`;
+  }).join('');
+}
+
+// Ingest state
+function ingest(s){
+  const id=s.entity_id, val=s.state;
+  if(ALL_LIGHT_IDS.includes(id)){
+    S.lights[id]=val==='on';
+    const b=s.attributes?.brightness; if(b!=null) S.bri[id]=b;
+    renderRooms();
+  }
+  if(ALL_SENS_IDS.has(id)){ const v=parseFloat(val); S.sens[id]=isNaN(v)?null:v; renderRooms(); }
+  if(id==='sensor.outside_temperature_met_no'){ const v=parseFloat(val); S.sens[id]=isNaN(v)?null:v; renderOutside(); renderChips(); }
+  if(id==='sensor.nordpool_current_price_15m'){ const v=parseFloat(val); S.elecNow=isNaN(v)?null:v; renderNP(); renderEnergy(); renderElec(); renderChips(); }
+  if(id==='sensor.nordpool_last_this_next_hour'){
+    const m=val.match(/Last:\s*([\d.]+).*?Now:\s*([\d.]+).*?Next:\s*([\d.]+)/s);
+    if(m){S.elecLast=parseFloat(m[1]);S.elecNow=parseFloat(m[2]);S.elecNext=parseFloat(m[3]);}
+    renderElec(); renderChips();
+  }
+  if(id==='sensor.nordpool_next_24h_15m'||id==='sensor.nordpool'){
+    const t=s.attributes?.raw_today||[], m=s.attributes?.raw_tomorrow||[];
+    if(t.length){S.np48=[...t,...m].map(e=>({s:e.start,v:parseFloat(e.value)})); renderNP(); renderEnergy();}
+  }
+  if(id==='sun.sun'){
+    S.sun.rise=s.attributes?.next_rising??null; S.sun.set=s.attributes?.next_setting??null;
+    S.sun.elev=s.attributes?.elevation??null;   S.sun.state=val; renderSun();
+  }
+  if(id==='sensor.bathroom_washer_machine_state'){S.washer=val==='run';renderWasher();renderChips();}
+  if(id==='sensor.bathroom_washer_completion_time'){S.washerCompletion=val;renderWasher();renderChips();}
+  if(id==='binary_sensor.balconydooropenclosed_window_door_is_open'){S.doorOpen=val==='on';renderSec();renderChips();}
+  if(id==='binary_sensor.kitchenmotiondetector_sensor_state_any')  {S.mKitch=val==='on';renderSec();}
+  if(id==='binary_sensor.motion_sensor_motion_detection')          {S.mHall=val==='on';renderSec();}
+  if(id==='binary_sensor.balconyluxtemp_motion_detection')         {S.mBalc=val==='on';renderSec();}
+  if(id==='binary_sensor.entrancemotionsensor_basic')              {S.mEntr=val==='on';renderSec();}
+  if(POWER_IDS.includes(id)){const v=parseFloat(val);S.power[id]=isNaN(v)?null:v;renderEnergy();renderChips();}
+  if(id==='weather.forecast_home_2') renderFc();
+}
+
+// HA calls
+let ws, wsOk=false, mid=1, wxMid=null, reconn=null;
+function haCall(dom,svc,data){ if(!ws||!wsOk){toast('Not connected');return;} ws.send(JSON.stringify({id:mid++,type:'call_service',domain:dom,service:svc,service_data:data})); }
+function haToggle(id,on){ haCall('light',on?'turn_on':'turn_off',{entity_id:id}); }
+function haDim(id,v)    { haCall('light','turn_on',{entity_id:id,brightness:parseInt(v)}); }
+
+function setConn(s){ const p=document.getElementById('conn-pip'),l=document.getElementById('conn-lbl'); p.className='conn-pip '+s; l.textContent=s==='online'?'connected':s==='offline'?'offline':'connecting…'; }
+
+function connect(){
+  setConn('connecting');
+  ws=new WebSocket(HA_WS);
+  ws.onmessage=evt=>{
+    const m=JSON.parse(evt.data);
+    if(m.type==='auth_required'){ws.send(JSON.stringify({type:'auth',access_token:HA_TOKEN}));}
+    else if(m.type==='auth_ok'){
+      wsOk=true; setConn('online');
+      ws.send(JSON.stringify({id:mid++,type:'get_states'}));
+      ws.send(JSON.stringify({id:mid++,type:'subscribe_events',event_type:'state_changed'}));
+      wxMid=mid;
+      ws.send(JSON.stringify({id:mid++,type:'call_service',domain:'weather',service:'get_forecasts',service_data:{entity_id:'weather.forecast_home_2',type:'hourly'},return_response:true}));
+    }
+    else if(m.type==='auth_invalid'){setConn('offline');toast('Auth failed');}
+    else if(m.type==='result'){
+      if(m.id===wxMid&&m.result?.response){
+        const fc=Object.values(m.result.response)[0]?.forecast;
+        if(Array.isArray(fc)){S.wxFc=fc.slice(0,24);renderFc();renderOutside();}
+      } else if(Array.isArray(m.result)){
+        m.result.forEach(s=>ingest(s));
+        renderRooms();renderSun();renderElec();renderNP();renderEnergy();renderOutside();renderSec();renderFc();renderWasher();
+      }
+    }
+    else if(m.type==='event'&&m.event?.event_type==='state_changed'){
+      const ns=m.event.data?.new_state;
+      if(ns){
+        ingest(ns);
+        if(ns.entity_id==='weather.forecast_home_2'){
+          wxMid=mid;
+          ws.send(JSON.stringify({id:mid++,type:'call_service',domain:'weather',service:'get_forecasts',service_data:{entity_id:'weather.forecast_home_2',type:'hourly'},return_response:true}));
+        }
+      }
+    }
+  };
+  ws.onerror=()=>setConn('offline');
+  ws.onclose=()=>{wsOk=false;setConn('offline');clearTimeout(reconn);reconn=setTimeout(connect,5000);};
+}
+
+renderRooms(); renderSun(); renderElec(); renderSec(); renderWasher();
+setInterval(renderSun,60000); setInterval(renderSec,60000); setInterval(()=>{renderWasher();renderChips();},60000);
+connect();
+</script>
+</body>
+</html>
