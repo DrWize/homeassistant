@@ -1076,6 +1076,102 @@ body.night-mode::before {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* ═══ READABILITY PASS ═══
+   Keep the C64 palette and pixel type, but render rem units from a normal
+   root size. The previous 0.65rem root made every nested rem value ~35%
+   smaller than intended. */
+:root {
+  --c64-light-blue: #AAA3FF;
+  --text: #DDD9FF;
+  --border: #AAA3FF;
+  --card-bg: #28185F;
+  --card-border: #AAA3FF;
+  --grey: #6654AA;
+  --grey-mid: #C8C0F4;
+}
+
+html { font-size: 16px; }
+body { font-size: 0.75rem; line-height: 1.7; }
+body::after {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.04) 3px,
+    rgba(0,0,0,0.04) 4px
+  );
+}
+
+.c64-header .title { font-size: 0.85rem; }
+.c64-header .sub,
+.c64-header .ready,
+.c64-status,
+.c64-footer { font-size: 0.625rem; }
+.c64-tab { font-size: 0.7rem; padding-block: 10px; }
+.lc-section-pill { font-size: 0.625rem; padding: 4px 12px; }
+
+.room-grid {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.room-card { border-color: var(--card-border); }
+.room-header { padding: 10px 10px 8px 14px; }
+.room-body { padding: 10px 10px 10px 14px; }
+.room-name { font-size: 0.7rem; color: var(--text); }
+.room-lit-badge,
+.sensor-chip,
+.light-row,
+.light-state,
+.dimmer-label,
+.dimmer-pct { font-size: 0.625rem; }
+.light-label,
+.light-state { color: var(--grey-mid); }
+
+.status-block { padding: 10px 12px; min-width: 150px; }
+.status-block label { font-size: 0.6rem; color: var(--grey-mid); }
+.status-block .val { font-size: 0.8rem; }
+.washer-badge { font-size: 0.625rem; }
+.washer-badge.running {
+  animation: none;
+  box-shadow: 0 0 0 1px var(--c64-yellow), 0 0 8px rgba(238, 238, 119, 0.35);
+}
+
+.data-row,
+.solar-block label,
+.weather-card .wc-time,
+.weather-card .wc-detail,
+.weather-card .wc-wind,
+.media-stat-block label,
+.session-meta,
+.mp-meta,
+.lc-energy-stat label { font-size: 0.625rem; }
+.data-val,
+.solar-block .val,
+.weather-card .wc-temp,
+.media-stat-block .val,
+.session-title,
+.mp-title,
+.lc-energy-stat .val { font-size: 0.7rem; }
+
+.lc-device-table { font-size: 0.8rem; }
+.lc-device-table th,
+.room-group-header td,
+.lc-power-hero-stat label { font-size: 0.65rem; }
+.lc-device-table td { padding-block: 6px; }
+
+@media (max-width: 700px) {
+  html { font-size: 15px; }
+  .c64-frame { border-width: 2px; }
+  .c64-header { padding: 8px 8px 6px; }
+  .c64-content { padding: 10px; }
+  .c64-status { gap: 10px; }
+  .c64-tab { min-width: 86px; font-size: 0.625rem; }
+  .room-grid { grid-template-columns: 1fr; gap: 10px; }
+  .status-block { min-width: min(145px, 100%); }
+  .lc-power-panel { overflow-x: auto; }
+  .lc-device-table { min-width: 620px; }
+}
 </style>
 </head>
 <body>

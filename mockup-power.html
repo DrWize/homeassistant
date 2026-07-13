@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power Consumption Mockup — LCARS Style</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23000'/><text x='6' y='24' font-size='22' fill='%23F90'>⚡</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap');
+
+:root {
+  --bg:       #000;
+  --orange:   #ff9900;
+  --tan:      #ffcc99;
+  --blue:     #9999ff;
+  --purple:   #cc99cc;
+  --red:      #ff3300;
+  --yellow:   #ffff00;
+  --teal:     #66cccc;
+  --white:    #fff;
+  --grey:     #626272;
+  --grey-mid: #808090;
+  --text-dim: #996644;
+  --radius:   28px;
+  --bar-h:    48px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  background: var(--bg);
+  color: var(--tan);
+  font-family: 'Titillium Web', sans-serif;
+  min-height: 100vh;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.mockup-banner {
+  background: var(--purple);
+  color: var(--bg);
+  text-align: center;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+/* ── Section headers (LCARS style) ── */
+.lc-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 28px 0 14px;
+}
+.lc-section-pill {
+  background: var(--purple);
+  color: var(--bg);
+  padding: 2px 14px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+}
+.lc-section-line {
+  flex: 1;
+  height: 3px;
+  background: var(--purple);
+  opacity: 0.4;
+}
+
+/* ═══════════════════════════════════
+   TOTAL POWER HERO
+═══════════════════════════════════ */
+.power-hero {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.power-hero-main {
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: var(--orange);
+  line-height: 1;
+}
+.power-hero-main small {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--tan);
+  opacity: 0.7;
+}
+.power-hero-stats {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.power-hero-stat label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--grey-mid);
+  display: block;
+}
+.power-hero-stat .val {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--tan);
+}
+
+/* ═══════════════════════════════════
+   ROOM POWER BREAKDOWN
+═══════════════════════════════════ */
+.room-power-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.room-power-card {
+  background: rgba(255, 153, 0, 0.06);
+  border: 1px solid rgba(255, 153, 0, 0.15);
+  border-radius: 8px;
+  padding: 12px 14px;
+  position: relative;
+  overflow: hidden;
+}
+.room-power-card .room-name {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--grey-mid);
+  margin-bottom: 4px;
+}
+.room-power-card .room-watts {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--orange);
+}
+.room-power-card .room-watts.zero {
+  color: var(--grey);
+}
+.room-power-card .room-watts small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--tan);
+  opacity: 0.6;
+}
+.room-power-card .room-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--orange);
+  border-radius: 0 3px 0 0;
+  transition: width 0.5s ease;
+}
+.room-power-card .room-devices {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════
+   DEVICE TABLE
+═══════════════════════════════════ */
+.device-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+.device-table th {
+  text-align: left;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--grey-mid);
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(255,153,0,0.15);
+}
+.device-table th.right { text-align: right; }
+.device-table td {
+  padding: 3px 8px;
+  vertical-align: middle;
+}
+.device-table td.right { text-align: right; font-variant-numeric: tabular-nums; }
+.device-table tr:hover { background: rgba(255,153,0,0.04); }
+
+.room-group-header td {
+  padding: 8px 8px 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--purple);
+  border-bottom: 1px solid rgba(204,153,204,0.15);
+}
+.room-group-header td.right { font-variant-numeric: tabular-nums; }
+.room-group-header:first-child td { padding-top: 2px; }
+.room-total-w { color: var(--orange); font-weight: 700; font-size: 0.65rem; }
+.room-total-kwh { color: var(--blue); font-weight: 600; font-size: 0.65rem; }
+
+.device-name { color: var(--tan); }
+.device-room { color: var(--grey-mid); font-size: 0.65rem; }
+
+.watts-val { color: var(--orange); font-weight: 600; }
+.watts-val.off { color: var(--grey); font-weight: 400; }
+.kwh-val { color: var(--blue); font-weight: 400; }
+
+.power-bar-cell { width: 90px; }
+.power-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,153,0,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.power-bar-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 3px;
+  transition: width 0.4s;
+}
+
+/* ═══════════════════════════════════
+   WEEKLY / MONTHLY CONSUMPTION
+═══════════════════════════════════ */
+.period-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 100px;
+  padding: 4px 0;
+}
+.period-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+.period-bar-wrap {
+  width: 100%;
+  height: 70px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.period-bar {
+  width: 70%;
+  background: var(--orange);
+  border-radius: 3px 3px 0 0;
+  opacity: 0.85;
+  transition: height 0.4s;
+  position: relative;
+}
+.period-bar.current { background: var(--yellow); opacity: 1; }
+.period-bar.nodata { background: var(--grey); opacity: 0.3; }
+.period-val {
+  font-size: 0.6rem;
+  color: var(--tan);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.period-val.nodata { color: var(--grey); }
+.period-label {
+  font-size: 0.55rem;
+  color: var(--grey-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.period-avg {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: var(--grey-mid);
+}
+.period-avg span { color: var(--orange); font-weight: 600; }
+
+/* ═══════════════════════════════════
+   EXISTING: ENERGY CHART (kept)
+═══════════════════════════════════ */
+.lc-energy-wrap { margin-bottom: 14px; }
+.lc-energy-header {
+  display: flex; gap: 20px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.lc-energy-stat label {
+  font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--grey-mid); display: block;
+}
+.lc-energy-stat .val { font-size: 1rem; font-weight: 700; color: var(--orange); }
+.lc-energy-chart {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 80px; background: rgba(255,153,0,0.03);
+  border-radius: 6px; padding: 4px; overflow: hidden;
+}
+.lc-energy-bar {
+  flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+  border-radius: 2px 2px 0 0; position: relative; min-width: 0;
+}
+.lc-energy-bar-price {
+  border-radius: 2px 2px 0 0; opacity: 0.25;
+}
+.lc-energy-bar-power {
+  background: var(--orange); opacity: 0.85; border-radius: 2px 2px 0 0;
+}
+.lc-energy-bar.current .lc-energy-bar-power {
+  opacity: 1; background: var(--yellow);
+}
+.lc-energy-legend {
+  display: flex; gap: 14px; font-size: 0.65rem; color: var(--grey-mid);
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════
+   TOP CONSUMERS PIE
+═══════════════════════════════════ */
+.top-consumers {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.donut-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+.donut-container svg { width: 100%; height: 100%; }
+.donut-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center;
+}
+.donut-center .big { font-size: 1.2rem; font-weight: 700; color: var(--orange); display: block; }
+.donut-center .sub { font-size: 0.6rem; color: var(--grey-mid); text-transform: uppercase; letter-spacing: 1px; }
+
+.consumer-list { flex: 1; min-width: 180px; }
+.consumer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 0.8rem;
+}
+.consumer-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.consumer-label { flex: 1; color: var(--tan); }
+.consumer-kwh { color: var(--blue); font-weight: 600; font-variant-numeric: tabular-nums; }
+.consumer-pct { color: var(--grey-mid); font-size: 0.7rem; width: 36px; text-align: right; }
+
+/* ── NOTE BANNER ── */
+.note {
+  margin-top: 28px;
+  padding: 12px 16px;
+  background: rgba(153,153,255,0.08);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.78rem;
+  color: var(--blue);
+  line-height: 1.6;
+}
+.note strong { color: var(--tan); }
+</style>
+</head>
+<body>
+
+<div class="mockup-banner">⚡ MOCKUP — Power Consumption Panel ⚡</div>
+
+<div class="container">
+
+  <!-- ════════════════════════════════ -->
+  <!-- SECTION 1: TOTAL POWER HERO    -->
+  <!-- ════════════════════════════════ -->
+  <div class="lc-section">
+    <div class="lc-section-pill">Apartment Power Overview</div>
+    <div class="lc-section-line"></div>
+  </div>
+
+  <div class="power-hero">
+    <div class="power-hero-main">
+      276.1 <small>W</small>
+    </div>
+    <div class="power-hero-stats">
+      <div class="power-hero-stat">
+        <label>Est. Cost/Hour</label>
+        <div class="val">0.083 SEK/h</div>
+      </div>
+      <div class="power-hero-stat">
+        <label>Price Now</label>
+        <div class="val">0.30 SEK/kWh</div>
+      </div>
+      <div class="power-hero-stat">
+        <label>Total Tracked</label>
+        <div class="val" style="color:var(--blue);">1,644 kWh</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ -->
+  <!-- SECTION 2: ROOM BREAKDOWN      -->
+  <!-- ════════════════════════════════ -->
+  <div class="lc-section">
+    <div class="lc-section-pill">Power by Room</div>
+    <div class="lc-section-line"></div>
+  </div>
+
+  <div class="room-power-grid">
+    <div class="room-power-card">
+      <div class="room-name">Guest Room</div>
+      <div class="room-watts">227.3 <small>W</small></div>
+      <div class="room-devices">Computer 224.0 · Window 3.3</div>
+      <div class="room-bar" style="width:82%"></div>
+    </div>
+    <div class="room-power-card">
+      <div class="room-name">Living Room</div>
+      <div class="room-watts">32.7 <small>W</small></div>
+      <div class="room-devices">TV 23.6 · Window 5.6 · Sofa 3.5</div>
+      <div class="room-bar" style="width:12%"></div>
+    </div>
+    <div class="room-power-card">
+      <div class="room-name">Balcony</div>
+      <div class="room-watts">7.0 <small>W</small></div>
+      <div class="room-devices">Deco Lights 7.0</div>
+      <div class="room-bar" style="width:3%"></div>
+    </div>
+    <div class="room-power-card">
+      <div class="room-name">Kitchen</div>
+      <div class="room-watts">5.4 <small>W</small></div>
+      <div class="room-devices">Window 5.4</div>
+      <div class="room-bar" style="width:2%"></div>
+    </div>
+    <div class="room-power-card">
+      <div class="room-name">Bedroom</div>
+      <div class="room-watts">3.7 <small>W</small></div>
+      <div class="room-devices">WinRight 1.9 · WinLeft 1.8 · Roof 0</div>
+      <div class="room-bar" style="width:1.5%"></div>
+    </div>
+    <div class="room-power-card">
+      <div class="room-name">Bathroom</div>
+      <div class="room-watts zero">-- <small>W</small></div>
+      <div class="room-devices">No sensors</div>
+      <div class="room-bar" style="width:0"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ -->
+  <!-- SECTION 3: LIVE ENERGY CHART   -->
+  <!-- (already exists — kept as-is)  -->
+  <!-- ════════════════════════════════ -->
+  <div class="lc-section">
+    <div class="lc-section-pill">Energy Consumption vs Price</div>
+    <div class="lc-section-line"></div>
+  </div>
+
+  <div class="lc-energy-wrap">
+    <div class="lc-energy-header">
+      <div class="lc-energy-stat">
+        <label>Current Load</label>
+        <div class="val">276.1 W</div>
+      </div>
+      <div class="lc-energy-stat">
+        <label>Est. Cost/Hour</label>
+        <div class="val">0.083 SEK/h</div>
+      </div>
+      <div class="lc-energy-stat">
+        <label>Price Now</label>
+        <div class="val">0.30 SEK/kWh</div>
+      </div>
+    </div>
+    <div class="lc-energy-chart" id="lc-energy-chart"></div>
+    <div class="lc-energy-legend">
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--orange);opacity:0.9;margin-right:4px;"></span>Power (W)</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--blue);opacity:0.35;margin-right:4px;"></span>Price overlay</span>
+      <span style="margin-left:auto;">Min 180 W · Max 340 W</span>
+    </div>
+  </div>
+
+  <!-- generate fake chart bars -->
+  <script>
+    const chart = document.getElementById('lc-energy-chart');
+    const fakeData = [
+      210,230,250,220,190,180,195,240,280,310,340,320,290,270,260,250,
+      240,235,230,225,230,240,255,270,280,290,310,300,285,270,260,250,
+      245,240,250,260,270,280,276
+    ];
+    const max = Math.max(...fakeData) * 1.1;
+    fakeData.forEach((w, i) => {
+      const isLast = i === fakeData.length - 1;
+      const wPct = (w / max) * 100;
+      const pPct = (20 + Math.random() * 40);
+      const bar = document.createElement('div');
+      bar.className = 'lc-energy-bar' + (isLast ? ' current' : '');
+      bar.innerHTML = `
+        <div class="lc-energy-bar-price" style="height:${pPct}%;background:var(--blue);"></div>
+        <div class="lc-energy-bar-power" style="height:${wPct}%;"></div>
+      `;
+      chart.appendChild(bar);
+    });
+  </script>
+
+  <!-- ════════════════════════════════ -->
+  <!-- SECTION 4: TOP CONSUMERS (kWh) -->
+  <!-- ════════════════════════════════ -->
+  <div class="lc-section">
+    <div class="lc-section-pill">All-Time Energy Consumption</div>
+    <div class="lc-section-line"></div>
+  </div>
+
+  <div class="top-consumers">
+    <div class="donut-container">
+      <svg viewBox="0 0 36 36">
+        <!-- Computer 67% -->
+        <circle cx="18" cy="18" r="14" fill="none" stroke="#ff9900" stroke-width="4"
+          stroke-dasharray="67 33" stroke-dashoffset="25" />
+        <!-- TV 16% -->
+        <circle cx="18" cy="18" r="14" fill="none" stroke="#cc99cc" stroke-width="4"
+          stroke-dasharray="16 84" stroke-dashoffset="58" />
+        <!-- Washer 8% -->
+        <circle cx="18" cy="18" r="14" fill="none" stroke="#9999ff" stroke-width="4"
+          stroke-dasharray="8 92" stroke-dashoffset="42" />
+        <!-- Other 9% -->
+        <circle cx="18" cy="18" r="14" fill="none" stroke="#626272" stroke-width="4"
+          stroke-dasharray="9 91" stroke-dashoffset="34" />
+      </svg>
+      <div class="donut-center">
+        <span class="big">1,644</span>
+        <span class="sub">kWh total</span>
+      </div>
+    </div>
+
+    <div class="consumer-list">
+      <div class="consumer-row">
+        <div class="consumer-dot" style="background:var(--orange)"></div>
+        <div class="consumer-label">Computer <span class="device-room">(Guest Room)</span></div>
+        <div class="consumer-kwh">1,099.6</div>
+        <div class="consumer-pct">67%</div>
+      </div>
+      <div class="consumer-row">
+        <div class="consumer-dot" style="background:var(--purple)"></div>
+        <div class="consumer-label">Television <span class="device-room">(Living Room)</span></div>
+        <div class="consumer-kwh">263.9</div>
+        <div class="consumer-pct">16%</div>
+      </div>
+      <div class="consumer-row">
+        <div class="consumer-dot" style="background:var(--blue)"></div>
+        <div class="consumer-label">Washer</div>
+        <div class="consumer-kwh">131.3</div>
+        <div class="consumer-pct">8%</div>
+      </div>
+      <div class="consumer-row">
+        <div class="consumer-dot" style="background:var(--teal)"></div>
+        <div class="consumer-label">Balcony Lights</div>
+        <div class="consumer-kwh">47.5</div>
+        <div class="consumer-pct">3%</div>
+      </div>
+      <div class="consumer-row">
+        <div class="consumer-dot" style="background:var(--grey)"></div>
+        <div class="consumer-label">All Other Lights</div>
+        <div class="consumer-kwh">101.7</div>
+        <div class="consumer-pct">6%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ -->
+  <!-- SECTION 5: WEEKLY CONSUMPTION  -->
+  <!-- ════════════════════════════════ -->
+  <div class="lc-section" style="margin-top:28px;">
+    <div class="lc-section-pill">Weekly Consumption</div>
+    <div class="lc-section-line"></div>
+  </div>
+
+  <div class="period-chart">
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Jan 27</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Feb 3</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Feb 10</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Feb 17</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Feb 24</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Mar 3</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val">32.3</div>
+      <div class="period-bar-wrap"><div class="period-bar" style="height:63%"></div></div>
+      <div class="period-label">Mar 10</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val">22.0</div>
+      <div class="period-bar-wrap"><div class="period-bar current" style="height:43%"></div></div>
+      <div class="period-label">This wk</div>
+    </div>
+  </div>
+  <div class="period-avg">Avg (available): <span>~27 kWh/wk</span> &nbsp;·&nbsp; HA history starts Mar 6 — older weeks unavailable</div>
+
+  <!-- ════════════════════════════════ -->
+  <!-- SECTION 6: MONTHLY CONSUMPTION -->
+  <!-- ════════════════════════════════ -->
+  <div class="lc-section" style="margin-top:24px;">
+    <div class="lc-section-pill">Monthly Consumption</div>
+    <div class="lc-section-line"></div>
+  </div>
+
+  <div class="period-chart">
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Oct</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Nov</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Dec</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Jan</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val nodata">—</div>
+      <div class="period-bar-wrap"><div class="period-bar nodata" style="height:5%"></div></div>
+      <div class="period-label">Feb</div>
+    </div>
+    <div class="period-col">
+      <div class="period-val">54.3</div>
+      <div class="period-bar-wrap"><div class="period-bar current" style="height:55%"></div></div>
+      <div class="period-label">Mar</div>
+    </div>
+  </div>
+  <div class="period-avg">Mar so far (15 days): <span>54.3 kWh</span> &nbsp;·&nbsp; Projected full month: <span>~109 kWh</span></div>
+
+  <!-- ════════════════════════════════ -->
+  <!-- SECTION 7: DEVICE TABLE        -->
+  <!-- ════════════════════════════════ -->
+  <div class="lc-section" style="margin-top:28px;">
+    <div class="lc-section-pill">All Monitored Devices</div>
+    <div class="lc-section-line"></div>
+  </div>
+
+  <table class="device-table">
+    <thead>
+      <tr>
+        <th>Device</th>
+        <th class="right">Now</th>
+        <th style="width:90px"></th>
+        <th class="right">kWh</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="room-group-header"><td colspan="2">Living Room</td><td class="right"><span class="room-total-w">32.7 W</span></td><td class="right"><span class="room-total-kwh">289.9</span></td></tr>
+      <tr>
+        <td>Television</td>
+        <td class="right"><span class="watts-val">23.6 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:8.5%"></div></div></td>
+        <td class="right"><span class="kwh-val">263.9</span></td>
+      </tr>
+      <tr>
+        <td>Window Light</td>
+        <td class="right"><span class="watts-val">5.6 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:2%"></div></div></td>
+        <td class="right"><span class="kwh-val">25.4</span></td>
+      </tr>
+      <tr>
+        <td>Sofa Light</td>
+        <td class="right"><span class="watts-val">3.5 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:1.3%"></div></div></td>
+        <td class="right"><span class="kwh-val">0.7</span></td>
+      </tr>
+
+      <tr class="room-group-header"><td colspan="2">Guest Room</td><td class="right"><span class="room-total-w">227.3 W</span></td><td class="right"><span class="room-total-kwh">1,118.8</span></td></tr>
+      <tr>
+        <td>Computer</td>
+        <td class="right"><span class="watts-val">224.0 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:81%"></div></div></td>
+        <td class="right"><span class="kwh-val">1,099.6</span></td>
+      </tr>
+      <tr>
+        <td>Window Light</td>
+        <td class="right"><span class="watts-val">3.3 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:1.2%"></div></div></td>
+        <td class="right"><span class="kwh-val">18.0</span></td>
+      </tr>
+      <tr>
+        <td>Ceiling</td>
+        <td class="right"><span class="watts-val off">0 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:0"></div></div></td>
+        <td class="right"><span class="kwh-val">1.2</span></td>
+      </tr>
+
+      <tr class="room-group-header"><td colspan="2">Bedroom</td><td class="right"><span class="room-total-w">3.7 W</span></td><td class="right"><span class="room-total-kwh">29.4</span></td></tr>
+      <tr>
+        <td>Win Right</td>
+        <td class="right"><span class="watts-val">1.9 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:0.7%"></div></div></td>
+        <td class="right"><span class="kwh-val">14.8</span></td>
+      </tr>
+      <tr>
+        <td>Win Left</td>
+        <td class="right"><span class="watts-val">1.8 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:0.65%"></div></div></td>
+        <td class="right"><span class="kwh-val">14.4</span></td>
+      </tr>
+      <tr>
+        <td>Ceiling</td>
+        <td class="right"><span class="watts-val off">0 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:0"></div></div></td>
+        <td class="right"><span class="kwh-val">0.2</span></td>
+      </tr>
+
+      <tr class="room-group-header"><td colspan="2">Kitchen</td><td class="right"><span class="room-total-w">5.4 W</span></td><td class="right"><span class="room-total-kwh">26.9</span></td></tr>
+      <tr>
+        <td>Window Light</td>
+        <td class="right"><span class="watts-val">5.4 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:2%"></div></div></td>
+        <td class="right"><span class="kwh-val">26.9</span></td>
+      </tr>
+
+      <tr class="room-group-header"><td colspan="2">Balcony</td><td class="right"><span class="room-total-w">7.0 W</span></td><td class="right"><span class="room-total-kwh">47.5</span></td></tr>
+      <tr>
+        <td>Deco Lights</td>
+        <td class="right"><span class="watts-val">7.0 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:2.5%"></div></div></td>
+        <td class="right"><span class="kwh-val">47.5</span></td>
+      </tr>
+
+      <tr class="room-group-header"><td colspan="2">Bathroom</td><td class="right"><span class="room-total-w">0 W</span></td><td class="right"><span class="room-total-kwh">131.3</span></td></tr>
+      <tr>
+        <td>Washer</td>
+        <td class="right"><span class="watts-val off">0 W</span></td>
+        <td class="power-bar-cell"><div class="power-bar-bg"><div class="power-bar-fill" style="width:0"></div></div></td>
+        <td class="right"><span class="kwh-val">131.3</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── NOTES ── -->
+  <div class="note">
+    <strong>What this mockup adds to the dashboard:</strong><br>
+    1. <strong>Room power cards</strong> — per-room watt totals with proportional bars and device breakdown<br>
+    2. <strong>All-time kWh donut</strong> — uses the <code>*_electric_consumption_kwh</code> entities already in HA<br>
+    3. <strong>Device table</strong> — combines live watts + cumulative kWh in one sortable view<br>
+    4. <strong>Washer</strong> included in overall power tracking (currently separate)<br>
+    <br>
+    <strong>Data sources:</strong> All values come from existing HA entities — no new integrations needed.
+    The bogus <code>guestbedroomwindow_electric_kwh</code> (5.3M kWh) would be excluded.<br>
+    <br>
+    <strong>Washer → Bathroom suggestions:</strong><br>
+    • Add <code>sensor.bathroom_washer_power</code> to the Bathroom <code>powerSensors</code> array in <code>shared.js</code><br>
+    • Add <code>sensor.bathroom_washer_power</code> to <code>LC_POWER_SENSORS</code> so it counts toward total power<br>
+    • Add <code>sensor.bathroom_washer_energy</code> to <code>liveData.power</code> for kWh tracking<br>
+    • Optionally add <code>sensor.bathroom_washer_energy_difference</code> for per-cycle cost estimates
+  </div>
+
+</div>
+</body>
+</html>

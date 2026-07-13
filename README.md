@@ -380,15 +380,15 @@ These Home Assistant entities must exist for full functionality:
 - `sensor.plex_*` — Plex media server sensors
 
 **Washer (Samsung SmartThings):**
-- `sensor.washer_job_state` — Current cycle phase (wash, rinse, spin, finish, none)
-- `sensor.washer_machine_state` — Machine state (run, stop, pause)
-- `sensor.washer_completion_time` — ETA timestamp
-- `select.washer_water_temperature` — Selected wash temperature
-- `select.washer_spin_level` — Selected spin speed (RPM)
-- `number.washer_rinse_cycles` — Number of rinse cycles
-- `sensor.washer_power` — Real-time power draw (W)
-- `sensor.washer_energy` — Lifetime energy (kWh, used for monthly statistics)
-- `sensor.washer_water_consumption` — Lifetime water (L, used for monthly statistics)
+- `sensor.bathroom_washer_job_state` — Current cycle phase (wash, rinse, spin, finish, none)
+- `sensor.bathroom_washer_machine_state` — Machine state (run, stop, pause)
+- `sensor.bathroom_washer_completion_time` — ETA timestamp
+- `select.bathroom_washer_water_temperature` — Selected wash temperature
+- `select.bathroom_washer_spin_level` — Selected spin speed (RPM)
+- `number.bathroom_washer_rinse_cycles` — Number of rinse cycles
+- `sensor.bathroom_washer_power` — Real-time power draw (W)
+- `sensor.bathroom_washer_energy` — Lifetime energy (kWh, used for monthly statistics)
+- `sensor.bathroom_washer_water_consumption` — Lifetime water (L, used for monthly statistics)
 - `sensor.washer_cycle_count` — Wash cycle counter (requires counter helper + automation, see [Washer Panel → Cycle counting setup](#cycle-counting-setup))
 
 **Power (per-room):**
@@ -455,7 +455,7 @@ The Sensors tab includes a washer status panel powered by Samsung SmartThings en
 #### What it shows
 
 - **Live status**: current cycle phase with animated progress indicator (e.g. WASH → RINSE → SPIN)
-- **ETA countdown**: time remaining and estimated completion timestamp, auto-updates every second during active cycles
+- **ETA countdown**: time remaining and estimated completion timestamp, auto-updates every minute during active cycles
 - **Cycle settings**: water temperature, spin speed (RPM), rinse count, real-time power draw (W) — shown only during active cycles
 - **Monthly statistics**: energy (kWh) and water (L) bar charts per month, grouped by year, with cycle counts
 - **Yearly totals**: aggregated energy, water, and cycle count per year
@@ -469,16 +469,16 @@ Configure these in `entities.js` under `integrations.washer`. All entity IDs com
 
 | Config Key | Entity ID Example | Type | What it provides |
 |------------|-------------------|------|------------------|
-| `jobState` | `sensor.washer_job_state` | sensor | Current cycle phase: `none`, `wash`, `rinse`, `spin`, `finish` |
-| `machState` | `sensor.washer_machine_state` | sensor | Machine state: `run`, `stop`, `pause` |
-| `completion` | `sensor.washer_completion_time` | sensor | ISO 8601 timestamp of estimated completion |
-| `power` | `sensor.washer_power` | sensor | Real-time power draw in watts |
-| `energy` | `sensor.washer_energy` | sensor | Lifetime energy in kWh (`state_class: total_increasing`) |
-| `water` | `sensor.washer_water_consumption` | sensor | Lifetime water in liters (`state_class: total_increasing`) |
+| `jobState` | `sensor.bathroom_washer_job_state` | sensor | Current cycle phase: `none`, `wash`, `rinse`, `spin`, `finish` |
+| `machState` | `sensor.bathroom_washer_machine_state` | sensor | Machine state: `run`, `stop`, `pause` |
+| `completion` | `sensor.bathroom_washer_completion_time` | sensor | ISO 8601 timestamp of estimated completion |
+| `power` | `sensor.bathroom_washer_power` | sensor | Real-time power draw in watts |
+| `energy` | `sensor.bathroom_washer_energy` | sensor | Lifetime energy in kWh (`state_class: total_increasing`) |
+| `water` | `sensor.bathroom_washer_water_consumption` | sensor | Lifetime water in liters (`state_class: total_increasing`) |
 | `cycles` | `sensor.washer_cycle_count` | sensor | Lifetime wash cycle count (requires helper, see below) |
-| `waterTemp` | `select.washer_water_temperature` | select | Selected wash temperature (e.g. "40", "60") |
-| `spinLevel` | `select.washer_spin_level` | select | Selected spin speed (e.g. "800", "1200") |
-| `rinses` | `number.washer_rinse_cycles` | number | Number of rinse cycles selected |
+| `waterTemp` | `select.bathroom_washer_water_temperature` | select | Selected wash temperature (e.g. "40", "60") |
+| `spinLevel` | `select.bathroom_washer_spin_level` | select | Selected spin speed (e.g. "800", "1200") |
+| `rinses` | `number.bathroom_washer_rinse_cycles` | number | Number of rinse cycles selected |
 
 #### Expected entity values
 
@@ -493,11 +493,13 @@ The dashboard interprets these state values to drive the UI:
 - Any other value → treated as active/unknown phase
 
 **`machState`** — determines the status badge in the environment bar:
-- `run` → badge shows "RUNNING" (green)
+- `run` → badge shows a live countdown such as "42 min left" or "1 h 12 min left" (green); its tooltip shows the 24-hour estimated finish time
 - `pause` → badge shows "PAUSED" (yellow)
 - `stop` → badge shows "IDLE"
 
-**`completion`** — must be an ISO 8601 timestamp (e.g. `2026-03-29T22:30:00+01:00`). The dashboard calculates remaining time from this. If the timestamp is in the past or missing, the ETA section is hidden.
+**`completion`** — must be an ISO 8601 timestamp (e.g. `2026-03-29T22:30:00+01:00`). The dashboard calculates remaining time from this and refreshes the countdown every minute. If the timestamp is missing or invalid, the badge falls back to the theme's running label.
+
+On viewports up to 700 px wide, the badge automatically switches to a compact total-minute form such as "72 min" so it remains readable without wrapping. Wider layouts retain the more descriptive "1 h 12 min left" form.
 
 **`energy` / `water`** — must have `state_class: total_increasing` for HA's recorder to track monthly statistics. Without this, the monthly bar charts will be empty.
 
@@ -532,7 +534,7 @@ The `state_class: total_increasing` is critical — it tells HA's recorder to tr
 - alias: "Count washer cycles"
   trigger:
     - platform: state
-      entity_id: sensor.washer_job_state
+      entity_id: sensor.bathroom_washer_job_state
       to: "wash"
   condition:
     - condition: template
@@ -785,8 +787,6 @@ Each dashboard defines a `THEME` object in an inline `<script>` before `shared.j
 - All dashboards run entirely client-side with no external dependencies beyond Google Fonts
 
 ## Setup Wizard
-
-![Setup Wizard Demo](screenshots/setup-wizard-demo.gif)
 
 Don't want to edit `entities.js` by hand? Use the setup wizard:
 

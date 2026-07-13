@@ -53,14 +53,17 @@ function washerIngest(id, s) {
     washerState.jobState = s.state || 'none';
     washerState.isActive = washerIsActiveJob(s.state);
     renderWasher();
+    renderWasherBadge();
   }
   if (_wCfg.machState && id === _wCfg.machState) {
     washerState.machineState = s.state || 'stop';
     renderWasher();
+    renderWasherBadge();
   }
   if (_wCfg.completion && id === _wCfg.completion) {
     washerState.completionTime = s.state || null;
     renderWasher();
+    renderWasherBadge();
   }
   if (_wCfg.waterTemp && id === _wCfg.waterTemp) {
     washerState.temp = s.state || null;
@@ -153,17 +156,50 @@ function washerHandleResult(msg) {
 // ═══════════════════════════════════════════════════
 // RENDER: WASHER ENVIRO BADGE
 // ═══════════════════════════════════════════════════
-/** Update the small washer status badge in the enviro bar and LCARS sidebar button. */
+/** Return a compact countdown and 24-hour finish time for the active cycle. */
+function washerEtaInfo() {
+  if (!washerState.isActive || !washerState.completionTime) return null;
+  const eta = new Date(washerState.completionTime);
+  if (Number.isNaN(eta.getTime())) return null;
+
+  const diffMin = Math.max(0, Math.ceil((eta.getTime() - Date.now()) / 60000));
+  const hours = Math.floor(diffMin / 60);
+  const minutes = diffMin % 60;
+  const remaining = diffMin === 0
+    ? 'finishing'
+    : hours > 0
+      ? `${hours} h${minutes > 0 ? ` ${minutes} min` : ''} left`
+      : `${minutes} min left`;
+
+  return {
+    diffMin,
+    remaining,
+    compactRemaining: diffMin === 0 ? 'finishing' : `${diffMin} min`,
+    finishTime: eta.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
+  };
+}
+
+/** Update the small washer status badge in the enviro bar and sidebar button. */
 function renderWasherBadge() {
   const w = washerState.isActive;
+  const etaInfo = washerEtaInfo();
+  const statusLabels = (THEME.washer && THEME.washer.statusLabels) || WASHER_STATUS_DEFAULT;
+  const activeText = etaInfo ? etaInfo.remaining : statusLabels.running;
+  const idleText = statusLabels.idle;
   const wb = document.getElementById('stat-washer');
   if (wb) {
-    wb.textContent = w ? 'RUNNING' : 'IDLE';
+    wb.innerHTML = w && etaInfo
+      ? `<span class="washer-time-full">${activeText}</span><span class="washer-time-compact">${etaInfo.compactRemaining}</span>`
+      : (w ? activeText : idleText);
     wb.className = `washer-badge ${w ? 'running' : ''}`;
+    wb.title = etaInfo ? `Estimated finish ${etaInfo.finishTime}` : '';
   }
   const wbBtn = document.getElementById('washer-btn');
   if (wbBtn) {
-    wbBtn.textContent = `WASHER: ${w ? 'RUNNING' : 'IDLE'}`;
+    wbBtn.innerHTML = w && etaInfo
+      ? `WASHER: <span class="washer-time-full">${activeText}</span><span class="washer-time-compact">${etaInfo.compactRemaining}</span>`
+      : `WASHER: ${w ? activeText : idleText}`;
+    wbBtn.title = etaInfo ? `Estimated finish ${etaInfo.finishTime}` : '';
     wbBtn.style.background = w ? 'var(--yellow)' : '#cc3333';
   }
 }
@@ -208,16 +244,16 @@ function renderWasher() {
 
   // ── ETA countdown ──
   let etaHtml = '';
-  if (running && washerState.completionTime) {
-    const eta = new Date(washerState.completionTime);
-    if (!Number.isNaN(eta.getTime())) {
-      const now = new Date();
-      const diffMin = Math.max(0, Math.round((eta - now) / 60000));
-      const h = Math.floor(diffMin / 60);
-      const m = diffMin % 60;
-      const timeStr = eta.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-      etaHtml = `<span class="washer-eta">${h > 0 ? h + 'h ' : ''}${m}min ${etaLabel} (ETA ${timeStr})</span>`;
-    }
+  const etaInfo = washerEtaInfo();
+  if (etaInfo) {
+    const etaHours = Math.floor(etaInfo.diffMin / 60);
+    const etaMinutes = etaInfo.diffMin % 60;
+    const duration = etaInfo.diffMin === 0
+      ? 'finishing'
+      : etaInfo.diffMin >= 60
+        ? `${etaHours} h${etaMinutes > 0 ? ` ${etaMinutes} min` : ''}`
+        : `${etaInfo.diffMin} min`;
+    etaHtml = `<span class="washer-eta">${duration} ${etaLabel} (ETA ${etaInfo.finishTime})</span>`;
   }
 
   // ── Phase progress ──
@@ -294,4 +330,28 @@ function renderWasher() {
     ${monthlyHtml}
     ${lifetimeHtml}
   `;
+}
+
+// Keep countdown text current even when Home Assistant sends no state changes.
+setInterval(() => {
+  renderWasherBadge();
+  renderWasher();
+}, 60000);
+
+// Shared responsive treatment for every themed dashboard using washer.js.
+if (!document.getElementById('washer-responsive-styles')) {
+  const washerResponsiveStyles = document.createElement('style');
+  washerResponsiveStyles.id = 'washer-responsive-styles';
+  washerResponsiveStyles.textContent = `
+    .washer-time-compact { display: none; }
+    .washer-badge, #washer-btn { white-space: nowrap; }
+    .washer-eta { white-space: normal; overflow-wrap: anywhere; }
+    @media (max-width: 700px) {
+      .washer-time-full { display: none; }
+      .washer-time-compact { display: inline; }
+      .washer-badge { max-width: 100%; letter-spacing: 0.5px; }
+      #washer-btn { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+    }
+  `;
+  document.head.appendChild(washerResponsiveStyles);
 }

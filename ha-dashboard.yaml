@@ -1,0 +1,953 @@
+###############################################################################
+# HomeA — Native HA Dashboard (3 views)
+#
+# Prerequisites (install via HACS → Frontend):
+#   - bubble-card
+#   - apexcharts-card
+#   - mushroom (entity-card, light-card, template-card, chips-card)
+#
+# How to use:
+#   1. In HA → Settings → Dashboards → Add Dashboard → name it "HomeA"
+#   2. Open the new dashboard → ⋮ menu → Raw configuration editor
+#   3. Paste this entire file → Save
+#   4. You can now edit everything from the UI
+#
+# UniFi note:
+#   The entity IDs below use placeholder names (ucg_ultra, ap_living_room,
+#   usw_flex_mini, etc). After pasting, open the UI editor and swap them
+#   for your actual UniFi device entity IDs. Check Developer Tools → States
+#   and filter for "unifi" to find yours.
+###############################################################################
+
+views:
+
+  # =========================================================================
+  #  VIEW 1 — ROOMS (sensors + light switches, grouped by room)
+  # =========================================================================
+  - title: Rooms
+    path: rooms
+    icon: mdi:floor-plan
+    cards:
+
+      # --- All Lights Off ---
+      - type: custom:mushroom-template-card
+        primary: All Lights Off
+        icon: mdi:lightbulb-group-off
+        icon_color: red
+        layout: horizontal
+        tap_action:
+          action: call-service
+          service: light.turn_off
+          target:
+            entity_id:
+              - light.livingroomwindow
+              - light.livingroomsofa
+              - light.kitchenwindow
+              - light.bedroomroof
+              - light.bedroomwinleft
+              - light.bedroomwinright
+              - light.guestbedroomroof
+              - light.guestbedroomwindow
+              - light.balconyonoff
+
+      # ·······································································
+      #  LIVING ROOM
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Living Room
+        icon: mdi:sofa
+
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.livingroomtemphum_air_temperature_2
+            icon: mdi:thermometer
+            content_info: state
+          - type: entity
+            entity: sensor.livingroomtemphum_humidity_2
+            icon: mdi:water-percent
+            content_info: state
+          - type: template
+            icon: mdi:flash
+            content: >-
+              {{ (states('sensor.livingroomwindow_power') | float(0) + states('sensor.livingroomsofa_power') | float(0) + states('sensor.livingroomwallplugtelevision_power') | float(0)) | round(0) }} W
+
+      - type: horizontal-stack
+        cards:
+          - type: custom:mushroom-light-card
+            entity: light.livingroomwindow
+            name: Window
+            use_light_color: true
+            show_brightness_control: false
+            layout: horizontal
+          - type: custom:mushroom-light-card
+            entity: light.livingroomsofa
+            name: Sofa
+            use_light_color: true
+            show_brightness_control: false
+            layout: horizontal
+
+      # ·······································································
+      #  KITCHEN
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Kitchen
+        icon: mdi:countertop
+
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.kitchenmotiondetector_air_temperature
+            icon: mdi:thermometer
+            content_info: state
+          - type: entity
+            entity: sensor.kitchenmotiondetector_illuminance
+            icon: mdi:brightness-5
+            content_info: state
+          - type: template
+            icon: mdi:flash
+            content: >-
+              {{ states('sensor.kitchenwindow_power') | float(0) | round(0) }} W
+
+      - type: custom:mushroom-light-card
+        entity: light.kitchenwindow
+        name: Window
+        use_light_color: true
+        show_brightness_control: false
+        layout: horizontal
+
+      # ·······································································
+      #  BEDROOM
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Bedroom
+        icon: mdi:bed
+
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.bedroomtemphum_air_temperature
+            icon: mdi:thermometer
+            content_info: state
+          - type: entity
+            entity: sensor.bedroomtemphum_humidity
+            icon: mdi:water-percent
+            content_info: state
+          - type: template
+            icon: mdi:flash
+            content: >-
+              {{ (states('sensor.bedroomroof_power') | float(0) + states('sensor.bedroomwinleft_power') | float(0) + states('sensor.bedroomwinright_power_2') | float(0)) | round(0) }} W
+
+      - type: horizontal-stack
+        cards:
+          - type: custom:mushroom-light-card
+            entity: light.bedroomroof
+            name: Ceiling
+            use_light_color: true
+            show_brightness_control: true
+            layout: horizontal
+          - type: custom:mushroom-light-card
+            entity: light.bedroomwinleft
+            name: Win Left
+            use_light_color: true
+            show_brightness_control: false
+            layout: horizontal
+          - type: custom:mushroom-light-card
+            entity: light.bedroomwinright
+            name: Win Right
+            use_light_color: true
+            show_brightness_control: false
+            layout: horizontal
+
+      # ·······································································
+      #  GUEST ROOM
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Guest Room
+        icon: mdi:bed-outline
+
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.guestbedroomtemphum_air_temperature
+            icon: mdi:thermometer
+            content_info: state
+          - type: entity
+            entity: sensor.guestbedroomtemphum_humidity
+            icon: mdi:water-percent
+            content_info: state
+          - type: template
+            icon: mdi:flash
+            content: >-
+              {{ (states('sensor.guestbedroomroof_power') | float(0) + states('sensor.guestbedroomwindow_power') | float(0) + states('sensor.guestbedroomwallplugcomputer_power_2') | float(0)) | round(0) }} W
+
+      - type: horizontal-stack
+        cards:
+          - type: custom:mushroom-light-card
+            entity: light.guestbedroomroof
+            name: Ceiling
+            use_light_color: true
+            show_brightness_control: true
+            layout: horizontal
+          - type: custom:mushroom-light-card
+            entity: light.guestbedroomwindow
+            name: Window
+            use_light_color: true
+            show_brightness_control: false
+            layout: horizontal
+
+      # ·······································································
+      #  BALCONY
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Balcony
+        icon: mdi:balcony
+
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.balconyluxtemp_air_temperature
+            icon: mdi:thermometer
+            content_info: state
+          - type: entity
+            entity: sensor.balconyluxtemp_illuminance
+            icon: mdi:brightness-5
+            content_info: state
+
+      - type: custom:mushroom-light-card
+        entity: light.balconyonoff
+        name: Deco Lights
+        use_light_color: true
+        show_brightness_control: false
+        layout: horizontal
+
+      # ·······································································
+      #  BATHROOM
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Bathroom
+        icon: mdi:shower
+
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.bathroomtemphum_air_temperature
+            icon: mdi:thermometer
+            content_info: state
+          - type: entity
+            entity: sensor.bathroomtemphum_humidity
+            icon: mdi:water-percent
+            content_info: state
+
+      # ·······································································
+      #  HALL
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Hall
+        icon: mdi:door
+
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.motion_sensor_air_temperature
+            icon: mdi:thermometer
+            content_info: state
+          - type: entity
+            entity: sensor.motion_sensor_illuminance
+            icon: mdi:brightness-5
+            content_info: state
+
+      # ·······································································
+      #  WARDROBE
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Wardrobe
+        icon: mdi:wardrobe
+
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.wardrobetemphum_air_temperature
+            icon: mdi:thermometer
+            content_info: state
+          - type: entity
+            entity: sensor.wardrobetemphum_humidity
+            icon: mdi:water-percent
+            content_info: state
+
+  # =========================================================================
+  #  VIEW 2 — UNIFI (network devices + restart buttons)
+  # =========================================================================
+  #
+  #  ⚠ PLACEHOLDER ENTITY IDs — replace with your actual UniFi device names
+  #     Go to Developer Tools → States → filter "unifi" to find yours.
+  #     Common patterns:
+  #       button.<device_name>_restart
+  #       sensor.<device_name>_uptime
+  #       update.<device_name>
+  #       binary_sensor.<device_name>
+  #
+  - title: UniFi
+    path: unifi
+    icon: mdi:lan
+    cards:
+
+      # ── UCG Ultra (Gateway) ──────────────────────────────────────
+      - type: custom:vertical-stack-in-card
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: UCG Ultra
+            icon: mdi:router-network
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.ucg_ultra_state
+                name: Status
+                icon: mdi:check-network
+              - type: custom:mushroom-entity-card
+                entity: sensor.ucg_ultra_uptime
+                name: Uptime
+                icon: mdi:clock-outline
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.ucg_ultra_cpu_utilization
+                name: CPU
+                icon: mdi:cpu-64-bit
+              - type: custom:mushroom-entity-card
+                entity: sensor.ucg_ultra_memory_utilization
+                name: Memory
+                icon: mdi:memory
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: update.ucg_ultra
+                name: Firmware
+                icon: mdi:update
+              - type: custom:mushroom-entity-card
+                entity: sensor.ucg_ultra_port_4_link_speed
+                name: WAN Speed
+                icon: mdi:speedometer
+
+          - type: custom:mushroom-template-card
+            primary: Restart UCG Ultra
+            icon: mdi:restart
+            icon_color: deep-orange
+            layout: horizontal
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.ucg_ultra_restart
+              confirmation:
+                text: Restart the UCG Ultra gateway?
+
+      # ── Livingroom Wifi (AC Pro) ─────────────────────────────────
+      - type: custom:vertical-stack-in-card
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Livingroom Wifi
+            icon: mdi:access-point
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.livingroom_wifi_state
+                name: Status
+                icon: mdi:check-network
+              - type: custom:mushroom-entity-card
+                entity: sensor.livingroom_wifi_uptime
+                name: Uptime
+                icon: mdi:clock-outline
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.livingroom_wifi_clients
+                name: Clients
+                icon: mdi:devices
+              - type: custom:mushroom-entity-card
+                entity: update.livingroom_wifi
+                name: Firmware
+                icon: mdi:update
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.livingroom_wifi_cpu_utilization
+                name: CPU
+                icon: mdi:cpu-64-bit
+              - type: custom:mushroom-entity-card
+                entity: sensor.livingroom_wifi_memory_utilization
+                name: Memory
+                icon: mdi:memory
+
+          - type: custom:mushroom-template-card
+            primary: Restart Livingroom Wifi
+            icon: mdi:restart
+            icon_color: deep-orange
+            layout: horizontal
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.livingroom_wifi_restart
+              confirmation:
+                text: Restart Livingroom Wifi AP?
+
+      # ── Bedroom Wifi (AC Pro) ────────────────────────────────────
+      - type: custom:vertical-stack-in-card
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Bedroom Wifi
+            icon: mdi:access-point
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.bedroom_wifi_state
+                name: Status
+                icon: mdi:check-network
+              - type: custom:mushroom-entity-card
+                entity: sensor.bedroom_wifi_uptime
+                name: Uptime
+                icon: mdi:clock-outline
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.bedroom_wifi_clients
+                name: Clients
+                icon: mdi:devices
+              - type: custom:mushroom-entity-card
+                entity: update.bedroom_wifi
+                name: Firmware
+                icon: mdi:update
+
+          - type: custom:mushroom-template-card
+            primary: Restart Bedroom Wifi
+            icon: mdi:restart
+            icon_color: deep-orange
+            layout: horizontal
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.bedroom_wifi_restart
+              confirmation:
+                text: Restart Bedroom Wifi AP?
+
+      # ── Wardrobe Switch (US8P60) ─────────────────────────────────
+      - type: custom:vertical-stack-in-card
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Wardrobe Switch
+            icon: mdi:switch
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.wardrobe_switch_state
+                name: Status
+                icon: mdi:check-network
+              - type: custom:mushroom-entity-card
+                entity: sensor.wardrobe_switch_uptime
+                name: Uptime
+                icon: mdi:clock-outline
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.wardrobe_switch_cpu_utilization
+                name: CPU
+                icon: mdi:cpu-64-bit
+              - type: custom:mushroom-entity-card
+                entity: sensor.wardrobe_switch_memory_utilization
+                name: Memory
+                icon: mdi:memory
+
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: update.wardrobe_switch
+                name: Firmware
+                icon: mdi:update
+              - type: custom:mushroom-template-card
+                primary: Restart
+                icon: mdi:restart
+                icon_color: deep-orange
+                layout: horizontal
+                tap_action:
+                  action: call-service
+                  service: button.press
+                  target:
+                    entity_id: button.wardrobe_switch_restart
+                  confirmation:
+                    text: Restart Wardrobe Switch?
+
+  # =========================================================================
+  #  VIEW 3 — ELECTRICITY + NORDPOOL + WASHER
+  # =========================================================================
+  - title: Electricity
+    path: electricity
+    icon: mdi:flash
+    cards:
+
+      # ·······································································
+      #  PRICE NOW — last / current / next hour (matches renderNordpoolBars)
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Electricity Price
+        icon: mdi:currency-usd
+
+      - type: horizontal-stack
+        cards:
+          - type: custom:mushroom-template-card
+            primary: Last Hour
+            secondary: >-
+              {% set attr = state_attr('sensor.nordpool_last_this_next_hour', 'last') %}
+              {{ '%.3f' | format(attr) if attr is not none else '--' }} SEK/kWh
+            icon: mdi:arrow-left
+            icon_color: >-
+              {% set v = state_attr('sensor.nordpool_last_this_next_hour', 'last') | float(0) %}
+              {% if v > 1.5 %}red{% elif v > 0.8 %}amber{% else %}teal{% endif %}
+          - type: custom:mushroom-template-card
+            primary: Now
+            secondary: >-
+              {% set v = states('sensor.nordpool_current_price_15m') | float(0) %}
+              {{ '%.3f' | format(v) }} SEK/kWh
+            icon: mdi:flash
+            icon_color: >-
+              {% set v = states('sensor.nordpool_current_price_15m') | float(0) %}
+              {% if v > 1.5 %}red{% elif v > 0.8 %}amber{% else %}teal{% endif %}
+          - type: custom:mushroom-template-card
+            primary: Next Hour
+            secondary: >-
+              {% set attr = state_attr('sensor.nordpool_last_this_next_hour', 'next') %}
+              {{ '%.3f' | format(attr) if attr is not none else '--' }} SEK/kWh
+            icon: mdi:arrow-right
+            icon_color: >-
+              {% set v = state_attr('sensor.nordpool_last_this_next_hour', 'next') | float(0) %}
+              {% if v > 1.5 %}red{% elif v > 0.8 %}amber{% else %}teal{% endif %}
+
+      # ·······································································
+      #  NORDPOOL 48h CHART (matches renderNordpool48h)
+      #  Color-coded: red >1.5, yellow >0.8, teal otherwise, orange = now
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Nordpool — 48h Forecast
+
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Electricity Price (SEK/kWh)
+          show_states: true
+        graph_span: 48h
+        span:
+          start: day
+        now:
+          show: true
+          color: '#FF9800'
+          label: Now
+        apex_config:
+          chart:
+            height: 250px
+          tooltip:
+            x:
+              format: ddd HH:mm
+          xaxis:
+            labels:
+              datetimeFormatter:
+                hour: HH:mm
+          plotOptions:
+            bar:
+              columnWidth: 90%
+              colors:
+                ranges:
+                  - from: 0
+                    to: 0.99
+                    color: '#4caf50'
+                  - from: 1.0
+                    to: 1.49
+                    color: '#ffeb3b'
+                  - from: 1.5
+                    to: 1.99
+                    color: '#ff9800'
+                  - from: 2.0
+                    to: 2.99
+                    color: '#f44336'
+                  - from: 3.0
+                    to: 99
+                    color: '#9c27b0'
+        series:
+          - entity: sensor.nordpool
+            name: Price
+            type: column
+            float_precision: 3
+            data_generator: |
+              const today = entity.attributes.raw_today.map((entry) => {
+                return [new Date(entry.start), entry.value];
+              });
+              const tomorrow = entity.attributes.raw_tomorrow.map((entry) => {
+                return [new Date(entry.start), entry.value];
+              });
+              return today.concat(tomorrow);
+
+      # ·······································································
+      #  COST RIGHT NOW (matches renderLcEnergy hero stats)
+      #  Shows total watts, current cost/h, and price
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Current Consumption
+        icon: mdi:meter-electric
+
+      - type: horizontal-stack
+        cards:
+          - type: custom:mushroom-template-card
+            primary: Total Power
+            secondary: >-
+              {% set total = states('sensor.livingroomwindow_power') | float(0)
+                + states('sensor.livingroomsofa_power') | float(0)
+                + states('sensor.livingroomwallplugtelevision_power') | float(0)
+                + states('sensor.kitchenwindow_power') | float(0)
+                + states('sensor.bedroomroof_power') | float(0)
+                + states('sensor.bedroomwinleft_power') | float(0)
+                + states('sensor.bedroomwinright_power_2') | float(0)
+                + states('sensor.guestbedroomroof_power') | float(0)
+                + states('sensor.guestbedroomwindow_power') | float(0)
+                + states('sensor.guestbedroomwallplugcomputer_power_2') | float(0)
+                + states('sensor.balconyonoff_power') | float(0)
+                + states('sensor.bathroom_washer_power') | float(0) %}
+              {{ total | round(1) }} W
+            icon: mdi:lightning-bolt
+            icon_color: amber
+          - type: custom:mushroom-template-card
+            primary: Cost / Hour
+            secondary: >-
+              {% set total = states('sensor.livingroomwindow_power') | float(0)
+                + states('sensor.livingroomsofa_power') | float(0)
+                + states('sensor.livingroomwallplugtelevision_power') | float(0)
+                + states('sensor.kitchenwindow_power') | float(0)
+                + states('sensor.bedroomroof_power') | float(0)
+                + states('sensor.bedroomwinleft_power') | float(0)
+                + states('sensor.bedroomwinright_power_2') | float(0)
+                + states('sensor.guestbedroomroof_power') | float(0)
+                + states('sensor.guestbedroomwindow_power') | float(0)
+                + states('sensor.guestbedroomwallplugcomputer_power_2') | float(0)
+                + states('sensor.balconyonoff_power') | float(0)
+                + states('sensor.bathroom_washer_power') | float(0) %}
+              {% set price = states('sensor.nordpool_current_price_15m') | float(0) %}
+              {{ '%.3f' | format((total / 1000) * price) }} SEK/h
+            icon: mdi:cash
+            icon_color: green
+          - type: custom:mushroom-template-card
+            primary: Price Now
+            secondary: >-
+              {{ '%.3f' | format(states('sensor.nordpool_current_price_15m') | float(0)) }} SEK/kWh
+            icon: mdi:currency-usd
+            icon_color: >-
+              {% set v = states('sensor.nordpool_current_price_15m') | float(0) %}
+              {% if v > 1.5 %}red{% elif v > 0.8 %}amber{% else %}teal{% endif %}
+
+      # ·······································································
+      #  POWER DISTRIBUTION (matches renderPowerPanel — per-device watts + kWh)
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Power Distribution
+        icon: mdi:flash-triangle
+
+      - type: entities
+        title: Live Power by Device
+        show_header_toggle: false
+        entities:
+          - type: section
+            label: Living Room
+          - entity: sensor.livingroomwindow_power
+            name: Window
+            icon: mdi:lamp
+          - entity: sensor.livingroomsofa_power
+            name: Sofa
+            icon: mdi:lamp
+          - entity: sensor.livingroomwallplugtelevision_power
+            name: Television
+            icon: mdi:television
+          - type: section
+            label: Kitchen
+          - entity: sensor.kitchenwindow_power
+            name: Window
+            icon: mdi:lamp
+          - type: section
+            label: Bedroom
+          - entity: sensor.bedroomroof_power
+            name: Ceiling
+            icon: mdi:ceiling-light
+          - entity: sensor.bedroomwinleft_power
+            name: Window Left
+            icon: mdi:lamp
+          - entity: sensor.bedroomwinright_power_2
+            name: Window Right
+            icon: mdi:lamp
+          - type: section
+            label: Guest Room
+          - entity: sensor.guestbedroomroof_power
+            name: Ceiling
+            icon: mdi:ceiling-light
+          - entity: sensor.guestbedroomwindow_power
+            name: Window
+            icon: mdi:lamp
+          - entity: sensor.guestbedroomwallplugcomputer_power_2
+            name: Computer
+            icon: mdi:desktop-tower
+          - type: section
+            label: Other
+          - entity: sensor.balconyonoff_power
+            name: Balcony Deco
+            icon: mdi:string-lights
+          - entity: sensor.bathroom_washer_power
+            name: Washer
+            icon: mdi:washing-machine
+
+      # ·······································································
+      #  ENERGY CONSUMPTION — cumulative kWh per device
+      # ·······································································
+      - type: entities
+        title: Cumulative Energy (kWh)
+        show_header_toggle: false
+        entities:
+          - entity: sensor.livingroomwindow_electric_consumption_kwh
+            name: LR Window
+          - entity: sensor.livingroomsofa_electric_consumption_kwh
+            name: LR Sofa
+          - entity: sensor.livingroomwallplugtelevision_electric_consumption_kwh
+            name: Television
+          - entity: sensor.kitchenwindow_electric_consumption_kwh
+            name: Kitchen Window
+          - entity: sensor.bedroomroof_electric_consumption_kwh
+            name: BR Ceiling
+          - entity: sensor.bedroomwinleft_electric_consumption_kwh
+            name: BR Win Left
+          - entity: sensor.bedroomwinright_electric_consumption_kwh_2
+            name: BR Win Right
+          - entity: sensor.guestbedroomroof_electric_consumption_kwh
+            name: GR Ceiling
+          - entity: sensor.guestbedroomwindow_electric_consumption_kwh
+            name: GR Window
+          - entity: sensor.guestbedroomwallplugcomputer_electric_consumption_kwh_2
+            name: Computer
+          - entity: sensor.balconyonoff_electric_consumption_kwh
+            name: Balcony
+          - entity: sensor.bathroom_washer_energy
+            name: Washer
+
+      # ·······································································
+      #  ENERGY vs PRICE — stacked chart (matches renderLcEnergy)
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Energy vs Price — 7 Days
+
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Daily Energy by Device (kWh)
+        graph_span: 7d
+        span:
+          end: day
+        stacked: true
+        apex_config:
+          chart:
+            height: 280px
+        series:
+          - entity: sensor.livingroomwindow_electric_consumption_kwh
+            name: LR Window
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.livingroomsofa_electric_consumption_kwh
+            name: LR Sofa
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.livingroomwallplugtelevision_electric_consumption_kwh
+            name: TV
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.kitchenwindow_electric_consumption_kwh
+            name: Kitchen
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.bedroomroof_electric_consumption_kwh
+            name: BR Ceiling
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.bedroomwinleft_electric_consumption_kwh
+            name: BR Win L
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.bedroomwinright_electric_consumption_kwh_2
+            name: BR Win R
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.guestbedroomroof_electric_consumption_kwh
+            name: GR Ceiling
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.guestbedroomwallplugcomputer_electric_consumption_kwh_2
+            name: Computer
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.balconyonoff_electric_consumption_kwh
+            name: Balcony
+            type: column
+            statistics:
+              type: change
+              period: day
+          - entity: sensor.bathroom_washer_energy
+            name: Washer
+            type: column
+            statistics:
+              type: change
+              period: day
+
+      # ·······································································
+      #  WASHER (matches washer.js panels)
+      # ·······································································
+      - type: custom:bubble-card
+        card_type: separator
+        name: Washer
+        icon: mdi:washing-machine
+
+      # Status row
+      - type: horizontal-stack
+        cards:
+          - type: custom:mushroom-template-card
+            primary: Status
+            secondary: >-
+              {{ states('sensor.bathroom_washer_machine_state') | title }}
+            icon: mdi:washing-machine
+            icon_color: >-
+              {% if states('sensor.bathroom_washer_machine_state') == 'run' %}green
+              {% elif states('sensor.bathroom_washer_machine_state') == 'pause' %}amber
+              {% else %}disabled{% endif %}
+          - type: custom:mushroom-template-card
+            primary: Phase
+            secondary: >-
+              {{ states('sensor.bathroom_washer_job_state') | replace('_', ' ') | title }}
+            icon: mdi:progress-wrench
+            icon_color: >-
+              {% if states('sensor.bathroom_washer_job_state') == 'wash' %}blue
+              {% elif states('sensor.bathroom_washer_job_state') == 'rinse' %}cyan
+              {% elif states('sensor.bathroom_washer_job_state') == 'spin' %}purple
+              {% elif states('sensor.bathroom_washer_job_state') == 'finish' %}green
+              {% else %}disabled{% endif %}
+          - type: custom:mushroom-template-card
+            primary: Done at
+            secondary: >-
+              {% set t = states('sensor.bathroom_washer_completion_time') %}
+              {% if t not in ['unknown', 'unavailable', 'none'] %}
+                {{ as_timestamp(t) | timestamp_custom('%H:%M') }}
+              {% else %}--{% endif %}
+            icon: mdi:clock-check
+
+      # Power + lifetime stats row
+      - type: horizontal-stack
+        cards:
+          - type: custom:mushroom-entity-card
+            entity: sensor.bathroom_washer_power
+            name: Power
+            icon: mdi:flash
+          - type: custom:mushroom-entity-card
+            entity: sensor.bathroom_washer_energy
+            name: Energy
+            icon: mdi:lightning-bolt
+          - type: custom:mushroom-entity-card
+            entity: sensor.bathroom_washer_water_consumption
+            name: Water
+            icon: mdi:water
+
+      # Washer settings
+      - type: entities
+        title: Washer Settings
+        show_header_toggle: false
+        entities:
+          - entity: select.bathroom_washer_water_temperature
+            name: Water Temperature
+          - entity: select.bathroom_washer_spin_level
+            name: Spin Level
+          - entity: number.bathroom_washer_rinse_cycles
+            name: Rinse Cycles
+
+      # Washer monthly energy chart
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Washer — Monthly Energy (kWh)
+        graph_span: 12mo
+        span:
+          end: day
+        apex_config:
+          chart:
+            height: 200px
+        series:
+          - entity: sensor.bathroom_washer_energy
+            name: Energy
+            type: column
+            color: '#4FC3F7'
+            statistics:
+              type: change
+              period: month
+
+      # Washer monthly water chart
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Washer — Monthly Water (L)
+        graph_span: 12mo
+        span:
+          end: day
+        apex_config:
+          chart:
+            height: 200px
+        series:
+          - entity: sensor.bathroom_washer_water_consumption
+            name: Water
+            type: column
+            color: '#26A69A'
+            statistics:
+              type: change
+              period: month
