@@ -2,6 +2,11 @@
 
 Themed HTML dashboards for Home Assistant, sharing a common JavaScript core (`shared.js`) with theme-specific styling and hooks. All dashboards provide real-time room monitoring, light controls, energy tracking, media players, and sensor data — presented through different aesthetic lenses.
 
+> ☕ Enjoying this project? If it makes your Home Assistant experience a little
+> more useful or fun, you can [buy me a coffee](https://buymeacoffee.com/drwize).
+> Every coffee is warmly appreciated and helps me keep building, improving, and
+> sharing my projects—thank you!
+
 ## Table of Contents
 
 - [Get Running](#get-running)
