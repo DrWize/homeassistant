@@ -105,20 +105,41 @@ function washerParseStats(result) {
   const cycleStats  = (_wCfg.cycles && result[_wCfg.cycles]) || [];
   const monthly = [];
   const yearTotals = {};
-  energyStats.forEach((e, i) => {
-    const d = new Date(e.start);
+
+  const periodKey = entry => {
+    const d = new Date(entry?.start);
+    return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 7);
+  };
+  const indexByPeriod = entries => new Map(
+    entries.map(entry => [periodKey(entry), entry]).filter(([key]) => key)
+  );
+  const statChange = entry => {
+    if (!entry) return 0;
+    const value = entry.change != null ? Number(entry.change) : Number(entry.max) - Number(entry.min);
+    return Number.isFinite(value) ? Math.max(0, value) : 0;
+  };
+
+  const energyByPeriod = indexByPeriod(energyStats);
+  const waterByPeriod = indexByPeriod(waterStats);
+  const cyclesByPeriod = indexByPeriod(cycleStats);
+  const periods = [...new Set([
+    ...energyByPeriod.keys(), ...waterByPeriod.keys(), ...cyclesByPeriod.keys(),
+  ])].sort();
+
+  periods.forEach(period => {
+    const e = energyByPeriod.get(period);
+    const w = waterByPeriod.get(period);
+    const c = cyclesByPeriod.get(period);
+    const d = new Date(`${period}-01T00:00:00Z`);
     const year = d.getFullYear();
     const monthLabel = d.toLocaleString('en', { month: 'short' });
-    // Prefer 'change' (net delta); fall back to max-min for older HA versions
-    const energy = (e.change != null) ? e.change : (e.max - e.min);
-    const w = waterStats[i];
-    const water = w ? ((w.change != null) ? w.change : (w.max - w.min)) : 0;
-    const c = cycleStats[i];
-    const cycles = c ? Math.round((c.change != null) ? c.change : (c.max - c.min)) : null;
-    monthly.push({ month: monthLabel, year, energy: Math.max(0, energy), water: Math.max(0, water), cycles });
+    const energy = statChange(e);
+    const water = statChange(w);
+    const cycles = c ? Math.round(statChange(c)) : null;
+    monthly.push({ month: monthLabel, year, energy, water, cycles });
     if (!yearTotals[year]) yearTotals[year] = { energy: 0, water: 0, cycles: 0 };
-    yearTotals[year].energy += Math.max(0, energy);
-    yearTotals[year].water  += Math.max(0, water);
+    yearTotals[year].energy += energy;
+    yearTotals[year].water  += water;
     yearTotals[year].cycles += (cycles || 0);
   });
   washerState.stats = { monthly, yearTotals };
@@ -333,7 +354,8 @@ function renderWasher() {
 }
 
 // Keep countdown text current even when Home Assistant sends no state changes.
-setInterval(() => {
+const washerMinuteTimer = typeof registerDashboardInterval === 'function' ? registerDashboardInterval : setInterval;
+washerMinuteTimer(() => {
   renderWasherBadge();
   renderWasher();
 }, 60000);

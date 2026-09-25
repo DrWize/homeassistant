@@ -936,6 +936,72 @@ body.night-mode::before {
 .basic-log::-webkit-scrollbar-track { background: #000; }
 .basic-log::-webkit-scrollbar-thumb { background: var(--c64-green); }
 
+/* ═══ GARDEN — 8-BIT PLANT MONITOR ═══ */
+.garden-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.garden-card {
+  min-width: 0; padding: 0; border: 3px solid var(--c64-light-blue); border-radius: 0;
+  background: var(--c64-dark-blue); color: var(--text); text-align: left; cursor: pointer;
+  font-family: 'Press Start 2P', monospace; box-shadow: inset 0 0 0 2px var(--c64-blue);
+}
+.garden-card:hover { border-color: var(--c64-cyan); transform: translateY(-2px); }
+.garden-card.warning { border-color: var(--c64-yellow); }
+.garden-card.critical { border-color: var(--c64-light-red); }
+.garden-card.offline { border-style: dashed; opacity: 0.78; }
+.garden-image-wrap { position: relative; display: block; aspect-ratio: 3 / 2; overflow: hidden; background: #08004f; border-bottom: 3px solid currentColor; }
+.garden-image { width: 100%; height: 100%; display: block; object-fit: cover; image-rendering: pixelated; }
+.garden-image-wrap.missing-art::before, .garden-dialog-art.missing-art::before {
+  content: '?FILE NOT FOUND ERROR'; position: absolute; inset: 0; z-index: 1; display: grid;
+  place-items: center; padding: 20px; color: var(--c64-yellow); background: #08004f; text-align: center;
+  font-size: 0.55rem; line-height: 1.8;
+}
+.garden-status { position: absolute; z-index: 2; top: 7px; left: 7px; padding: 4px 6px; background: #08004f; border: 2px solid currentColor; color: var(--c64-green); font-size: 0.48rem; }
+.garden-card.warning .garden-status { color: var(--c64-yellow); }
+.garden-card.critical .garden-status { color: var(--c64-light-red); }
+.garden-card.offline .garden-status { color: var(--grey-mid); }
+.garden-card-body { display: block; padding: 10px; }
+.garden-card-id { display: block; color: var(--c64-cyan); font-size: 0.45rem; }
+.garden-card-name { display: block; margin-top: 6px; color: var(--c64-light-green); font-size: 0.66rem; line-height: 1.5; }
+.garden-card-species { display: block; min-height: 2.8em; margin-top: 4px; color: var(--grey-mid); font-size: 0.48rem; line-height: 1.45; text-transform: uppercase; }
+.garden-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 9px; }
+.garden-metric { min-width: 0; padding: 5px 2px; border: 2px solid var(--c64-blue); background: #08004f; text-align: center; }
+.garden-metric label { display: block; color: var(--c64-cyan); font-size: 0.4rem; }
+.garden-metric span { display: block; margin-top: 4px; color: var(--text); font-size: 0.48rem; white-space: nowrap; }
+.garden-empty { grid-column: 1 / -1; padding: 42px 20px; border: 3px dashed var(--c64-light-blue); color: var(--c64-cyan); text-align: center; font-size: 0.58rem; line-height: 2; }
+.garden-dialog { width: min(900px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 4px solid var(--c64-light-blue); border-radius: 0; background: var(--c64-dark-blue); color: var(--text); box-shadow: 10px 10px 0 #08004f; overflow: auto; }
+.garden-dialog::backdrop { background: rgba(0,0,40,0.88); }
+.garden-dialog-shell { background: var(--c64-dark-blue); }
+.garden-dialog-shell.warning { color: var(--c64-yellow); }
+.garden-dialog-shell.critical { color: var(--c64-light-red); }
+.garden-dialog-header { display: flex; align-items: center; gap: 12px; padding: 10px; border-bottom: 3px solid currentColor; background: #08004f; }
+.garden-dialog-title { flex: 1; min-width: 0; color: var(--c64-light-green); font-size: 0.66rem; line-height: 1.5; }
+.garden-dialog-close { width: 36px; height: 32px; padding: 0; border: 2px solid var(--c64-light-blue); border-radius: 0; background: transparent; color: var(--text); font: 0.65rem/1 'Press Start 2P', monospace; cursor: pointer; }
+.garden-dialog-body { display: grid; grid-template-columns: minmax(300px, 1.1fr) minmax(300px, 1fr); gap: 12px; padding: 12px; }
+.garden-dialog-art { position: relative; min-height: 300px; border: 3px solid var(--c64-light-blue); background: #08004f; overflow: hidden; }
+.garden-dialog-image { width: 100%; height: 100%; min-height: 300px; display: block; object-fit: cover; image-rendering: pixelated; }
+.garden-dialog-data { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.garden-dialog-state-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px; border: 2px solid var(--c64-light-blue); background: #08004f; }
+.garden-dialog-state-row label, .garden-reading label, .garden-report label { color: var(--c64-cyan); font-size: 0.43rem; line-height: 1.5; }
+.garden-dialog-state { color: var(--c64-green); font-size: 0.55rem; }
+.garden-dialog-shell.warning .garden-dialog-state { color: var(--c64-yellow); }
+.garden-dialog-shell.critical .garden-dialog-state { color: var(--c64-light-red); }
+.garden-dialog-shell.offline .garden-dialog-state { color: var(--grey-mid); }
+.garden-dialog-species { color: var(--grey-mid); font-size: 0.5rem; line-height: 1.6; text-transform: uppercase; }
+.garden-readings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.garden-reading { padding: 7px; border: 2px solid var(--c64-blue); background: #08004f; }
+.garden-reading .val { display: block; margin-top: 5px; color: var(--text); font-size: 0.5rem; line-height: 1.5; }
+.garden-report { flex: 1; padding: 9px; border: 2px solid var(--c64-light-blue); background: #08004f; }
+.garden-report-text { margin-top: 8px; color: var(--text); font-size: 0.48rem; line-height: 1.7; }
+@media (max-width: 820px) {
+  .garden-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .garden-dialog-body { grid-template-columns: 1fr; }
+  .garden-dialog-art, .garden-dialog-image { min-height: 240px; }
+}
+@media (max-width: 500px) {
+  .garden-grid, .garden-readings { grid-template-columns: 1fr; }
+  .garden-dialog { width: calc(100vw - 12px); max-height: calc(100dvh - 12px); }
+  .garden-dialog-art, .garden-dialog-image { min-height: 210px; }
+}
+
 /* ═══ WCAG FOCUS ═══ */
 :focus-visible {
   outline: 2px solid var(--c64-yellow);
@@ -1210,6 +1276,7 @@ body::after {
     <button class="c64-tab" role="tab" aria-selected="false" onclick="switchTab('data')">DATA</button>
     <button class="c64-tab" role="tab" aria-selected="false" onclick="switchTab('media')">MEDIA</button>
     <button class="c64-tab" role="tab" aria-selected="false" onclick="switchTab('sensors')">SECURITY</button>
+    <button class="c64-tab" role="tab" aria-selected="false" onclick="switchTab('plants')">GARDEN</button>
   </div>
 
   <!-- CONTENT -->
@@ -1489,6 +1556,50 @@ body::after {
       </div>
     </div>
 
+    <!-- GARDEN TAB -->
+    <div class="page" id="page-plants">
+      <div class="lc-section">
+        <div class="lc-section-pill">GARDEN MONITOR</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="garden-grid" id="garden-grid"></div>
+
+      <dialog class="garden-dialog" id="garden-dialog" aria-labelledby="garden-dialog-name">
+        <section class="garden-dialog-shell offline" id="garden-dialog-shell">
+          <div class="garden-dialog-header">
+            <span class="garden-dialog-title" id="garden-dialog-name">PLANT DATA: NO SELECTION</span>
+            <button class="garden-dialog-close" type="button" onclick="closeGarden()" aria-label="Close plant details">X</button>
+          </div>
+          <div class="garden-dialog-body">
+            <div class="garden-dialog-art">
+              <img class="garden-dialog-image" id="garden-dialog-image" src="/local/plant-status/c64/pilea/pilea-not-ok.webp" alt="Plant telemetry unavailable" onload="this.style.opacity='1'" onerror="this.style.opacity='0';this.parentElement.classList.add('missing-art')">
+            </div>
+            <div class="garden-dialog-data">
+              <div class="garden-dialog-state-row">
+                <label>STATUS</label>
+                <span class="garden-dialog-state" id="garden-dialog-state" role="status" aria-live="polite">OFFLINE</span>
+              </div>
+              <div class="garden-dialog-species" id="garden-dialog-species">SPECIES UNKNOWN</div>
+              <div class="garden-readings">
+                <div class="garden-reading"><label>SOIL MOISTURE</label><span class="val" id="garden-dialog-moisture">-- %</span></div>
+                <div class="garden-reading"><label>TEMPERATURE</label><span class="val" id="garden-dialog-temperature">-- C</span></div>
+                <div class="garden-reading"><label>AIR HUMIDITY</label><span class="val" id="garden-dialog-humidity">-- %</span></div>
+                <div class="garden-reading"><label>ILLUMINANCE</label><span class="val" id="garden-dialog-illuminance">-- LX</span></div>
+                <div class="garden-reading"><label>VPD</label><span class="val" id="garden-dialog-vpd">-- KPA</span></div>
+                <div class="garden-reading"><label>DLI / 24H</label><span class="val" id="garden-dialog-dli">-- MOL/D*M2</span></div>
+                <div class="garden-reading"><label>BATTERY</label><span class="val" id="garden-dialog-battery">-- %</span></div>
+              </div>
+              <div class="garden-report">
+                <label>PLANT MONITOR REPORT</label>
+                <div class="garden-report-text" id="garden-dialog-report">WAITING FOR PLANT DATA...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </dialog>
+    </div>
+
   </div><!-- /content -->
 
   <!-- FOOTER -->
@@ -1520,13 +1631,13 @@ const THEME = {
   title: '**** COMMODORE 64 HOME SYSTEM ****',
   subtitle: '64K RAM SYSTEM  38911 BASIC BYTES FREE',
   footer: 'LOAD "*",8,1',
-  tabs: ['ROOMS', 'LIGHTS', 'DATA', 'MEDIA', 'SECURITY'],
-  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  tabs: ['ROOMS', 'LIGHTS', 'DATA', 'MEDIA', 'SECURITY', 'GARDEN'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'plants'],
   emptyMedia: '// NO SIGNAL //',
   connOnline: 'ONLINE',
   connOffline: 'OFFLINE',
   connConnecting: 'CONNECTING...',
-  connToast: true,
+  connToast: 'CONNECTED TO HOME ASSISTANT',
   footerOnline: 'LOAD "*",8,1',
   footerConnecting: 'LOAD "*",8,1',
   footerOffline: 'LOAD "*",8,1',
@@ -1544,6 +1655,10 @@ const THEME = {
     lifetimeLabel: 'TOTAL BLOCKS', etaLabel: 'to READY',
   },
 
+  extraLiveData: {
+    garden: { plants: {}, selected: null },
+  },
+
   onToggleLight(entityId, on) {
     addBasicLogEntry(`${on ? 'OFF' : 'ON'} ${entityId.split('.')[1].toUpperCase()}`);
   },
@@ -1557,13 +1672,14 @@ const THEME = {
     addBasicLogEntry('?CONNECTION ERROR');
   },
   onIngest(id, s) {
+    ingestGardenState(id, s);
     if (id.includes('temperature')) {
       const v = parseFloat(s.state);
       if (!isNaN(v)) addBasicLogEntry(`TEMP ${id.split('.')[1].substring(0,8).toUpperCase()} = ${v.toFixed(1)}C`);
     }
   },
-  onInit() {},
-  onStatesLoaded() {},
+  onInit() { initGarden(); },
+  onStatesLoaded() { renderGarden(); },
   onStateChanged() {},
   onAuthFail() {}
 };
@@ -1582,8 +1698,201 @@ function addBasicLogEntry(text) {
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
 }
+
+// ── C64-SPECIFIC: GARDEN ──
+const GARDEN_PLANTS = ENTITIES.integrations?.plants || [];
+let gardenOpener = null;
+
+function getGardenRecord(entityId) {
+  if (!liveData.garden.plants[entityId]) {
+    liveData.garden.plants[entityId] = { entityState: null, attributes: {}, values: {} };
+  }
+  return liveData.garden.plants[entityId];
+}
+
+function getGardenSeverity(record) {
+  const state = record?.entityState;
+  const problems = Array.isArray(record?.attributes?.problems) ? record.attributes.problems : [];
+  if (!state || state === 'unknown' || state === 'unavailable') return 'offline';
+  if (problems.length > 1) return 'critical';
+  if (problems.length === 1) return 'warning';
+  return 'ok';
+}
+
+function getGardenStatus(severity) {
+  return severity === 'offline' ? 'OFFLINE' : severity === 'critical' ? 'CRITICAL' : severity === 'warning' ? 'WARNING' : 'HEALTHY';
+}
+
+function getGardenImageSet(plant) {
+  const imageSet = String(plant.imageSet || 'plant-1');
+  return imageSet === 'plant-1' ? 'pilea' : imageSet;
+}
+
+function getGardenImage(plant, severity) {
+  const imageSet = getGardenImageSet(plant);
+  const variant = severity === 'critical' ? 'bad' : severity === 'ok' ? 'ok' : 'not-ok';
+  const safeSet = encodeURIComponent(imageSet);
+  return `/local/plant-status/c64/${safeSet}/${safeSet}-${variant}.webp`;
+}
+
+function ingestGardenState(id, state) {
+  if (!GARDEN_PLANTS.length || !liveData.garden) return;
+  let matchedPlant = null;
+  let sensorKey = null;
+  for (const plant of GARDEN_PLANTS) {
+    if (id === plant.entity) {
+      matchedPlant = plant;
+      break;
+    }
+    for (const [key, sensorId] of Object.entries(plant.sensors || {})) {
+      if (id === sensorId) {
+        matchedPlant = plant;
+        sensorKey = key;
+        break;
+      }
+    }
+    if (matchedPlant) break;
+  }
+  if (!matchedPlant) return;
+
+  const record = getGardenRecord(matchedPlant.entity);
+  if (id === matchedPlant.entity) {
+    record.entityState = state.state;
+    record.attributes = state.attributes || {};
+  } else if (sensorKey) {
+    const value = parseFloat(state.state);
+    record.values[sensorKey] = Number.isFinite(value) ? value : null;
+  }
+  scheduleThemeRender('garden', renderGarden);
+}
+
+function gardenValue(record, key, decimals, unit) {
+  const value = record?.values?.[key];
+  return Number.isFinite(value) ? `${value.toFixed(decimals)} ${unit}` : `-- ${unit}`;
+}
+
+function gardenImageMarkup(plant, severity, label, className) {
+  const status = getGardenStatus(severity).toLowerCase();
+  return `<img class="${className}" src="${getGardenImage(plant, severity)}" alt="${escapeHtml(label)} plant status: ${status}" loading="lazy" onload="this.style.opacity='1'" onerror="this.style.opacity='0';this.parentElement.classList.add('missing-art')">`;
+}
+
+function renderGarden() {
+  const grid = document.getElementById('garden-grid');
+  if (!grid || !liveData.garden) return;
+  if (!GARDEN_PLANTS.length) {
+    grid.innerHTML = '<div class="garden-empty">0 PLANTS READY.<br>ADD PLANTS TO ENTITIES.JS<br>READY.</div>';
+    return;
+  }
+
+  grid.innerHTML = GARDEN_PLANTS.map((plant, index) => {
+    const record = getGardenRecord(plant.entity);
+    const attrs = record.attributes || {};
+    const severity = getGardenSeverity(record);
+    const status = getGardenStatus(severity);
+    const label = plant.label || attrs.friendly_name || plant.entity;
+    const species = attrs.species || 'Species unknown';
+    const slot = String(index + 1).padStart(2, '0');
+    return `<button type="button" class="garden-card ${severity}" data-garden-entity="${escapeHtml(plant.entity)}" aria-label="Open ${escapeHtml(label)} plant details">
+      <span class="garden-image-wrap">
+        ${gardenImageMarkup(plant, severity, label, 'garden-image')}
+        <span class="garden-status">${status}</span>
+      </span>
+      <span class="garden-card-body">
+        <span class="garden-card-id">PLANT FILE #${slot}</span>
+        <span class="garden-card-name">${escapeHtml(label.toUpperCase())}</span>
+        <span class="garden-card-species">${escapeHtml(species)}</span>
+        <span class="garden-metrics">
+          <span class="garden-metric"><label>MOIST</label><span>${gardenValue(record, 'moisture', 1, '%')}</span></span>
+          <span class="garden-metric"><label>TEMP</label><span>${gardenValue(record, 'temperature', 1, 'C')}</span></span>
+          <span class="garden-metric"><label>BATT</label><span>${gardenValue(record, 'battery', 0, '%')}</span></span>
+        </span>
+      </span>
+    </button>`;
+  }).join('');
+
+  if (liveData.garden.selected) renderGardenDialog(liveData.garden.selected);
+}
+
+function renderGardenDialog(entityId) {
+  const plant = GARDEN_PLANTS.find(item => item.entity === entityId);
+  const shell = document.getElementById('garden-dialog-shell');
+  if (!plant || !shell) return;
+  const record = getGardenRecord(entityId);
+  const attrs = record.attributes || {};
+  const problems = Array.isArray(attrs.problems) ? attrs.problems : [];
+  const severity = getGardenSeverity(record);
+  const status = getGardenStatus(severity);
+  const label = plant.label || attrs.friendly_name || plant.entity;
+  const species = attrs.species || 'Species unknown';
+
+  shell.classList.remove('ok', 'warning', 'critical', 'offline');
+  shell.classList.add(severity);
+  document.getElementById('garden-dialog-state').textContent = status;
+  document.getElementById('garden-dialog-name').textContent = `PLANT DATA: ${label.toUpperCase()}`;
+  document.getElementById('garden-dialog-species').textContent = species.toUpperCase();
+
+  const image = document.getElementById('garden-dialog-image');
+  image.parentElement.classList.remove('missing-art');
+  image.style.opacity = '1';
+  image.src = getGardenImage(plant, severity);
+  image.alt = severity === 'offline' ? `${label} telemetry unavailable` : `${label} plant status: ${status.toLowerCase()}`;
+
+  document.getElementById('garden-dialog-moisture').textContent = gardenValue(record, 'moisture', 1, '%');
+  document.getElementById('garden-dialog-temperature').textContent = gardenValue(record, 'temperature', 1, 'C');
+  document.getElementById('garden-dialog-humidity').textContent = gardenValue(record, 'humidity', 0, '%');
+  document.getElementById('garden-dialog-illuminance').textContent = gardenValue(record, 'illuminance', 0, 'LX');
+  document.getElementById('garden-dialog-vpd').textContent = gardenValue(record, 'vpd', 2, 'KPA');
+  document.getElementById('garden-dialog-dli').textContent = gardenValue(record, 'dli24h', 2, 'MOL/D*M2');
+  document.getElementById('garden-dialog-battery').textContent = gardenValue(record, 'battery', 0, '%');
+
+  let report = '0 PROBLEMS. ALL VALUES WITHIN RANGE.';
+  if (severity === 'offline') report = '?DEVICE NOT PRESENT. SENSOR VALUES MAY BE STALE.';
+  else if (problems.length) {
+    report = problems.map(problem => {
+      if (typeof problem === 'string') return problem.toUpperCase();
+      const sensor = String(problem.sensor || problem.attribute || 'SENSOR').toUpperCase();
+      const current = problem.current !== undefined ? ` (${problem.current})` : '';
+      return `${sensor}: ${String(problem.status || 'OUT OF RANGE').toUpperCase()}${current}`;
+    }).join(' / ');
+  }
+  document.getElementById('garden-dialog-report').textContent = report;
+}
+
+function openGarden(entityId) {
+  const dialog = document.getElementById('garden-dialog');
+  if (!dialog || !GARDEN_PLANTS.some(plant => plant.entity === entityId)) return;
+  gardenOpener = document.activeElement;
+  liveData.garden.selected = entityId;
+  renderGardenDialog(entityId);
+  if (!dialog.open) dialog.showModal();
+  dialog.querySelector('.garden-dialog-close')?.focus();
+}
+
+function closeGarden() {
+  const dialog = document.getElementById('garden-dialog');
+  if (dialog?.open) dialog.close();
+}
+
+function initGarden() {
+  GARDEN_PLANTS.forEach(plant => getGardenRecord(plant.entity));
+  const grid = document.getElementById('garden-grid');
+  const dialog = document.getElementById('garden-dialog');
+  grid?.addEventListener('click', event => {
+    const card = event.target.closest('[data-garden-entity]');
+    if (card) openGarden(card.dataset.gardenEntity);
+  });
+  dialog?.addEventListener('click', event => {
+    if (event.target === dialog) closeGarden();
+  });
+  dialog?.addEventListener('close', () => {
+    liveData.garden.selected = null;
+    if (gardenOpener instanceof HTMLElement) gardenOpener.focus();
+    gardenOpener = null;
+  });
+  renderGarden();
+}
 </script>
-<script src="shared.js"></script>
-<script src="washer.js"></script>
+<script src="shared.js?v=20260714-1"></script>
+<script src="washer.js?v=20260714-1"></script>
 </body>
 </html>

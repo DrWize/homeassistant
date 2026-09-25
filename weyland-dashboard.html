@@ -1148,6 +1148,57 @@ body.night-mode .wy-header { opacity: 0.9; }
 .mp-type,
 .mp-badge { background: #292929; color: #f2f2f2; }
 .watts-val.off { color: #b8b8b8; }
+
+/* XENOBOTANY — corporate specimen monitor */
+.xeno-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.xeno-card { min-width: 0; padding: 0; border: 1px solid #6f756f; background: #111514; color: #e6e4d9; text-align: left; cursor: pointer; font-family: inherit; box-shadow: inset 0 0 0 1px rgba(255,255,255,.035); transition: border-color .15s, transform .15s, box-shadow .15s; }
+.xeno-card:hover { border-color: var(--amber); transform: translateY(-2px); box-shadow: 0 0 16px rgba(255,153,0,.18); }
+.xeno-card.warning { border-color: var(--amber); }
+.xeno-card.critical { border-color: var(--red); }
+.xeno-card.offline { border-style: dashed; opacity: .74; }
+.xeno-image-wrap { position: relative; display: block; aspect-ratio: 3 / 2; overflow: hidden; background: #050707; border-bottom: 1px solid currentColor; }
+.xeno-image-wrap::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 49.8%, rgba(220,235,242,.13) 50%, transparent 50.2%), linear-gradient(transparent 49.8%, rgba(220,235,242,.08) 50%, transparent 50.2%); }
+.xeno-image { width: 100%; height: 100%; display: block; object-fit: cover; }
+.xeno-image-wrap.missing-art::before, .xeno-dialog-art.missing-art::before { content: 'SPECIMEN IMAGE UNAVAILABLE'; position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 20px; color: var(--grey-mid); background: #080b0b; text-align: center; letter-spacing: 2px; }
+.xeno-status { position: absolute; z-index: 3; top: 8px; left: 8px; padding: 4px 8px; border: 1px solid currentColor; background: rgba(5,7,7,.9); color: #c9e4ed; font: .72rem/1 'VT323', monospace; letter-spacing: 2px; }
+.xeno-card.warning .xeno-status { color: #ffbd45; }
+.xeno-card.critical .xeno-status { color: #ff5a4f; }
+.xeno-card.offline .xeno-status { color: #b8b8b8; }
+.xeno-card-body { display: block; padding: 10px; border-left: 4px solid #9ca8aa; }
+.xeno-card.warning .xeno-card-body { border-left-color: var(--amber); }
+.xeno-card.critical .xeno-card-body { border-left-color: var(--red); }
+.xeno-card-id { display: block; color: var(--amber); font: .68rem/1 'VT323', monospace; letter-spacing: 3px; }
+.xeno-card-name { display: block; margin-top: 5px; color: #f2f0e6; font-size: .95rem; letter-spacing: 2px; }
+.xeno-card-species { display: block; min-height: 2.4em; margin-top: 2px; color: #aeb7b8; font-size: .68rem; line-height: 1.4; text-transform: uppercase; }
+.xeno-metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 5px; margin-top: 9px; }
+.xeno-metric { min-width: 0; padding: 5px 3px; border: 1px solid #414746; background: #080b0b; text-align: center; }
+.xeno-metric label { display: block; color: #9ca8aa; font-size: .56rem; }
+.xeno-metric span { display: block; margin-top: 3px; color: #e6e4d9; font-size: .68rem; white-space: nowrap; }
+.xeno-empty { grid-column: 1 / -1; padding: 42px 20px; border: 1px dashed #6f756f; background: #111514; color: #c8c8bd; text-align: center; letter-spacing: 2px; line-height: 1.8; }
+.xeno-dialog { width: min(900px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--amber); background: #0b0e0e; color: #e6e4d9; box-shadow: 0 0 40px rgba(255,153,0,.22); overflow: auto; }
+.xeno-dialog::backdrop { background: rgba(0,0,0,.88); backdrop-filter: blur(2px); }
+.xeno-dialog-shell { background: #0b0e0e; }
+.xeno-dialog-header { display: flex; align-items: center; gap: 12px; padding: 9px 11px; border-bottom: 2px solid var(--amber); background: #1a1d1c; }
+.xeno-dialog-title { flex: 1; min-width: 0; color: var(--amber); font: 1rem/1 'VT323', monospace; letter-spacing: 3px; }
+.xeno-dialog-close { width: 34px; height: 30px; padding: 0; border: 1px solid var(--amber); background: transparent; color: var(--amber); font: 1rem/1 inherit; cursor: pointer; }
+.xeno-dialog-body { display: grid; grid-template-columns: minmax(300px,1.1fr) minmax(300px,1fr); gap: 12px; padding: 12px; }
+.xeno-dialog-art { position: relative; min-height: 300px; border: 1px solid #59605f; background: #050707; overflow: hidden; }
+.xeno-dialog-image { width: 100%; height: 100%; min-height: 300px; display: block; object-fit: cover; }
+.xeno-dialog-data { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.xeno-dialog-state-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px; border: 1px solid #59605f; background: #151918; }
+.xeno-dialog-state-row label, .xeno-reading label, .xeno-report label { color: #9ca8aa; font-size: .6rem; letter-spacing: 1px; }
+.xeno-dialog-state { color: #c9e4ed; font-size: .9rem; letter-spacing: 1px; }
+.xeno-dialog-shell.warning .xeno-dialog-state { color: #ffbd45; }
+.xeno-dialog-shell.critical .xeno-dialog-state { color: #ff5a4f; }
+.xeno-dialog-shell.offline .xeno-dialog-state { color: #b8b8b8; }
+.xeno-dialog-species { color: #c8c8bd; font-size: .7rem; text-transform: uppercase; }
+.xeno-readings { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.xeno-reading { padding: 7px 8px; border: 1px solid #414746; background: #070909; }
+.xeno-reading .val { display: block; margin-top: 4px; color: #f2f0e6; font-size: .72rem; }
+.xeno-report { flex: 1; padding: 9px; border: 1px solid #59605f; border-left: 4px solid var(--amber); background: #070909; }
+.xeno-report-text { margin-top: 7px; color: #e6e4d9; font-size: .7rem; line-height: 1.55; }
+@media (max-width: 820px) { .xeno-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .xeno-dialog-body { grid-template-columns: 1fr; } .xeno-dialog-art,.xeno-dialog-image { min-height: 240px; } }
+@media (max-width: 500px) { .xeno-grid,.xeno-readings { grid-template-columns: 1fr; } .xeno-dialog { width: calc(100vw - 12px); max-height: calc(100dvh - 12px); } .xeno-dialog-art,.xeno-dialog-image { min-height: 210px; } }
 </style>
 </head>
 <body class="crt-flicker">
@@ -1180,6 +1231,7 @@ body.night-mode .wy-header { opacity: 0.9; }
     <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('data')">TELEMETRY</button>
     <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('media')">COMMS</button>
     <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('sensors')">CONTAINMENT</button>
+    <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('plants')">XENOBOTANY</button>
   </div>
 
   <!-- CONTENT -->
@@ -1473,6 +1525,44 @@ HULL INTEGRITY: 100%</div>
 
     </div>
 
+    <!-- ========== XENOBOTANY (PLANTS) ========== -->
+    <div class="page" id="page-plants">
+      <div class="lc-section">
+        <div class="lc-section-pill">Xenobotanical Specimen Registry</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="xeno-grid" id="xeno-grid"></div>
+
+      <dialog class="xeno-dialog" id="xeno-dialog" aria-labelledby="xeno-dialog-name">
+        <section class="xeno-dialog-shell offline" id="xeno-dialog-shell">
+          <div class="xeno-dialog-header">
+            <span class="xeno-dialog-title" id="xeno-dialog-name">SPECIMEN // NO SELECTION</span>
+            <button class="xeno-dialog-close" type="button" onclick="closeXenobotany()" aria-label="Close plant details">×</button>
+          </div>
+          <div class="xeno-dialog-body">
+            <div class="xeno-dialog-art">
+              <img class="xeno-dialog-image" id="xeno-dialog-image" src="/local/plant-status/weyland/pilea/pilea-not-ok.webp" alt="Plant telemetry unavailable" onload="this.style.opacity='1'" onerror="this.style.opacity='0';this.parentElement.classList.add('missing-art')">
+            </div>
+            <div class="xeno-dialog-data">
+              <div class="xeno-dialog-state-row"><label>CONTAINMENT STATUS</label><span class="xeno-dialog-state" id="xeno-dialog-state" role="status" aria-live="polite">OFFLINE</span></div>
+              <div class="xeno-dialog-species" id="xeno-dialog-species">SPECIES UNCLASSIFIED</div>
+              <div class="xeno-readings">
+                <div class="xeno-reading"><label>SOIL MOISTURE</label><span class="val" id="xeno-dialog-moisture">-- %</span></div>
+                <div class="xeno-reading"><label>TEMPERATURE</label><span class="val" id="xeno-dialog-temperature">-- °C</span></div>
+                <div class="xeno-reading"><label>AIR HUMIDITY</label><span class="val" id="xeno-dialog-humidity">-- %</span></div>
+                <div class="xeno-reading"><label>ILLUMINANCE</label><span class="val" id="xeno-dialog-illuminance">-- lx</span></div>
+                <div class="xeno-reading"><label>VPD</label><span class="val" id="xeno-dialog-vpd">-- kPa</span></div>
+                <div class="xeno-reading"><label>DLI / 24H</label><span class="val" id="xeno-dialog-dli">-- mol/d⋅m²</span></div>
+                <div class="xeno-reading"><label>BATTERY RESERVE</label><span class="val" id="xeno-dialog-battery">-- %</span></div>
+              </div>
+              <div class="xeno-report"><label>MU/TH/UR DIAGNOSTIC REPORT</label><div class="xeno-report-text" id="xeno-dialog-report">AWAITING SPECIMEN TELEMETRY...</div></div>
+            </div>
+          </div>
+        </section>
+      </dialog>
+    </div>
+
   </div><!-- /content -->
 
   <!-- FOOTER -->
@@ -1510,8 +1600,8 @@ const THEME = {
   title: 'WEYLAND-YUTANI CORP',
   subtitle: 'MU/TH/UR 6000 INTERFACE',
   footer: 'BUILDING BETTER WORLDS',
-  tabs: ['HABITATION', 'ENVIRONMENTAL', 'TELEMETRY', 'COMMS', 'CONTAINMENT'],
-  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  tabs: ['HABITATION', 'ENVIRONMENTAL', 'TELEMETRY', 'COMMS', 'CONTAINMENT', 'XENOBOTANY'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'plants'],
   emptyMedia: 'INTERFACE 2037 READY FOR INQUIRY',
   connOnline: 'UPLINK ACTIVE',
   connOffline: 'UPLINK FAILURE',
@@ -1533,11 +1623,16 @@ const THEME = {
     statusLabels: { idle:'SECURED', running:'ACTIVE', paused:'HOLD', complete:'CYCLE COMPLETE' },
     lifetimeLabel: 'CUMULATIVE LOG', etaLabel: 'to secure',
   },
+  extraLiveData: {
+    xenobotany: { plants: {}, selected: null },
+  },
   onInit() {
     renderMother();
+    initXenobotany();
   },
   onStatesLoaded() {
     renderMother();
+    renderXenobotany();
   },
   onStateChanged(id, s) {
     if (id.includes('sensor.') || id.includes('power') || id.includes('motion')) renderMother();
@@ -1545,7 +1640,9 @@ const THEME = {
   intervals: [
     [() => renderMother(), 30000]
   ],
-  onIngest() {},
+  onIngest(id, state) {
+    ingestXenobotanyState(id, state);
+  },
   onAuthOk() {},
   onAuthFail() {},
   onToggleLight() {},
@@ -1585,8 +1682,176 @@ PERIMETER: ${perimeterLine}
 POWER CONSUMPTION: ${powerLine}
 HULL INTEGRITY: ${integrityPct}%`;
 }
+
+// XENOBOTANY — plant telemetry
+const XENOBOTANY_PLANTS = ENTITIES.integrations?.plants || [];
+let xenobotanyOpener = null;
+
+function getXenoRecord(entityId) {
+  if (!liveData.xenobotany.plants[entityId]) liveData.xenobotany.plants[entityId] = { entityState: null, attributes: {}, values: {} };
+  return liveData.xenobotany.plants[entityId];
+}
+
+function getXenoSeverity(record) {
+  const state = record?.entityState;
+  const problems = Array.isArray(record?.attributes?.problems) ? record.attributes.problems : [];
+  if (!state || state === 'unknown' || state === 'unavailable') return 'offline';
+  if (problems.length > 1) return 'critical';
+  if (problems.length === 1) return 'warning';
+  return 'ok';
+}
+
+function getXenoStatus(severity) {
+  return severity === 'offline' ? 'LINK LOST' : severity === 'critical' ? 'CRITICAL' : severity === 'warning' ? 'ATTENTION' : 'VIABLE';
+}
+
+function getXenoImageSet(plant) {
+  const imageSet = String(plant.imageSet || 'plant-1');
+  return imageSet === 'plant-1' ? 'pilea' : imageSet;
+}
+
+function getXenoImage(plant, severity) {
+  const imageSet = getXenoImageSet(plant);
+  const variant = severity === 'critical' ? 'bad' : severity === 'ok' ? 'ok' : 'not-ok';
+  const safeSet = encodeURIComponent(imageSet);
+  return '/local/plant-status/weyland/' + safeSet + '/' + safeSet + '-' + variant + '.webp';
+}
+
+function ingestXenobotanyState(id, state) {
+  if (!XENOBOTANY_PLANTS.length || !liveData.xenobotany) return;
+  let matchedPlant = null;
+  let sensorKey = null;
+  for (const plant of XENOBOTANY_PLANTS) {
+    if (id === plant.entity) { matchedPlant = plant; break; }
+    for (const [key, sensorId] of Object.entries(plant.sensors || {})) {
+      if (id === sensorId) { matchedPlant = plant; sensorKey = key; break; }
+    }
+    if (matchedPlant) break;
+  }
+  if (!matchedPlant) return;
+  const record = getXenoRecord(matchedPlant.entity);
+  if (id === matchedPlant.entity) {
+    record.entityState = state.state;
+    record.attributes = state.attributes || {};
+  } else if (sensorKey) {
+    const value = parseFloat(state.state);
+    record.values[sensorKey] = Number.isFinite(value) ? value : null;
+  }
+  scheduleThemeRender('xenobotany', renderXenobotany);
+}
+
+function xenoValue(record, key, decimals, unit) {
+  const value = record?.values?.[key];
+  return Number.isFinite(value) ? value.toFixed(decimals) + ' ' + unit : '-- ' + unit;
+}
+
+function xenoImageMarkup(plant, severity, label, className) {
+  return '<img class="' + className + '" src="' + getXenoImage(plant, severity) + '" alt="' + escapeHtml(label) + ' plant status: ' + getXenoStatus(severity).toLowerCase() + '" loading="lazy" onload="this.style.opacity=\'1\'" onerror="this.style.opacity=\'0\';this.parentElement.classList.add(\'missing-art\')">';
+}
+
+function renderXenobotany() {
+  const grid = document.getElementById('xeno-grid');
+  if (!grid || !liveData.xenobotany) return;
+  if (!XENOBOTANY_PLANTS.length) {
+    grid.innerHTML = '<div class="xeno-empty">NO SPECIMENS REGISTERED<br>ADD PLANTS TO ENTITIES.JS</div>';
+    return;
+  }
+  grid.innerHTML = XENOBOTANY_PLANTS.map((plant, index) => {
+    const record = getXenoRecord(plant.entity);
+    const attrs = record.attributes || {};
+    const severity = getXenoSeverity(record);
+    const status = getXenoStatus(severity);
+    const label = plant.label || attrs.friendly_name || plant.entity;
+    const species = attrs.species || 'Species unclassified';
+    return '<button type="button" class="xeno-card ' + severity + '" data-xeno-entity="' + escapeHtml(plant.entity) + '" aria-label="Open ' + escapeHtml(label) + ' plant details">' +
+      '<span class="xeno-image-wrap">' + xenoImageMarkup(plant, severity, label, 'xeno-image') + '<span class="xeno-status">' + status + '</span></span>' +
+      '<span class="xeno-card-body">' +
+        '<span class="xeno-card-id">SPECIMEN ' + String(index + 1).padStart(2, '0') + '</span>' +
+        '<span class="xeno-card-name">' + escapeHtml(label.toUpperCase()) + '</span>' +
+        '<span class="xeno-card-species">' + escapeHtml(species) + '</span>' +
+        '<span class="xeno-metrics">' +
+          '<span class="xeno-metric"><label>MOIST</label><span>' + xenoValue(record, 'moisture', 1, '%') + '</span></span>' +
+          '<span class="xeno-metric"><label>TEMP</label><span>' + xenoValue(record, 'temperature', 1, '°C') + '</span></span>' +
+          '<span class="xeno-metric"><label>BATT</label><span>' + xenoValue(record, 'battery', 0, '%') + '</span></span>' +
+        '</span>' +
+      '</span>' +
+    '</button>';
+  }).join('');
+  if (liveData.xenobotany.selected) renderXenobotanyDialog(liveData.xenobotany.selected);
+}
+
+function renderXenobotanyDialog(entityId) {
+  const plant = XENOBOTANY_PLANTS.find(item => item.entity === entityId);
+  const shell = document.getElementById('xeno-dialog-shell');
+  if (!plant || !shell) return;
+  const record = getXenoRecord(entityId);
+  const attrs = record.attributes || {};
+  const problems = Array.isArray(attrs.problems) ? attrs.problems : [];
+  const severity = getXenoSeverity(record);
+  const status = getXenoStatus(severity);
+  const label = plant.label || attrs.friendly_name || plant.entity;
+  const species = attrs.species || 'Species unclassified';
+  shell.classList.remove('ok', 'warning', 'critical', 'offline');
+  shell.classList.add(severity);
+  document.getElementById('xeno-dialog-state').textContent = status;
+  document.getElementById('xeno-dialog-name').textContent = 'SPECIMEN // ' + label.toUpperCase();
+  document.getElementById('xeno-dialog-species').textContent = species.toUpperCase();
+  const image = document.getElementById('xeno-dialog-image');
+  image.parentElement.classList.remove('missing-art');
+  image.style.opacity = '1';
+  image.src = getXenoImage(plant, severity);
+  image.alt = severity === 'offline' ? label + ' telemetry unavailable' : label + ' plant status: ' + status.toLowerCase();
+  document.getElementById('xeno-dialog-moisture').textContent = xenoValue(record, 'moisture', 1, '%');
+  document.getElementById('xeno-dialog-temperature').textContent = xenoValue(record, 'temperature', 1, '°C');
+  document.getElementById('xeno-dialog-humidity').textContent = xenoValue(record, 'humidity', 0, '%');
+  document.getElementById('xeno-dialog-illuminance').textContent = xenoValue(record, 'illuminance', 0, 'lx');
+  document.getElementById('xeno-dialog-vpd').textContent = xenoValue(record, 'vpd', 2, 'kPa');
+  document.getElementById('xeno-dialog-dli').textContent = xenoValue(record, 'dli24h', 2, 'mol/d⋅m²');
+  document.getElementById('xeno-dialog-battery').textContent = xenoValue(record, 'battery', 0, '%');
+  let report = 'NO ANOMALIES DETECTED. SPECIMEN VIABLE.';
+  if (severity === 'offline') report = 'TELEMETRY LINK LOST. DISPLAYED VALUES MAY BE STALE.';
+  else if (problems.length) report = problems.map(problem => {
+    if (typeof problem === 'string') return problem.toUpperCase();
+    const sensor = String(problem.sensor || problem.attribute || 'SENSOR').toUpperCase();
+    const current = problem.current !== undefined ? ' (' + problem.current + ')' : '';
+    return sensor + ': ' + String(problem.status || 'OUT OF RANGE').toUpperCase() + current;
+  }).join(' // ');
+  document.getElementById('xeno-dialog-report').textContent = report;
+}
+
+function openXenobotany(entityId) {
+  const dialog = document.getElementById('xeno-dialog');
+  if (!dialog || !XENOBOTANY_PLANTS.some(plant => plant.entity === entityId)) return;
+  xenobotanyOpener = document.activeElement;
+  liveData.xenobotany.selected = entityId;
+  renderXenobotanyDialog(entityId);
+  if (!dialog.open) dialog.showModal();
+  dialog.querySelector('.xeno-dialog-close')?.focus();
+}
+
+function closeXenobotany() {
+  const dialog = document.getElementById('xeno-dialog');
+  if (dialog?.open) dialog.close();
+}
+
+function initXenobotany() {
+  XENOBOTANY_PLANTS.forEach(plant => getXenoRecord(plant.entity));
+  const grid = document.getElementById('xeno-grid');
+  const dialog = document.getElementById('xeno-dialog');
+  grid?.addEventListener('click', event => {
+    const card = event.target.closest('[data-xeno-entity]');
+    if (card) openXenobotany(card.dataset.xenoEntity);
+  });
+  dialog?.addEventListener('click', event => { if (event.target === dialog) closeXenobotany(); });
+  dialog?.addEventListener('close', () => {
+    liveData.xenobotany.selected = null;
+    if (xenobotanyOpener instanceof HTMLElement) xenobotanyOpener.focus();
+    xenobotanyOpener = null;
+  });
+  renderXenobotany();
+}
 </script>
-<script src="shared.js"></script>
-<script src="washer.js"></script>
+<script src="shared.js?v=20260714-1"></script>
+<script src="washer.js?v=20260714-1"></script>
 </body>
 </html>

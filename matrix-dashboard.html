@@ -1172,6 +1172,55 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 .matrix-header-status > span { color: #00b83e !important; opacity: 0.8 !important; }
 .matrix-tab { color: #00b83e; }
 #daynight-btn { background: #001a08 !important; color: #00ff41 !important; }
+
+/* BIOCODE — botanical source monitor */
+.biocode-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.biocode-card { min-width: 0; padding: 0; border: 1px solid var(--green-dim); background: rgba(0,12,3,0.92); color: var(--green); text-align: left; cursor: pointer; font-family: inherit; box-shadow: 0 0 12px rgba(0,255,65,0.08), inset 0 0 18px rgba(0,255,65,0.035); transition: border-color .15s, transform .15s, box-shadow .15s; }
+.biocode-card:hover { border-color: var(--green); transform: translateY(-2px); box-shadow: 0 0 18px var(--green-glow); }
+.biocode-card.warning { border-color: #d6aa00; }
+.biocode-card.critical { border-color: var(--red); }
+.biocode-card.offline { border-style: dashed; opacity: .76; }
+.biocode-image-wrap { position: relative; display: block; aspect-ratio: 3 / 2; overflow: hidden; background: #000; border-bottom: 1px solid currentColor; }
+.biocode-image-wrap::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(transparent 49%, rgba(0,255,65,.05) 50%, transparent 51%); background-size: 100% 5px; }
+.biocode-image { width: 100%; height: 100%; display: block; object-fit: cover; }
+.biocode-image-wrap.missing-art::before, .biocode-dialog-art.missing-art::before { content: 'SOURCE IMAGE UNAVAILABLE'; position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 20px; color: var(--green-dim); background: #000; text-align: center; letter-spacing: 2px; }
+.biocode-status { position: absolute; z-index: 3; top: 8px; left: 8px; padding: 3px 7px; border: 1px solid currentColor; background: rgba(0,0,0,.9); color: var(--green); font-size: .62rem; letter-spacing: 1px; }
+.biocode-card.warning .biocode-status { color: #ffd23f; }
+.biocode-card.critical .biocode-status { color: var(--red); }
+.biocode-card.offline .biocode-status { color: var(--grey-mid); }
+.biocode-card-body { display: block; padding: 10px; }
+.biocode-card-id { display: block; color: var(--green-dim); font-size: .58rem; letter-spacing: 2px; }
+.biocode-card-name { display: block; margin-top: 3px; font-size: 1rem; letter-spacing: 2px; text-shadow: 0 0 7px var(--green-glow); }
+.biocode-card-species { display: block; min-height: 2.4em; color: #00b83e; font-size: .68rem; line-height: 1.4; text-transform: uppercase; }
+.biocode-metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 5px; margin-top: 9px; }
+.biocode-metric { min-width: 0; padding: 5px 3px; border: 1px solid var(--green-dark); background: #000; text-align: center; }
+.biocode-metric label { display: block; color: var(--green-dim); font-size: .56rem; }
+.biocode-metric span { display: block; margin-top: 3px; color: var(--green); font-size: .68rem; white-space: nowrap; }
+.biocode-empty { grid-column: 1 / -1; padding: 42px 20px; border: 1px dashed var(--green-dim); background: rgba(0,10,2,.8); color: #00b83e; text-align: center; letter-spacing: 2px; line-height: 1.8; }
+.biocode-dialog { width: min(900px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--green); background: #030805; color: var(--green); box-shadow: 0 0 35px var(--green-glow); overflow: auto; }
+.biocode-dialog::backdrop { background: rgba(0,0,0,.9); backdrop-filter: blur(2px); }
+.biocode-dialog-shell { background: #030805; }
+.biocode-dialog-header { display: flex; align-items: center; gap: 12px; padding: 9px 11px; border-bottom: 1px solid currentColor; background: #001406; }
+.biocode-dialog-title { flex: 1; min-width: 0; font-size: 1rem; letter-spacing: 2px; }
+.biocode-dialog-close { width: 34px; height: 30px; padding: 0; border: 1px solid var(--green); background: transparent; color: var(--green); font: 1rem/1 inherit; cursor: pointer; }
+.biocode-dialog-body { display: grid; grid-template-columns: minmax(300px,1.1fr) minmax(300px,1fr); gap: 12px; padding: 12px; }
+.biocode-dialog-art { position: relative; min-height: 300px; border: 1px solid var(--green-dim); background: #000; overflow: hidden; }
+.biocode-dialog-image { width: 100%; height: 100%; min-height: 300px; display: block; object-fit: cover; }
+.biocode-dialog-data { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.biocode-dialog-state-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px; border: 1px solid var(--green-dim); background: #001006; }
+.biocode-dialog-state-row label, .biocode-reading label, .biocode-report label { color: var(--green-dim); font-size: .6rem; letter-spacing: 1px; }
+.biocode-dialog-state { font-size: .9rem; letter-spacing: 1px; }
+.biocode-dialog-shell.warning .biocode-dialog-state { color: #ffd23f; }
+.biocode-dialog-shell.critical .biocode-dialog-state { color: var(--red); }
+.biocode-dialog-shell.offline .biocode-dialog-state { color: var(--grey-mid); }
+.biocode-dialog-species { color: #00b83e; font-size: .7rem; text-transform: uppercase; }
+.biocode-readings { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.biocode-reading { padding: 7px 8px; border: 1px solid var(--green-dark); background: #000; }
+.biocode-reading .val { display: block; margin-top: 4px; color: var(--green); font-size: .72rem; }
+.biocode-report { flex: 1; padding: 9px; border: 1px solid var(--green-dim); background: #000; }
+.biocode-report-text { margin-top: 7px; color: var(--green); font-size: .7rem; line-height: 1.55; }
+@media (max-width: 820px) { .biocode-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .biocode-dialog-body { grid-template-columns: 1fr; } .biocode-dialog-art,.biocode-dialog-image { min-height: 240px; } }
+@media (max-width: 500px) { .biocode-grid,.biocode-readings { grid-template-columns: 1fr; } .biocode-dialog { width: calc(100vw - 12px); max-height: calc(100dvh - 12px); } .biocode-dialog-art,.biocode-dialog-image { min-height: 210px; } }
 </style>
 </head>
 <body>
@@ -1202,6 +1251,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     <button class="matrix-tab" onclick="switchTab('data')" role="tab" aria-selected="false">STREAM</button>
     <button class="matrix-tab" onclick="switchTab('media')" role="tab" aria-selected="false">SIGNAL</button>
     <button class="matrix-tab" onclick="switchTab('sensors')" role="tab" aria-selected="false">SENTINEL</button>
+    <button class="matrix-tab" onclick="switchTab('plants')" role="tab" aria-selected="false">BIOCODE</button>
   </div>
 
   <!-- CONTENT -->
@@ -1497,6 +1547,44 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       </div>
     </div>
 
+    <!-- BIOCODE TAB -->
+    <div class="page" id="page-plants">
+      <div class="lc-section">
+        <div class="lc-section-pill">Botanical Source Code</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="biocode-grid" id="biocode-grid"></div>
+
+      <dialog class="biocode-dialog" id="biocode-dialog" aria-labelledby="biocode-dialog-name">
+        <section class="biocode-dialog-shell offline" id="biocode-dialog-shell">
+          <div class="biocode-dialog-header">
+            <span class="biocode-dialog-title" id="biocode-dialog-name">SOURCE // NO SELECTION</span>
+            <button class="biocode-dialog-close" type="button" onclick="closeBiocode()" aria-label="Close plant details">×</button>
+          </div>
+          <div class="biocode-dialog-body">
+            <div class="biocode-dialog-art">
+              <img class="biocode-dialog-image" id="biocode-dialog-image" src="/local/plant-status/matrix/pilea/pilea-not-ok.webp" alt="Plant telemetry unavailable" onload="this.style.opacity='1'" onerror="this.style.opacity='0';this.parentElement.classList.add('missing-art')">
+            </div>
+            <div class="biocode-dialog-data">
+              <div class="biocode-dialog-state-row"><label>SOURCE STATE</label><span class="biocode-dialog-state" id="biocode-dialog-state" role="status" aria-live="polite">OFFLINE</span></div>
+              <div class="biocode-dialog-species" id="biocode-dialog-species">SPECIES UNKNOWN</div>
+              <div class="biocode-readings">
+                <div class="biocode-reading"><label>SOIL MOISTURE</label><span class="val" id="biocode-dialog-moisture">-- %</span></div>
+                <div class="biocode-reading"><label>TEMPERATURE</label><span class="val" id="biocode-dialog-temperature">-- °C</span></div>
+                <div class="biocode-reading"><label>AIR HUMIDITY</label><span class="val" id="biocode-dialog-humidity">-- %</span></div>
+                <div class="biocode-reading"><label>ILLUMINANCE</label><span class="val" id="biocode-dialog-illuminance">-- lx</span></div>
+                <div class="biocode-reading"><label>VPD</label><span class="val" id="biocode-dialog-vpd">-- kPa</span></div>
+                <div class="biocode-reading"><label>DLI / 24H</label><span class="val" id="biocode-dialog-dli">-- mol/d⋅m²</span></div>
+                <div class="biocode-reading"><label>BATTERY</label><span class="val" id="biocode-dialog-battery">-- %</span></div>
+              </div>
+              <div class="biocode-report"><label>PLANT MONITOR EXCEPTION TRACE</label><div class="biocode-report-text" id="biocode-dialog-report">AWAITING SOURCE TELEMETRY...</div></div>
+            </div>
+          </div>
+        </section>
+      </dialog>
+    </div>
+
   </div><!-- /content -->
 
   <!-- FOOTER -->
@@ -1535,8 +1623,8 @@ const THEME = {
   title: 'THE MATRIX',
   subtitle: 'SYSTEM CONTROL INTERFACE',
   footer: 'ZION MAINFRAME v2.0',
-  tabs: ['NODES', 'ACCESS', 'STREAM', 'SIGNAL', 'SENTINEL'],
-  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  tabs: ['NODES', 'ACCESS', 'STREAM', 'SIGNAL', 'SENTINEL', 'BIOCODE'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'plants'],
   emptyMedia: '// NO SIGNAL DETECTED //',
   connOnline: 'SIGNAL LOCKED',
   connOffline: 'SIGNAL LOST',
@@ -1560,16 +1648,23 @@ const THEME = {
     lifetimeLabel: 'TOTAL CYCLES', etaLabel: 'to exit',
   },
 
+  extraLiveData: {
+    biocode: { plants: {}, selected: null },
+  },
+
   onIngest(id, s) {
+    ingestBiocodeState(id, s);
     if (id === 'sun.sun') updateRainSpeed();
     renderMonitor();
   },
   onStatesLoaded() {
     renderMonitor();
+    renderBiocode();
   },
   onInit() {
     initRain();
     drawRain();
+    initBiocode();
   },
   onStateChanged() {},
   onAuthOk() {},
@@ -1648,8 +1743,176 @@ function updateRainSpeed() {
   const nightFactor = liveData.sun.state === 'below_horizon' ? 0.5 : 1.0;
   rainSpeed = baseFactor * nightFactor;
 }
+
+// BIOCODE — plant telemetry
+const BIOCODE_PLANTS = ENTITIES.integrations?.plants || [];
+let biocodeOpener = null;
+
+function getBiocodeRecord(entityId) {
+  if (!liveData.biocode.plants[entityId]) liveData.biocode.plants[entityId] = { entityState: null, attributes: {}, values: {} };
+  return liveData.biocode.plants[entityId];
+}
+
+function getBiocodeSeverity(record) {
+  const state = record?.entityState;
+  const problems = Array.isArray(record?.attributes?.problems) ? record.attributes.problems : [];
+  if (!state || state === 'unknown' || state === 'unavailable') return 'offline';
+  if (problems.length > 1) return 'critical';
+  if (problems.length === 1) return 'warning';
+  return 'ok';
+}
+
+function getBiocodeStatus(severity) {
+  return severity === 'offline' ? 'OFFLINE' : severity === 'critical' ? 'CRITICAL' : severity === 'warning' ? 'WARNING' : 'HEALTHY';
+}
+
+function getBiocodeImageSet(plant) {
+  const imageSet = String(plant.imageSet || 'plant-1');
+  return imageSet === 'plant-1' ? 'pilea' : imageSet;
+}
+
+function getBiocodeImage(plant, severity) {
+  const imageSet = getBiocodeImageSet(plant);
+  const variant = severity === 'critical' ? 'bad' : severity === 'ok' ? 'ok' : 'not-ok';
+  const safeSet = encodeURIComponent(imageSet);
+  return `/local/plant-status/matrix/${safeSet}/${safeSet}-${variant}.webp`;
+}
+
+function ingestBiocodeState(id, state) {
+  if (!BIOCODE_PLANTS.length || !liveData.biocode) return;
+  let matchedPlant = null;
+  let sensorKey = null;
+  for (const plant of BIOCODE_PLANTS) {
+    if (id === plant.entity) { matchedPlant = plant; break; }
+    for (const [key, sensorId] of Object.entries(plant.sensors || {})) {
+      if (id === sensorId) { matchedPlant = plant; sensorKey = key; break; }
+    }
+    if (matchedPlant) break;
+  }
+  if (!matchedPlant) return;
+  const record = getBiocodeRecord(matchedPlant.entity);
+  if (id === matchedPlant.entity) {
+    record.entityState = state.state;
+    record.attributes = state.attributes || {};
+  } else if (sensorKey) {
+    const value = parseFloat(state.state);
+    record.values[sensorKey] = Number.isFinite(value) ? value : null;
+  }
+  scheduleThemeRender('biocode', renderBiocode);
+}
+
+function biocodeValue(record, key, decimals, unit) {
+  const value = record?.values?.[key];
+  return Number.isFinite(value) ? `${value.toFixed(decimals)} ${unit}` : `-- ${unit}`;
+}
+
+function biocodeImageMarkup(plant, severity, label, className) {
+  return `<img class="${className}" src="${getBiocodeImage(plant, severity)}" alt="${escapeHtml(label)} plant status: ${getBiocodeStatus(severity).toLowerCase()}" loading="lazy" onload="this.style.opacity='1'" onerror="this.style.opacity='0';this.parentElement.classList.add('missing-art')">`;
+}
+
+function renderBiocode() {
+  const grid = document.getElementById('biocode-grid');
+  if (!grid || !liveData.biocode) return;
+  if (!BIOCODE_PLANTS.length) {
+    grid.innerHTML = '<div class="biocode-empty">NO BIOLOGICAL SOURCES MAPPED<br>ADD PLANTS TO ENTITIES.JS</div>';
+    return;
+  }
+  grid.innerHTML = BIOCODE_PLANTS.map((plant, index) => {
+    const record = getBiocodeRecord(plant.entity);
+    const attrs = record.attributes || {};
+    const severity = getBiocodeSeverity(record);
+    const status = getBiocodeStatus(severity);
+    const label = plant.label || attrs.friendly_name || plant.entity;
+    const species = attrs.species || 'Species unknown';
+    return `<button type="button" class="biocode-card ${severity}" data-biocode-entity="${escapeHtml(plant.entity)}" aria-label="Open ${escapeHtml(label)} plant details">
+      <span class="biocode-image-wrap">${biocodeImageMarkup(plant, severity, label, 'biocode-image')}<span class="biocode-status">${status}</span></span>
+      <span class="biocode-card-body">
+        <span class="biocode-card-id">SOURCE ${String(index + 1).padStart(2, '0')}</span>
+        <span class="biocode-card-name">${escapeHtml(label.toUpperCase())}</span>
+        <span class="biocode-card-species">${escapeHtml(species)}</span>
+        <span class="biocode-metrics">
+          <span class="biocode-metric"><label>MOIST</label><span>${biocodeValue(record, 'moisture', 1, '%')}</span></span>
+          <span class="biocode-metric"><label>TEMP</label><span>${biocodeValue(record, 'temperature', 1, '°C')}</span></span>
+          <span class="biocode-metric"><label>BATT</label><span>${biocodeValue(record, 'battery', 0, '%')}</span></span>
+        </span>
+      </span>
+    </button>`;
+  }).join('');
+  if (liveData.biocode.selected) renderBiocodeDialog(liveData.biocode.selected);
+}
+
+function renderBiocodeDialog(entityId) {
+  const plant = BIOCODE_PLANTS.find(item => item.entity === entityId);
+  const shell = document.getElementById('biocode-dialog-shell');
+  if (!plant || !shell) return;
+  const record = getBiocodeRecord(entityId);
+  const attrs = record.attributes || {};
+  const problems = Array.isArray(attrs.problems) ? attrs.problems : [];
+  const severity = getBiocodeSeverity(record);
+  const status = getBiocodeStatus(severity);
+  const label = plant.label || attrs.friendly_name || plant.entity;
+  const species = attrs.species || 'Species unknown';
+  shell.classList.remove('ok', 'warning', 'critical', 'offline');
+  shell.classList.add(severity);
+  document.getElementById('biocode-dialog-state').textContent = status;
+  document.getElementById('biocode-dialog-name').textContent = `SOURCE // ${label.toUpperCase()}`;
+  document.getElementById('biocode-dialog-species').textContent = species.toUpperCase();
+  const image = document.getElementById('biocode-dialog-image');
+  image.parentElement.classList.remove('missing-art');
+  image.style.opacity = '1';
+  image.src = getBiocodeImage(plant, severity);
+  image.alt = severity === 'offline' ? `${label} telemetry unavailable` : `${label} plant status: ${status.toLowerCase()}`;
+  document.getElementById('biocode-dialog-moisture').textContent = biocodeValue(record, 'moisture', 1, '%');
+  document.getElementById('biocode-dialog-temperature').textContent = biocodeValue(record, 'temperature', 1, '°C');
+  document.getElementById('biocode-dialog-humidity').textContent = biocodeValue(record, 'humidity', 0, '%');
+  document.getElementById('biocode-dialog-illuminance').textContent = biocodeValue(record, 'illuminance', 0, 'lx');
+  document.getElementById('biocode-dialog-vpd').textContent = biocodeValue(record, 'vpd', 2, 'kPa');
+  document.getElementById('biocode-dialog-dli').textContent = biocodeValue(record, 'dli24h', 2, 'mol/d⋅m²');
+  document.getElementById('biocode-dialog-battery').textContent = biocodeValue(record, 'battery', 0, '%');
+  let report = 'NO EXCEPTIONS. SOURCE CODE STABLE.';
+  if (severity === 'offline') report = 'SOURCE DISCONNECTED. DISPLAYED VALUES MAY BE STALE.';
+  else if (problems.length) report = problems.map(problem => {
+    if (typeof problem === 'string') return problem.toUpperCase();
+    const sensor = String(problem.sensor || problem.attribute || 'SENSOR').toUpperCase();
+    const current = problem.current !== undefined ? ` (${problem.current})` : '';
+    return `${sensor}: ${String(problem.status || 'OUT OF RANGE').toUpperCase()}${current}`;
+  }).join(' // ');
+  document.getElementById('biocode-dialog-report').textContent = report;
+}
+
+function openBiocode(entityId) {
+  const dialog = document.getElementById('biocode-dialog');
+  if (!dialog || !BIOCODE_PLANTS.some(plant => plant.entity === entityId)) return;
+  biocodeOpener = document.activeElement;
+  liveData.biocode.selected = entityId;
+  renderBiocodeDialog(entityId);
+  if (!dialog.open) dialog.showModal();
+  dialog.querySelector('.biocode-dialog-close')?.focus();
+}
+
+function closeBiocode() {
+  const dialog = document.getElementById('biocode-dialog');
+  if (dialog?.open) dialog.close();
+}
+
+function initBiocode() {
+  BIOCODE_PLANTS.forEach(plant => getBiocodeRecord(plant.entity));
+  const grid = document.getElementById('biocode-grid');
+  const dialog = document.getElementById('biocode-dialog');
+  grid?.addEventListener('click', event => {
+    const card = event.target.closest('[data-biocode-entity]');
+    if (card) openBiocode(card.dataset.biocodeEntity);
+  });
+  dialog?.addEventListener('click', event => { if (event.target === dialog) closeBiocode(); });
+  dialog?.addEventListener('close', () => {
+    liveData.biocode.selected = null;
+    if (biocodeOpener instanceof HTMLElement) biocodeOpener.focus();
+    biocodeOpener = null;
+  });
+  renderBiocode();
+}
 </script>
-<script src="shared.js"></script>
-<script src="washer.js"></script>
+<script src="shared.js?v=20260714-1"></script>
+<script src="washer.js?v=20260714-1"></script>
 </body>
 </html>

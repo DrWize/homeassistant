@@ -1481,6 +1481,55 @@ body.night-mode {
 .mp-badge { background: #22262e; color: #d6c8ad; }
 .skip-link { background: #c69b58; color: #050608; }
 #daynight-btn { background: #0c0d10 !important; color: #e7c779 !important; }
+
+/* HERBARIUM — Horadric botanical archive */
+.herbarium-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+.herbarium-card { min-width: 0; padding: 0; border: 1px solid #65533d; border-top: 3px solid var(--gold); background: #12100e; color: var(--bone); text-align: left; cursor: pointer; font-family: inherit; box-shadow: 0 8px 22px rgba(0,0,0,.34), inset 0 0 20px rgba(213,184,114,.035); transition: transform .15s, border-color .15s, box-shadow .15s; }
+.herbarium-card:hover { transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 10px 28px rgba(0,0,0,.42), 0 0 14px rgba(213,184,114,.14); }
+.herbarium-card.warning { border-top-color: var(--ember); }
+.herbarium-card.critical { border-top-color: var(--red); }
+.herbarium-card.offline { border-style: dashed; opacity: .74; }
+.herbarium-image-wrap { position: relative; display: block; aspect-ratio: 3/2; overflow: hidden; background: #080706; border-bottom: 1px solid #65533d; }
+.herbarium-image-wrap::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 48%, rgba(0,0,0,.32) 100%); }
+.herbarium-image { width: 100%; height: 100%; display: block; object-fit: cover; }
+.herbarium-image-wrap.missing-art::before, .herbarium-dialog-art.missing-art::before { content: 'LOST FROM THE ARCHIVE'; position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 20px; color: var(--grey-mid); background: #090807; text-align: center; letter-spacing: 2px; }
+.herbarium-status { position: absolute; z-index: 3; top: 9px; left: 9px; padding: 4px 9px; border: 1px solid currentColor; background: rgba(9,7,5,.9); color: var(--gold); font: .68rem/1 'Cinzel', serif; letter-spacing: 1px; }
+.herbarium-card.warning .herbarium-status { color: #e79345; }
+.herbarium-card.critical .herbarium-status { color: #df5b52; }
+.herbarium-card.offline .herbarium-status { color: var(--grey-mid); }
+.herbarium-card-body { display: block; padding: 11px; background: linear-gradient(180deg, rgba(213,184,114,.045), transparent); }
+.herbarium-card-id { display: block; color: #b9995f; font-size: .58rem; letter-spacing: 2px; }
+.herbarium-card-name { display: block; margin-top: 5px; color: var(--gold); font: 700 .96rem/1.25 'Cinzel', serif; letter-spacing: 1px; }
+.herbarium-card-species { display: block; min-height: 2.5em; margin-top: 3px; color: #aa9a83; font-size: .66rem; line-height: 1.4; font-style: italic; }
+.herbarium-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 5px; margin-top: 10px; }
+.herbarium-metric { min-width: 0; padding: 6px 3px; border: 1px solid #443a2e; background: #090807; text-align: center; }
+.herbarium-metric label { display: block; color: #897a65; font-size: .53rem; letter-spacing: 1px; }
+.herbarium-metric span { display: block; margin-top: 3px; color: var(--bone); font-size: .66rem; white-space: nowrap; }
+.herbarium-empty { grid-column: 1/-1; padding: 44px 20px; border: 1px dashed #65533d; background: #12100e; color: #aa9a83; text-align: center; letter-spacing: 2px; line-height: 1.9; }
+.herbarium-dialog { width: min(900px,calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid #806944; background: #0d0b09; color: var(--bone); box-shadow: 0 0 44px rgba(0,0,0,.8), 0 0 20px rgba(213,184,114,.12); overflow: auto; }
+.herbarium-dialog::backdrop { background: rgba(0,0,0,.9); backdrop-filter: blur(2px); }
+.herbarium-dialog-shell { background: #0d0b09; }
+.herbarium-dialog-header { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-bottom: 2px solid var(--gold); background: linear-gradient(180deg,#262016,#13100c); }
+.herbarium-dialog-title { flex: 1; min-width: 0; color: var(--gold); font: 700 1rem/1 'Cinzel', serif; letter-spacing: 2px; }
+.herbarium-dialog-close { width: 35px; height: 31px; padding: 0; border: 1px solid var(--gold); background: #0b0907; color: var(--gold); font: 1rem/1 inherit; cursor: pointer; }
+.herbarium-dialog-body { display: grid; grid-template-columns: minmax(300px,1.1fr) minmax(300px,1fr); gap: 13px; padding: 13px; }
+.herbarium-dialog-art { position: relative; min-height: 300px; border: 1px solid #65533d; background: #070605; overflow: hidden; }
+.herbarium-dialog-image { width: 100%; height: 100%; min-height: 300px; display: block; object-fit: cover; }
+.herbarium-dialog-data { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.herbarium-dialog-state-row { display: flex; justify-content: space-between; gap: 10px; padding: 9px; border: 1px solid #554633; background: #17130e; }
+.herbarium-dialog-state-row label, .herbarium-reading label, .herbarium-report label { color: #8f806c; font-size: .58rem; letter-spacing: 1px; }
+.herbarium-dialog-state { color: var(--gold); font-size: .86rem; letter-spacing: 1px; }
+.herbarium-dialog-shell.warning .herbarium-dialog-state { color: #e79345; }
+.herbarium-dialog-shell.critical .herbarium-dialog-state { color: #df5b52; }
+.herbarium-dialog-shell.offline .herbarium-dialog-state { color: var(--grey-mid); }
+.herbarium-dialog-species { color: #c7b79c; font-size: .69rem; font-style: italic; }
+.herbarium-readings { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.herbarium-reading { padding: 8px; border: 1px solid #443a2e; background: #080706; }
+.herbarium-reading .val { display: block; margin-top: 4px; color: var(--bone); font-size: .7rem; }
+.herbarium-report { flex: 1; padding: 10px; border: 1px solid #554633; border-left: 4px solid var(--crimson); background: #080706; }
+.herbarium-report-text { margin-top: 7px; color: #c7b79c; font-size: .68rem; line-height: 1.6; }
+@media (max-width:820px) { .herbarium-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .herbarium-dialog-body { grid-template-columns:1fr; } .herbarium-dialog-art,.herbarium-dialog-image { min-height:240px; } }
+@media (max-width:500px) { .herbarium-grid,.herbarium-readings { grid-template-columns:1fr; } .herbarium-dialog { width:calc(100vw - 12px);max-height:calc(100dvh - 12px); } .herbarium-dialog-art,.herbarium-dialog-image { min-height:210px; } }
 </style>
 </head>
 <body class="crt-flicker">
@@ -1513,6 +1562,7 @@ body.night-mode {
     <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('data')">OMENS</button>
     <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('media')">ECHOES</button>
     <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('sensors')">ALCHEMY</button>
+    <button class="wy-tab" role="tab" aria-selected="false" onclick="switchTab('plants')">HERBARIUM</button>
   </div>
 
   <!-- CONTENT -->
@@ -1805,6 +1855,44 @@ WARD INTEGRITY: 100%</div>
 
     </div>
 
+    <!-- ========== HERBARIUM (PLANTS) ========== -->
+    <div class="page" id="page-plants">
+      <div class="lc-section">
+        <div class="lc-section-pill">Horadric Herbarium</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="herbarium-grid" id="herbarium-grid"></div>
+
+      <dialog class="herbarium-dialog" id="herbarium-dialog" aria-labelledby="herbarium-dialog-name">
+        <section class="herbarium-dialog-shell offline" id="herbarium-dialog-shell">
+          <div class="herbarium-dialog-header">
+            <span class="herbarium-dialog-title" id="herbarium-dialog-name">SPECIMEN // UNBOUND</span>
+            <button class="herbarium-dialog-close" type="button" onclick="closeHerbarium()" aria-label="Close plant details">×</button>
+          </div>
+          <div class="herbarium-dialog-body">
+            <div class="herbarium-dialog-art">
+              <img class="herbarium-dialog-image" id="herbarium-dialog-image" src="/local/plant-status/diablo/pilea/pilea-not-ok.webp" alt="Plant telemetry unavailable" onload="this.style.opacity='1'" onerror="this.style.opacity='0';this.parentElement.classList.add('missing-art')">
+            </div>
+            <div class="herbarium-dialog-data">
+              <div class="herbarium-dialog-state-row"><label>VITAL ESSENCE</label><span class="herbarium-dialog-state" id="herbarium-dialog-state" role="status" aria-live="polite">VEILED</span></div>
+              <div class="herbarium-dialog-species" id="herbarium-dialog-species">Species unknown to the archive</div>
+              <div class="herbarium-readings">
+                <div class="herbarium-reading"><label>EARTH MOISTURE</label><span class="val" id="herbarium-dialog-moisture">-- %</span></div>
+                <div class="herbarium-reading"><label>VESSEL WARMTH</label><span class="val" id="herbarium-dialog-temperature">-- °C</span></div>
+                <div class="herbarium-reading"><label>AIR HUMOR</label><span class="val" id="herbarium-dialog-humidity">-- %</span></div>
+                <div class="herbarium-reading"><label>RADIANCE</label><span class="val" id="herbarium-dialog-illuminance">-- lx</span></div>
+                <div class="herbarium-reading"><label>VPD</label><span class="val" id="herbarium-dialog-vpd">-- kPa</span></div>
+                <div class="herbarium-reading"><label>DLI / 24H</label><span class="val" id="herbarium-dialog-dli">-- mol/d⋅m²</span></div>
+                <div class="herbarium-reading"><label>RUNE CHARGE</label><span class="val" id="herbarium-dialog-battery">-- %</span></div>
+              </div>
+              <div class="herbarium-report"><label>ALCHEMIST'S DIAGNOSIS</label><div class="herbarium-report-text" id="herbarium-dialog-report">THE ARCHIVE AWAITS A LIVING SIGN...</div></div>
+            </div>
+          </div>
+        </section>
+      </dialog>
+    </div>
+
   </div><!-- /content -->
 
   <!-- FOOTER -->
@@ -1842,8 +1930,8 @@ const THEME = {
   title: 'SANCTUARY',
   subtitle: 'HORADRIC INTERFACE',
   footer: 'BY THREE THEY COME',
-  tabs: ['SANCTUM', 'TORCHES', 'OMENS', 'ECHOES', 'ALCHEMY'],
-  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  tabs: ['SANCTUM', 'TORCHES', 'OMENS', 'ECHOES', 'ALCHEMY', 'HERBARIUM'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'plants'],
   emptyMedia: 'The Silence of the Nephalem',
   connOnline: 'BOUND',
   connOffline: 'SEVERED',
@@ -1865,11 +1953,16 @@ const THEME = {
     statusLabels: { idle:'DORMANT', running:'PURGING', paused:'HALTED', complete:'SANCTIFIED' },
     lifetimeLabel: 'TOTAL PURIFICATIONS', etaLabel: 'to sanctify',
   },
+  extraLiveData: {
+    herbarium: { plants: {}, selected: null },
+  },
   onInit() {
     renderWorldstone();
+    initHerbarium();
   },
   onStatesLoaded() {
     renderWorldstone();
+    renderHerbarium();
   },
   onStateChanged(id, s) {
     if (id.includes('sensor.') || id.includes('power')) renderWorldstone();
@@ -1877,7 +1970,9 @@ const THEME = {
   intervals: [
     [() => renderWorldstone(), 30000]
   ],
-  onIngest() {},
+  onIngest(id, state) {
+    ingestHerbariumState(id, state);
+  },
   onAuthOk() {},
   onAuthFail() {},
   onToggleLight() {},
@@ -1909,8 +2004,176 @@ THE WILDS: ${wildsLine}
 ARCANE DRAW: ${powerLine}
 WARD INTEGRITY: ${wardPct}%`;
 }
+
+// HERBARIUM — plant telemetry
+const HERBARIUM_PLANTS = ENTITIES.integrations?.plants || [];
+let herbariumOpener = null;
+
+function getHerbariumRecord(entityId) {
+  if (!liveData.herbarium.plants[entityId]) liveData.herbarium.plants[entityId] = { entityState: null, attributes: {}, values: {} };
+  return liveData.herbarium.plants[entityId];
+}
+
+function getHerbariumSeverity(record) {
+  const state = record?.entityState;
+  const problems = Array.isArray(record?.attributes?.problems) ? record.attributes.problems : [];
+  if (!state || state === 'unknown' || state === 'unavailable') return 'offline';
+  if (problems.length > 1) return 'critical';
+  if (problems.length === 1) return 'warning';
+  return 'ok';
+}
+
+function getHerbariumStatus(severity) {
+  return severity === 'offline' ? 'VEILED' : severity === 'critical' ? 'WITHERING' : severity === 'warning' ? 'AILING' : 'THRIVING';
+}
+
+function getHerbariumImageSet(plant) {
+  const imageSet = String(plant.imageSet || 'plant-1');
+  return imageSet === 'plant-1' ? 'pilea' : imageSet;
+}
+
+function getHerbariumImage(plant, severity) {
+  const imageSet = getHerbariumImageSet(plant);
+  const variant = severity === 'critical' ? 'bad' : severity === 'ok' ? 'ok' : 'not-ok';
+  const safeSet = encodeURIComponent(imageSet);
+  return '/local/plant-status/diablo/' + safeSet + '/' + safeSet + '-' + variant + '.webp';
+}
+
+function ingestHerbariumState(id, state) {
+  if (!HERBARIUM_PLANTS.length || !liveData.herbarium) return;
+  let matchedPlant = null;
+  let sensorKey = null;
+  for (const plant of HERBARIUM_PLANTS) {
+    if (id === plant.entity) { matchedPlant = plant; break; }
+    for (const [key, sensorId] of Object.entries(plant.sensors || {})) {
+      if (id === sensorId) { matchedPlant = plant; sensorKey = key; break; }
+    }
+    if (matchedPlant) break;
+  }
+  if (!matchedPlant) return;
+  const record = getHerbariumRecord(matchedPlant.entity);
+  if (id === matchedPlant.entity) {
+    record.entityState = state.state;
+    record.attributes = state.attributes || {};
+  } else if (sensorKey) {
+    const value = parseFloat(state.state);
+    record.values[sensorKey] = Number.isFinite(value) ? value : null;
+  }
+  scheduleThemeRender('herbarium', renderHerbarium);
+}
+
+function herbariumValue(record, key, decimals, unit) {
+  const value = record?.values?.[key];
+  return Number.isFinite(value) ? value.toFixed(decimals) + ' ' + unit : '-- ' + unit;
+}
+
+function herbariumImageMarkup(plant, severity, label, className) {
+  return '<img class="' + className + '" src="' + getHerbariumImage(plant, severity) + '" alt="' + escapeHtml(label) + ' plant status: ' + getHerbariumStatus(severity).toLowerCase() + '" loading="lazy" onload="this.style.opacity=\'1\'" onerror="this.style.opacity=\'0\';this.parentElement.classList.add(\'missing-art\')">';
+}
+
+function renderHerbarium() {
+  const grid = document.getElementById('herbarium-grid');
+  if (!grid || !liveData.herbarium) return;
+  if (!HERBARIUM_PLANTS.length) {
+    grid.innerHTML = '<div class="herbarium-empty">THE ARCHIVE HOLDS NO LIVING SPECIMENS<br>ADD PLANTS TO ENTITIES.JS</div>';
+    return;
+  }
+  grid.innerHTML = HERBARIUM_PLANTS.map((plant, index) => {
+    const record = getHerbariumRecord(plant.entity);
+    const attrs = record.attributes || {};
+    const severity = getHerbariumSeverity(record);
+    const status = getHerbariumStatus(severity);
+    const label = plant.label || attrs.friendly_name || plant.entity;
+    const species = attrs.species || 'Species unknown to the archive';
+    return '<button type="button" class="herbarium-card ' + severity + '" data-herbarium-entity="' + escapeHtml(plant.entity) + '" aria-label="Open ' + escapeHtml(label) + ' plant details">' +
+      '<span class="herbarium-image-wrap">' + herbariumImageMarkup(plant, severity, label, 'herbarium-image') + '<span class="herbarium-status">' + status + '</span></span>' +
+      '<span class="herbarium-card-body">' +
+        '<span class="herbarium-card-id">FOLIO ' + String(index + 1).padStart(2, '0') + '</span>' +
+        '<span class="herbarium-card-name">' + escapeHtml(label.toUpperCase()) + '</span>' +
+        '<span class="herbarium-card-species">' + escapeHtml(species) + '</span>' +
+        '<span class="herbarium-metrics">' +
+          '<span class="herbarium-metric"><label>EARTH</label><span>' + herbariumValue(record, 'moisture', 1, '%') + '</span></span>' +
+          '<span class="herbarium-metric"><label>WARMTH</label><span>' + herbariumValue(record, 'temperature', 1, '°C') + '</span></span>' +
+          '<span class="herbarium-metric"><label>RUNE</label><span>' + herbariumValue(record, 'battery', 0, '%') + '</span></span>' +
+        '</span>' +
+      '</span>' +
+    '</button>';
+  }).join('');
+  if (liveData.herbarium.selected) renderHerbariumDialog(liveData.herbarium.selected);
+}
+
+function renderHerbariumDialog(entityId) {
+  const plant = HERBARIUM_PLANTS.find(item => item.entity === entityId);
+  const shell = document.getElementById('herbarium-dialog-shell');
+  if (!plant || !shell) return;
+  const record = getHerbariumRecord(entityId);
+  const attrs = record.attributes || {};
+  const problems = Array.isArray(attrs.problems) ? attrs.problems : [];
+  const severity = getHerbariumSeverity(record);
+  const status = getHerbariumStatus(severity);
+  const label = plant.label || attrs.friendly_name || plant.entity;
+  const species = attrs.species || 'Species unknown to the archive';
+  shell.classList.remove('ok', 'warning', 'critical', 'offline');
+  shell.classList.add(severity);
+  document.getElementById('herbarium-dialog-state').textContent = status;
+  document.getElementById('herbarium-dialog-name').textContent = 'SPECIMEN // ' + label.toUpperCase();
+  document.getElementById('herbarium-dialog-species').textContent = species;
+  const image = document.getElementById('herbarium-dialog-image');
+  image.parentElement.classList.remove('missing-art');
+  image.style.opacity = '1';
+  image.src = getHerbariumImage(plant, severity);
+  image.alt = severity === 'offline' ? label + ' telemetry unavailable' : label + ' plant status: ' + status.toLowerCase();
+  document.getElementById('herbarium-dialog-moisture').textContent = herbariumValue(record, 'moisture', 1, '%');
+  document.getElementById('herbarium-dialog-temperature').textContent = herbariumValue(record, 'temperature', 1, '°C');
+  document.getElementById('herbarium-dialog-humidity').textContent = herbariumValue(record, 'humidity', 0, '%');
+  document.getElementById('herbarium-dialog-illuminance').textContent = herbariumValue(record, 'illuminance', 0, 'lx');
+  document.getElementById('herbarium-dialog-vpd').textContent = herbariumValue(record, 'vpd', 2, 'kPa');
+  document.getElementById('herbarium-dialog-dli').textContent = herbariumValue(record, 'dli24h', 2, 'mol/d⋅m²');
+  document.getElementById('herbarium-dialog-battery').textContent = herbariumValue(record, 'battery', 0, '%');
+  let report = 'THE SPECIMEN FLOURISHES. NO BLIGHT IS SEEN.';
+  if (severity === 'offline') report = 'THE DIVINING LINK IS VEILED. THESE READINGS MAY BE STALE.';
+  else if (problems.length) report = problems.map(problem => {
+    if (typeof problem === 'string') return problem.toUpperCase();
+    const sensor = String(problem.sensor || problem.attribute || 'ESSENCE').toUpperCase();
+    const current = problem.current !== undefined ? ' (' + problem.current + ')' : '';
+    return sensor + ': ' + String(problem.status || 'OUT OF BALANCE').toUpperCase() + current;
+  }).join(' // ');
+  document.getElementById('herbarium-dialog-report').textContent = report;
+}
+
+function openHerbarium(entityId) {
+  const dialog = document.getElementById('herbarium-dialog');
+  if (!dialog || !HERBARIUM_PLANTS.some(plant => plant.entity === entityId)) return;
+  herbariumOpener = document.activeElement;
+  liveData.herbarium.selected = entityId;
+  renderHerbariumDialog(entityId);
+  if (!dialog.open) dialog.showModal();
+  dialog.querySelector('.herbarium-dialog-close')?.focus();
+}
+
+function closeHerbarium() {
+  const dialog = document.getElementById('herbarium-dialog');
+  if (dialog?.open) dialog.close();
+}
+
+function initHerbarium() {
+  HERBARIUM_PLANTS.forEach(plant => getHerbariumRecord(plant.entity));
+  const grid = document.getElementById('herbarium-grid');
+  const dialog = document.getElementById('herbarium-dialog');
+  grid?.addEventListener('click', event => {
+    const card = event.target.closest('[data-herbarium-entity]');
+    if (card) openHerbarium(card.dataset.herbariumEntity);
+  });
+  dialog?.addEventListener('click', event => { if (event.target === dialog) closeHerbarium(); });
+  dialog?.addEventListener('close', () => {
+    liveData.herbarium.selected = null;
+    if (herbariumOpener instanceof HTMLElement) herbariumOpener.focus();
+    herbariumOpener = null;
+  });
+  renderHerbarium();
+}
 </script>
-<script src="shared.js"></script>
-<script src="washer.js"></script>
+<script src="shared.js?v=20260714-1"></script>
+<script src="washer.js?v=20260714-1"></script>
 </body>
 </html>

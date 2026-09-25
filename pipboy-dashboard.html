@@ -453,7 +453,7 @@
     margin-bottom: 16px;
   }
   .w-item { font-size: 0.72rem; letter-spacing: 1px; }
-  .w-item label { color: var(--green-mid); display: block; font-size: 0.65rem; margin-bottom: 2px; }
+  .w-item label { color: var(--green-mid); display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 2px; }
   .w-item .w-val {
     color: var(--amber);
     font-size: 1.05rem;
@@ -1079,6 +1079,120 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* FLORA — Pip-Boy botanical scanner */
+.flora-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.flora-card {
+  min-width: 0;
+  padding: 0;
+  border: 1px solid var(--green-dim);
+  background: rgba(3,13,5,0.92);
+  color: var(--green);
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  box-shadow: inset 0 0 18px rgba(74,250,106,0.05);
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.flora-card:hover {
+  border-color: var(--green);
+  box-shadow: 0 0 14px var(--green-glow), inset 0 0 18px rgba(74,250,106,0.09);
+  transform: translateY(-1px);
+}
+.flora-card.warning { border-color: var(--amber); }
+.flora-card.critical { border-color: var(--red); }
+.flora-card.offline { border-style: dashed; opacity: 0.78; }
+.flora-image-wrap {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: #010703;
+  border-bottom: 1px solid currentColor;
+}
+.flora-image-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,0.2) 3px 4px);
+  pointer-events: none;
+}
+.flora-image-wrap.missing-art::before, .flora-dialog-art.missing-art::before {
+  content: 'NO LOCAL SCAN';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--green-dim);
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  background: radial-gradient(circle, rgba(74,250,106,0.09), transparent 62%);
+}
+.flora-image { width: 100%; height: 100%; display: block; object-fit: cover; filter: saturate(0.82) contrast(1.08); }
+.flora-status {
+  position: absolute;
+  z-index: 1;
+  top: 7px;
+  right: 7px;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  background: rgba(3,13,5,0.9);
+  color: var(--green);
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  text-shadow: 0 0 7px currentColor;
+}
+.flora-card.warning .flora-status { color: var(--amber); }
+.flora-card.critical .flora-status { color: var(--red); }
+.flora-card.offline .flora-status { color: var(--green-dim); }
+.flora-card-body { display: block; padding: 10px; }
+.flora-card-id { display: block; color: var(--green-dim); font-size: 0.58rem; letter-spacing: 2px; }
+.flora-card-name { display: block; margin-top: 2px; font-family: 'VT323', monospace; font-size: 1.35rem; letter-spacing: 2px; }
+.flora-card-species { display: block; min-height: 1.8em; color: var(--green-mid); font-size: 0.62rem; line-height: 1.4; text-transform: uppercase; }
+.flora-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 9px; }
+.flora-metric { min-width: 0; padding: 5px 3px; border: 1px solid rgba(45,158,69,0.7); background: rgba(74,250,106,0.035); text-align: center; }
+.flora-metric label { display: block; color: var(--green-dim); font-size: 0.52rem; letter-spacing: 0.5px; }
+.flora-metric span { display: block; margin-top: 3px; font-size: 0.66rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.flora-empty { grid-column: 1 / -1; padding: 42px 20px; border: 1px dashed var(--green-dim); color: var(--green-mid); text-align: center; letter-spacing: 2px; line-height: 1.8; }
+.flora-dialog { width: min(900px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--green); background: var(--bg); color: var(--green); box-shadow: 0 0 30px var(--green-glow); overflow: auto; }
+.flora-dialog::backdrop { background: rgba(0,0,0,0.88); backdrop-filter: blur(2px); }
+.flora-dialog-shell { background: var(--bg); }
+.flora-dialog-shell.warning { border-color: var(--amber); }
+.flora-dialog-shell.critical { border-color: var(--red); }
+.flora-dialog-header { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-bottom: 1px solid currentColor; background: var(--green-faint); }
+.flora-dialog-title { flex: 1; min-width: 0; font-family: 'VT323', monospace; font-size: 1.3rem; letter-spacing: 2px; }
+.flora-dialog-close { width: 30px; height: 28px; padding: 0; border: 1px solid var(--green); background: transparent; color: var(--green); font: 1.2rem/1 'VT323', monospace; }
+.flora-dialog-body { display: grid; grid-template-columns: minmax(300px, 1.1fr) minmax(300px, 1fr); gap: 12px; padding: 12px; }
+.flora-dialog-art { position: relative; min-height: 300px; border: 1px solid var(--green-dim); background: #010703; overflow: hidden; }
+.flora-dialog-image { width: 100%; height: 100%; min-height: 300px; display: block; object-fit: cover; }
+.flora-dialog-data { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.flora-dialog-state-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px; border: 1px solid var(--green-dim); }
+.flora-dialog-state-row label, .flora-reading label, .flora-report label { color: var(--green-dim); font-size: 0.56rem; letter-spacing: 1px; }
+.flora-dialog-state { font-family: 'VT323', monospace; font-size: 1.15rem; letter-spacing: 1px; }
+.flora-dialog-shell.warning .flora-dialog-state { color: var(--amber); }
+.flora-dialog-shell.critical .flora-dialog-state { color: var(--red); }
+.flora-dialog-shell.offline .flora-dialog-state { color: var(--green-dim); }
+.flora-dialog-species { color: var(--green-mid); font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; }
+.flora-readings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.flora-reading { padding: 7px 8px; border: 1px solid rgba(45,158,69,0.7); background: var(--green-faint); }
+.flora-reading .val { display: block; margin-top: 4px; font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+.flora-report { flex: 1; padding: 9px; border: 1px solid var(--green-dim); background: var(--green-faint); }
+.flora-report-text { margin-top: 7px; font-size: 0.67rem; line-height: 1.55; }
+@media (max-width: 820px) {
+  .flora-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flora-dialog-body { grid-template-columns: 1fr; }
+  .flora-dialog-art, .flora-dialog-image { min-height: 240px; }
+}
+@media (max-width: 500px) {
+  .flora-grid, .flora-readings { grid-template-columns: 1fr; }
+  .flora-dialog { width: calc(100vw - 12px); max-height: calc(100dvh - 12px); }
+  .flora-dialog-art, .flora-dialog-image { min-height: 210px; }
+}
 </style>
 </head>
 <body class="crt-flicker">
@@ -1106,6 +1220,7 @@
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-data" tabindex="-1" onclick="switchTab('data')">DATA</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-media" tabindex="-1" onclick="switchTab('media')">MEDIA</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-sensors" tabindex="-1" onclick="switchTab('sensors')">VAULT</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-plants" tabindex="-1" onclick="switchTab('plants')">FLORA</button>
   </div>
 
   <!-- CONTENT -->
@@ -1373,6 +1488,46 @@
 
     </div>
 
+    <!-- ═══════════════ FLORA TAB ═══════════════ -->
+    <div class="page" id="page-plants">
+      <div class="section-title">// BOTANICAL LIFE-SUPPORT SCAN</div>
+      <div class="flora-grid" id="flora-grid"></div>
+
+      <dialog class="flora-dialog" id="flora-dialog" aria-labelledby="flora-dialog-name">
+        <section class="flora-dialog-shell offline" id="flora-dialog-shell">
+          <div class="flora-dialog-header">
+            <span class="flora-dialog-title" id="flora-dialog-name">SPECIMEN // NO SELECTION</span>
+            <button class="flora-dialog-close" type="button" onclick="closeFlora()" aria-label="Close plant details">×</button>
+          </div>
+          <div class="flora-dialog-body">
+            <div class="flora-dialog-art">
+              <img class="flora-dialog-image" id="flora-dialog-image" src="/local/plant-status/pipboy/pilea/pilea-not-ok.webp" alt="Plant telemetry unavailable" onload="this.style.opacity='1'" onerror="this.style.opacity='0';this.parentElement.classList.add('missing-art')">
+            </div>
+            <div class="flora-dialog-data">
+              <div class="flora-dialog-state-row">
+                <label>SCAN RESULT</label>
+                <span class="flora-dialog-state" id="flora-dialog-state" role="status" aria-live="polite">OFFLINE</span>
+              </div>
+              <div class="flora-dialog-species" id="flora-dialog-species">SPECIES UNKNOWN</div>
+              <div class="flora-readings">
+                <div class="flora-reading"><label>Soil moisture</label><span class="val" id="flora-dialog-moisture">-- %</span></div>
+                <div class="flora-reading"><label>Temperature</label><span class="val" id="flora-dialog-temperature">-- °C</span></div>
+                <div class="flora-reading"><label>Air humidity</label><span class="val" id="flora-dialog-humidity">-- %</span></div>
+                <div class="flora-reading"><label>Illuminance</label><span class="val" id="flora-dialog-illuminance">-- lx</span></div>
+                <div class="flora-reading"><label>Vapour pressure deficit</label><span class="val" id="flora-dialog-vpd">-- kPa</span></div>
+                <div class="flora-reading"><label>DLI / 24 hours</label><span class="val" id="flora-dialog-dli">-- mol/d⋅m²</span></div>
+                <div class="flora-reading"><label>Sensor battery</label><span class="val" id="flora-dialog-battery">-- %</span></div>
+              </div>
+              <div class="flora-report">
+                <label>PLANT MONITOR PROBLEM REPORT</label>
+                <div class="flora-report-text" id="flora-dialog-report">AWAITING BOTANICAL TELEMETRY...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </dialog>
+    </div>
+
   </div><!-- /content -->
 
   <!-- FOOTER -->
@@ -1407,8 +1562,8 @@ const THEME = {
   title: 'PIP-BOY 3000',
   subtitle: 'HOME MANAGEMENT SYSTEM // VAULT-TEC CORP',
   footer: 'VAULT-TEC CORPORATION // HOME AUTOMATION UNIT',
-  tabs: ['STAT', 'ITEMS', 'DATA', 'MEDIA', 'VAULT'],
-  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  tabs: ['STAT', 'ITEMS', 'DATA', 'MEDIA', 'VAULT', 'FLORA'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'plants'],
   emptyMedia: '// NO ACTIVE TRANSMISSIONS //',
   connOnline: 'SYSTEM ONLINE',
   connOffline: 'OFFLINE',
@@ -1432,21 +1587,24 @@ const THEME = {
     lifetimeLabel: 'TOTAL USAGE', etaLabel: 'until clear',
   },
 
+  extraLiveData: {
+    flora: { plants: {}, selected: null },
+  },
+
   onInit() {
     renderGeiger();
     renderThreat();
+    initFlora();
   },
   onStatesLoaded() {
     renderGeiger();
     renderThreat();
+    renderFlora();
   },
-  onIngest(id, s) {
-    if (id.includes('motion') || id.includes('door')) {
-      renderThreat();
-    }
-  },
+  onIngest(id, s) { ingestFloraState(id, s); },
   onStateChanged(id, s) {
-    if (id.includes('power')) renderGeiger();
+    if (id.includes('motion') || id.includes('door')) scheduleThemeRender('pipboy-threat', renderThreat);
+    if (id.includes('power')) scheduleThemeRender('pipboy-geiger', renderGeiger);
   },
   intervals: [
     [() => renderThreat(), 5000],
@@ -1503,7 +1661,7 @@ function renderGeiger() {
   // Ticker animation speed proportional to radiation
   const clickRate = Math.max(200, 3000 - (rad / 5) * 2800);
   if (geigerInterval) clearInterval(geigerInterval);
-  geigerInterval = setInterval(() => {
+  geigerInterval = registerDashboardInterval(() => {
     const tickEl = document.getElementById('geiger-ticker');
     if (!tickEl) return;
     const chars = ['· · ·', '·  · ·', ' · ·  ·', '·   ·', '· ·  '];
@@ -1555,8 +1713,199 @@ function renderThreat() {
     ).join('');
   }
 }
+
+// ── PIPBOY-SPECIFIC: FLORA ──
+const FLORA_PLANTS = ENTITIES.integrations?.plants || [];
+let floraOpener = null;
+
+function getFloraRecord(entityId) {
+  if (!liveData.flora.plants[entityId]) {
+    liveData.flora.plants[entityId] = { entityState: null, attributes: {}, values: {} };
+  }
+  return liveData.flora.plants[entityId];
+}
+
+function getFloraSeverity(record) {
+  const state = record?.entityState;
+  const problems = Array.isArray(record?.attributes?.problems) ? record.attributes.problems : [];
+  if (!state || state === 'unknown' || state === 'unavailable') return 'offline';
+  if (problems.length > 1) return 'critical';
+  if (problems.length === 1 || state === 'problem') return 'warning';
+  return 'ok';
+}
+
+function getFloraStatus(severity) {
+  return severity === 'offline' ? 'OFFLINE' : severity === 'critical' ? 'CRITICAL' : severity === 'warning' ? 'WARNING' : 'HEALTHY';
+}
+
+function getFloraImageSet(plant) {
+  const imageSet = String(plant.imageSet || 'plant-1');
+  return imageSet === 'plant-1' ? 'pilea' : imageSet;
+}
+
+function getFloraImage(plant, severity) {
+  const imageSet = getFloraImageSet(plant);
+  const variant = severity === 'critical' ? 'bad' : severity === 'ok' ? 'ok' : 'not-ok';
+  const safeSet = encodeURIComponent(imageSet);
+  return `/local/plant-status/pipboy/${safeSet}/${safeSet}-${variant}.webp`;
+}
+
+function ingestFloraState(id, state) {
+  if (!FLORA_PLANTS.length || !liveData.flora) return;
+  let matchedPlant = null;
+  let sensorKey = null;
+  for (const plant of FLORA_PLANTS) {
+    if (id === plant.entity) {
+      matchedPlant = plant;
+      break;
+    }
+    const match = Object.entries(plant.sensors || {}).find(([, entityId]) => entityId === id);
+    if (match) {
+      matchedPlant = plant;
+      sensorKey = match[0];
+      break;
+    }
+  }
+  if (!matchedPlant) return;
+
+  const record = getFloraRecord(matchedPlant.entity);
+  if (id === matchedPlant.entity) {
+    record.entityState = state.state;
+    record.attributes = state.attributes || {};
+  } else if (sensorKey) {
+    const value = parseFloat(state.state);
+    record.values[sensorKey] = Number.isFinite(value) ? value : null;
+  }
+  scheduleThemeRender('flora', renderFlora);
+}
+
+function floraValue(record, key, decimals, unit) {
+  const value = record?.values?.[key];
+  return Number.isFinite(value) ? `${value.toFixed(decimals)} ${unit}` : `-- ${unit}`;
+}
+
+function floraImageMarkup(plant, severity, label, className) {
+  const status = getFloraStatus(severity).toLowerCase();
+  return `<img class="${className}" src="${getFloraImage(plant, severity)}" alt="${escapeHtml(label)} plant status: ${status}" loading="lazy" onload="this.style.opacity='1'" onerror="this.style.opacity='0';this.parentElement.classList.add('missing-art')">`;
+}
+
+function renderFlora() {
+  const grid = document.getElementById('flora-grid');
+  if (!grid || !liveData.flora) return;
+  if (!FLORA_PLANTS.length) {
+    grid.innerHTML = '<div class="flora-empty">NO SPECIMENS REGISTERED<br>ADD PLANTS TO ENTITIES.JS TO BEGIN SCANNING</div>';
+    return;
+  }
+
+  grid.innerHTML = FLORA_PLANTS.map((plant, index) => {
+    const record = getFloraRecord(plant.entity);
+    const attrs = record.attributes || {};
+    const severity = getFloraSeverity(record);
+    const status = getFloraStatus(severity);
+    const label = plant.label || attrs.friendly_name || plant.entity;
+    const species = attrs.species || 'Species unknown';
+    const specimenId = String(index + 1).padStart(2, '0');
+    return `<button type="button" class="flora-card ${severity}" data-flora-entity="${escapeHtml(plant.entity)}" aria-label="Open ${escapeHtml(label)} plant details">
+      <span class="flora-image-wrap">
+        ${floraImageMarkup(plant, severity, label, 'flora-image')}
+        <span class="flora-status">${status}</span>
+      </span>
+      <span class="flora-card-body">
+        <span class="flora-card-id">SPECIMEN FL-${specimenId}</span>
+        <span class="flora-card-name">${escapeHtml(label.toUpperCase())}</span>
+        <span class="flora-card-species">${escapeHtml(species)}</span>
+        <span class="flora-metrics">
+          <span class="flora-metric"><label>MOIST</label><span>${floraValue(record, 'moisture', 1, '%')}</span></span>
+          <span class="flora-metric"><label>TEMP</label><span>${floraValue(record, 'temperature', 1, '°C')}</span></span>
+          <span class="flora-metric"><label>BATT</label><span>${floraValue(record, 'battery', 0, '%')}</span></span>
+        </span>
+      </span>
+    </button>`;
+  }).join('');
+
+  if (liveData.flora.selected) renderFloraDialog(liveData.flora.selected);
+}
+
+function renderFloraDialog(entityId) {
+  const plant = FLORA_PLANTS.find(item => item.entity === entityId);
+  const shell = document.getElementById('flora-dialog-shell');
+  if (!plant || !shell) return;
+  const record = getFloraRecord(entityId);
+  const attrs = record.attributes || {};
+  const problems = Array.isArray(attrs.problems) ? attrs.problems : [];
+  const severity = getFloraSeverity(record);
+  const status = getFloraStatus(severity);
+  const label = plant.label || attrs.friendly_name || plant.entity;
+  const species = attrs.species || 'Species unknown';
+
+  shell.classList.remove('ok', 'warning', 'critical', 'offline');
+  shell.classList.add(severity);
+  document.getElementById('flora-dialog-state').textContent = status;
+  document.getElementById('flora-dialog-name').textContent = `SPECIMEN // ${label.toUpperCase()}`;
+  document.getElementById('flora-dialog-species').textContent = species.toUpperCase();
+
+  const image = document.getElementById('flora-dialog-image');
+  image.parentElement.classList.remove('missing-art');
+  image.style.opacity = '1';
+  image.src = getFloraImage(plant, severity);
+  image.alt = severity === 'offline' ? `${label} telemetry unavailable` : `${label} plant status: ${status.toLowerCase()}`;
+
+  document.getElementById('flora-dialog-moisture').textContent = floraValue(record, 'moisture', 1, '%');
+  document.getElementById('flora-dialog-temperature').textContent = floraValue(record, 'temperature', 1, '°C');
+  document.getElementById('flora-dialog-humidity').textContent = floraValue(record, 'humidity', 0, '%');
+  document.getElementById('flora-dialog-illuminance').textContent = floraValue(record, 'illuminance', 0, 'lx');
+  document.getElementById('flora-dialog-vpd').textContent = floraValue(record, 'vpd', 2, 'kPa');
+  document.getElementById('flora-dialog-dli').textContent = floraValue(record, 'dli24h', 2, 'mol/d⋅m²');
+  document.getElementById('flora-dialog-battery').textContent = floraValue(record, 'battery', 0, '%');
+
+  let report = 'ALL BOTANICAL PARAMETERS WITHIN VAULT-TEC TOLERANCES.';
+  if (severity === 'offline') report = 'TELEMETRY LINK OFFLINE. DISPLAYED SENSOR VALUES MAY BE STALE.';
+  else if (problems.length) {
+    report = problems.map(problem => {
+      if (typeof problem === 'string') return problem.replaceAll('_', ' ').toUpperCase();
+      const sensor = String(problem.sensor_type || 'sensor').replaceAll('_', ' ').toUpperCase();
+      const current = problem.current != null ? ` ${problem.current}` : '';
+      return `${sensor}: ${String(problem.status || 'OUT OF RANGE').toUpperCase()}${current}`;
+    }).join(' // ');
+  }
+  document.getElementById('flora-dialog-report').textContent = report;
+}
+
+function openFlora(entityId) {
+  const dialog = document.getElementById('flora-dialog');
+  if (!dialog || !FLORA_PLANTS.some(plant => plant.entity === entityId)) return;
+  floraOpener = document.activeElement;
+  liveData.flora.selected = entityId;
+  renderFloraDialog(entityId);
+  if (!dialog.open) dialog.showModal();
+  dialog.querySelector('.flora-dialog-close')?.focus();
+}
+
+function closeFlora() {
+  const dialog = document.getElementById('flora-dialog');
+  if (dialog?.open) dialog.close();
+}
+
+function initFlora() {
+  FLORA_PLANTS.forEach(plant => getFloraRecord(plant.entity));
+  const grid = document.getElementById('flora-grid');
+  const dialog = document.getElementById('flora-dialog');
+  grid?.addEventListener('click', event => {
+    const card = event.target.closest('[data-flora-entity]');
+    if (card) openFlora(card.dataset.floraEntity);
+  });
+  dialog?.addEventListener('click', event => {
+    if (event.target === dialog) closeFlora();
+  });
+  dialog?.addEventListener('close', () => {
+    liveData.flora.selected = null;
+    if (floraOpener instanceof HTMLElement) floraOpener.focus();
+    floraOpener = null;
+  });
+  renderFlora();
+}
 </script>
-<script src="shared.js"></script>
-<script src="washer.js"></script>
+<script src="shared.js?v=20260714-1"></script>
+<script src="washer.js?v=20260714-1"></script>
 </body>
 </html>

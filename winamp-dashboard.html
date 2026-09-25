@@ -617,7 +617,6 @@
   .wa-eq-channel.off .wa-eq-val { color: var(--red); font-weight: bold; }
   .wa-eq-channel.toggle { cursor: pointer; }
   .wa-eq-channel.toggle .wa-eq-slider { cursor: pointer; }
-  }
 
   /* ── LOAD BARS ── */
   .load-bar-wrap { margin-top: 8px; }
@@ -1199,6 +1198,201 @@
   white-space: nowrap;
 }
 
+/* PLANTLIST — Winamp playlist/editor treatment */
+.plantlist-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.plantlist-card {
+  min-width: 0;
+  padding: 0;
+  border: 2px outset var(--chrome);
+  background: #09090c;
+  color: var(--green);
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.plantlist-card:hover {
+  border-color: var(--green);
+  box-shadow: 0 0 10px rgba(0,224,0,0.24);
+  transform: translateY(-1px);
+}
+.plantlist-card.warning { border-color: var(--orange); }
+.plantlist-card.critical { border-color: var(--red); }
+.plantlist-card.offline { border-color: var(--grey-mid); }
+.plantlist-artwork-wrap {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: #030304;
+  border-bottom: 1px solid var(--grey);
+}
+.plantlist-artwork {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.plantlist-state {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  background: rgba(0,0,0,0.84);
+  color: var(--green);
+  font-family: 'VT323', monospace;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-shadow: 0 0 6px currentColor;
+}
+.plantlist-card.warning .plantlist-state { color: var(--orange); }
+.plantlist-card.critical .plantlist-state { color: var(--red); }
+.plantlist-card.offline .plantlist-state { color: var(--grey-mid); }
+.plantlist-card-body { display: block; padding: 8px; }
+.plantlist-card-name {
+  display: block;
+  color: var(--green);
+  font-family: 'VT323', monospace;
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+}
+.plantlist-card-species {
+  display: block;
+  min-height: 1.8em;
+  margin-top: 2px;
+  color: var(--chrome-light);
+  font-size: 0.58rem;
+  line-height: 1.35;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+.plantlist-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 7px;
+}
+.plantlist-card-metric {
+  min-width: 0;
+  padding: 4px 2px;
+  border: 1px inset var(--grey);
+  background: #050507;
+  text-align: center;
+}
+.plantlist-card-metric label {
+  display: block;
+  color: var(--grey-mid);
+  font-size: 0.5rem;
+  letter-spacing: 0.5px;
+}
+.plantlist-card-metric span {
+  display: block;
+  margin-top: 2px;
+  color: var(--green);
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+.plantlist-empty {
+  grid-column: 1 / -1;
+  padding: 28px;
+  border: 2px inset var(--chrome);
+  background: #08080b;
+  color: var(--grey-mid);
+  text-align: center;
+  letter-spacing: 2px;
+}
+.plantlist-dialog {
+  width: min(920px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  overflow: auto;
+}
+.plantlist-dialog::backdrop { background: rgba(0,0,0,0.86); backdrop-filter: blur(3px); }
+.plantlist-window {
+  border: 3px outset var(--chrome);
+  background: var(--bg-deep);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+}
+.plantlist-titlebar {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 3px 4px 3px 8px;
+  background: linear-gradient(90deg, #182940, #66809c 55%, #1d2d42);
+  color: #fff;
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+.plantlist-titlebar-name { flex: 1; min-width: 0; }
+.plantlist-dialog-close {
+  width: 24px;
+  height: 21px;
+  padding: 0;
+  border: 2px outset var(--chrome-light);
+  background: var(--chrome);
+  color: #000;
+  font: bold 15px/15px Arial, sans-serif;
+}
+.plantlist-dialog-close:active { border-style: inset; }
+.plantlist-detail {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.1fr) minmax(300px, 1fr);
+  gap: 10px;
+  padding: 10px;
+}
+.plantlist-detail-art {
+  min-height: 300px;
+  border: 2px inset var(--chrome);
+  background: #020203;
+  overflow: hidden;
+}
+.plantlist-detail-image { width: 100%; height: 100%; min-height: 300px; display: block; object-fit: cover; }
+.plantlist-detail-data { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.plantlist-detail-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 9px;
+  border: 2px inset var(--chrome);
+  background: #08080b;
+}
+.plantlist-detail-status label { color: var(--grey-mid); font-size: 0.6rem; letter-spacing: 1px; }
+.plantlist-detail-state { color: var(--green); font-family: 'VT323', monospace; font-size: 1.15rem; letter-spacing: 1px; }
+.plantlist-window.warning .plantlist-detail-state { color: var(--orange); }
+.plantlist-window.critical .plantlist-detail-state { color: var(--red); }
+.plantlist-window.offline .plantlist-detail-state { color: var(--grey-mid); }
+.plantlist-detail-species { color: var(--chrome-light); font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase; }
+.plantlist-readings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+.plantlist-reading { padding: 7px 8px; border: 1px inset var(--grey); background: #070709; }
+.plantlist-reading label { display: block; color: var(--grey-mid); font-size: 0.53rem; letter-spacing: 0.7px; text-transform: uppercase; }
+.plantlist-reading .val { display: block; margin-top: 4px; color: var(--green); font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+.plantlist-report { flex: 1; padding: 8px 9px; border: 1px inset var(--grey); background: #070709; }
+.plantlist-report label { color: var(--grey-mid); font-size: 0.53rem; letter-spacing: 0.7px; }
+.plantlist-report-text { margin-top: 6px; color: var(--green); font-size: 0.65rem; line-height: 1.5; }
+@media (max-width: 980px) {
+  .plantlist-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .plantlist-detail { grid-template-columns: 1fr; }
+  .plantlist-detail-art, .plantlist-detail-image { min-height: 240px; }
+}
+@media (max-width: 480px) {
+  .plantlist-cards { grid-template-columns: 1fr; }
+  .plantlist-readings { grid-template-columns: 1fr; }
+  .plantlist-dialog { width: calc(100vw - 12px); max-height: calc(100dvh - 12px); }
+  .plantlist-detail-art, .plantlist-detail-image { min-height: 210px; }
+}
+
 /* RENDERED CONTRAST SAFEGUARDS */
 .tab:not(.active),
 .wa-titlebar-btn,
@@ -1260,6 +1454,7 @@ body.night-mode { --green: #00c83a; }
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-data" tabindex="-1" onclick="switchTab('data')">EQ</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-media" tabindex="-1" onclick="switchTab('media')">MEDIA</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="page-sensors" tabindex="-1" onclick="switchTab('sensors')">VIS</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="page-plants" tabindex="-1" onclick="switchTab('plants')">PLANTLIST</button>
   </div>
 
   <!-- CONTENT -->
@@ -1491,6 +1686,46 @@ body.night-mode { --green: #00c83a; }
 
     </div>
 
+    <!-- ═══════════════ PLANTLIST TAB ═══════════════ -->
+    <div class="page" id="page-plants">
+      <div class="section-title">PLANTLIST EDITOR — ORGANIC TRACKS</div>
+      <div class="plantlist-cards" id="plantlist-cards"></div>
+
+      <dialog class="plantlist-dialog" id="plantlist-dialog" aria-labelledby="plantlist-modal-name">
+        <section class="plantlist-window offline" id="plantlist-modal-window">
+          <div class="plantlist-titlebar">
+            <span class="plantlist-titlebar-name" id="plantlist-modal-name">PLANTLIST — NO TRACK SELECTED</span>
+            <button class="plantlist-dialog-close" type="button" onclick="closePlantlist()" aria-label="Close plant details">×</button>
+          </div>
+          <div class="plantlist-detail">
+            <div class="plantlist-detail-art">
+              <img class="plantlist-detail-image" id="plantlist-modal-image" src="/local/plant-status/winamp/pilea/pilea-not-ok.webp" alt="Plant telemetry unavailable">
+            </div>
+            <div class="plantlist-detail-data">
+              <div class="plantlist-detail-status">
+                <label>TRACK STATUS</label>
+                <span class="plantlist-detail-state" id="plantlist-modal-state" role="status" aria-live="polite">OFFLINE</span>
+              </div>
+              <div class="plantlist-detail-species" id="plantlist-modal-species">SPECIES UNKNOWN</div>
+              <div class="plantlist-readings">
+                <div class="plantlist-reading"><label>Soil moisture</label><span class="val" id="plantlist-modal-moisture">-- %</span></div>
+                <div class="plantlist-reading"><label>Temperature</label><span class="val" id="plantlist-modal-temperature">-- °C</span></div>
+                <div class="plantlist-reading"><label>Air humidity</label><span class="val" id="plantlist-modal-humidity">-- %</span></div>
+                <div class="plantlist-reading"><label>Illuminance</label><span class="val" id="plantlist-modal-illuminance">-- lx</span></div>
+                <div class="plantlist-reading"><label>Vapour pressure deficit</label><span class="val" id="plantlist-modal-vpd">-- kPa</span></div>
+                <div class="plantlist-reading"><label>DLI / 24 hours</label><span class="val" id="plantlist-modal-dli">-- mol/d⋅m²</span></div>
+                <div class="plantlist-reading"><label>Sensor battery</label><span class="val" id="plantlist-modal-battery">-- %</span></div>
+              </div>
+              <div class="plantlist-report">
+                <label>TRACK NOTES</label>
+                <div class="plantlist-report-text" id="plantlist-modal-report">AWAITING ORGANIC TELEMETRY...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </dialog>
+    </div>
+
   </div><!-- /content -->
 
   <!-- TRANSPORT CONTROLS -->
@@ -1530,8 +1765,8 @@ const THEME = {
   title: 'WINAMP HOME AUTOMATION',
   subtitle: 'IT REALLY WHIPS THE LLAMA\'S ASS',
   footer: 'WINAMP HOME AUTOMATION // LLAMA GROUP',
-  tabs: ['PLAYLIST', 'CONTROLS', 'EQ', 'MEDIA', 'VIS'],
-  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  tabs: ['PLAYLIST', 'CONTROLS', 'EQ', 'MEDIA', 'VIS', 'PLANTLIST'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'plants'],
   emptyMedia: '*** NO ACTIVE STREAMS ***',
   connOnline: 'ONLINE',
   connOffline: 'OFFLINE',
@@ -1556,14 +1791,20 @@ const THEME = {
     lifetimeLabel: 'TOTAL USAGE', etaLabel: 'remaining',
   },
 
+  extraLiveData: {
+    plantlist: { plants: {}, selected: null },
+  },
+
   onInit() {
     initSpecSources();
     initSpectrum();
+    initPlantlist();
   },
   onStatesLoaded() {
     updateSpectrum();
     updateMarquee();
     applyRainbow();
+    renderPlantlist();
   },
   onStateChanged(id, s) {
     if (id.includes('power')) { updateSpectrum(); applyRainbow(); }
@@ -1575,13 +1816,199 @@ const THEME = {
     [() => updateMarquee(), 15000],
     [() => applyRainbow(), 5000],
   ],
-  onIngest() {},
+  onIngest(id, s) { ingestPlantlistState(id, s); },
   onAuthOk() {},
   onAuthFail() {},
   onToggleLight() {},
   onNightProtocol() {},
   onWsError() {}
 };
+
+// ── WINAMP-SPECIFIC: PLANTLIST ──
+const PLANTLIST_PLANTS = ENTITIES.integrations?.plants || [];
+let plantlistOpener = null;
+
+function getPlantlistRecord(entityId) {
+  if (!liveData.plantlist.plants[entityId]) {
+    liveData.plantlist.plants[entityId] = { entityState: null, attributes: {}, values: {} };
+  }
+  return liveData.plantlist.plants[entityId];
+}
+
+function getPlantlistSeverity(record) {
+  const state = record?.entityState;
+  const problems = Array.isArray(record?.attributes?.problems) ? record.attributes.problems : [];
+  if (!state || state === 'unknown' || state === 'unavailable') return 'offline';
+  if (problems.length > 1) return 'critical';
+  if (problems.length === 1 || state === 'problem') return 'warning';
+  return 'ok';
+}
+
+function getPlantlistStatusText(severity) {
+  return severity === 'offline' ? 'OFFLINE' : severity === 'critical' ? 'CRITICAL' : severity === 'warning' ? 'WARNING' : 'HEALTHY';
+}
+
+function getPlantlistImageSet(plant) {
+  const imageSet = String(plant.imageSet || 'plant-1');
+  return imageSet === 'plant-1' ? 'pilea' : imageSet;
+}
+
+function getPlantlistImage(plant, severity) {
+  const imageSet = getPlantlistImageSet(plant);
+  const variant = severity === 'critical' ? 'bad' : severity === 'ok' ? 'ok' : 'not-ok';
+  const safeSet = encodeURIComponent(imageSet);
+  return `/local/plant-status/winamp/${safeSet}/${safeSet}-${variant}.webp`;
+}
+
+function ingestPlantlistState(id, state) {
+  if (!PLANTLIST_PLANTS.length || !liveData.plantlist) return;
+  let matchedPlant = null;
+  let sensorKey = null;
+  for (const plant of PLANTLIST_PLANTS) {
+    if (id === plant.entity) {
+      matchedPlant = plant;
+      break;
+    }
+    const match = Object.entries(plant.sensors || {}).find(([, entityId]) => entityId === id);
+    if (match) {
+      matchedPlant = plant;
+      sensorKey = match[0];
+      break;
+    }
+  }
+  if (!matchedPlant) return;
+
+  const record = getPlantlistRecord(matchedPlant.entity);
+  if (id === matchedPlant.entity) {
+    record.entityState = state.state;
+    record.attributes = state.attributes || {};
+  } else if (sensorKey) {
+    const value = parseFloat(state.state);
+    record.values[sensorKey] = Number.isFinite(value) ? value : null;
+  }
+  scheduleThemeRender('plantlist', renderPlantlist);
+}
+
+function plantlistValue(record, key, decimals, unit) {
+  const value = record?.values?.[key];
+  return Number.isFinite(value) ? `${value.toFixed(decimals)} ${unit}` : `-- ${unit}`;
+}
+
+function renderPlantlist() {
+  const grid = document.getElementById('plantlist-cards');
+  if (!grid || !liveData.plantlist) return;
+  if (!PLANTLIST_PLANTS.length) {
+    grid.innerHTML = '<div class="plantlist-empty">*** PLANTLIST IS EMPTY — ADD PLANTS IN ENTITIES.JS ***</div>';
+    return;
+  }
+
+  grid.innerHTML = PLANTLIST_PLANTS.map((plant, index) => {
+    const record = getPlantlistRecord(plant.entity);
+    const attrs = record.attributes || {};
+    const severity = getPlantlistSeverity(record);
+    const statusText = getPlantlistStatusText(severity);
+    const label = plant.label || attrs.friendly_name || plant.entity;
+    const species = attrs.species || 'Species unknown';
+    const image = getPlantlistImage(plant, severity);
+    const track = String(index + 1).padStart(2, '0');
+    return `<button type="button" class="plantlist-card ${severity}" data-plantlist-entity="${escapeHtml(plant.entity)}" aria-label="Open ${escapeHtml(label)} plant details">
+      <span class="plantlist-artwork-wrap">
+        <img class="plantlist-artwork" src="${image}" alt="${escapeHtml(label)} status: ${statusText.toLowerCase()}" loading="lazy">
+        <span class="plantlist-state">${statusText}</span>
+      </span>
+      <span class="plantlist-card-body">
+        <span class="plantlist-card-name">${track}. ${escapeHtml(label.toUpperCase())}</span>
+        <span class="plantlist-card-species">${escapeHtml(species)}</span>
+        <span class="plantlist-card-metrics">
+          <span class="plantlist-card-metric"><label>MOIST</label><span>${plantlistValue(record, 'moisture', 1, '%')}</span></span>
+          <span class="plantlist-card-metric"><label>TEMP</label><span>${plantlistValue(record, 'temperature', 1, '°C')}</span></span>
+          <span class="plantlist-card-metric"><label>BATT</label><span>${plantlistValue(record, 'battery', 0, '%')}</span></span>
+        </span>
+      </span>
+    </button>`;
+  }).join('');
+
+  if (liveData.plantlist.selected) renderPlantlistDialog(liveData.plantlist.selected);
+}
+
+function renderPlantlistDialog(entityId) {
+  const plant = PLANTLIST_PLANTS.find(item => item.entity === entityId);
+  const modalWindow = document.getElementById('plantlist-modal-window');
+  if (!plant || !modalWindow) return;
+  const record = getPlantlistRecord(entityId);
+  const attrs = record.attributes || {};
+  const problems = Array.isArray(attrs.problems) ? attrs.problems : [];
+  const severity = getPlantlistSeverity(record);
+  const statusText = getPlantlistStatusText(severity);
+  const label = plant.label || attrs.friendly_name || plant.entity;
+  const species = attrs.species || 'Species unknown';
+
+  modalWindow.classList.remove('ok', 'warning', 'critical', 'offline');
+  modalWindow.classList.add(severity);
+  document.getElementById('plantlist-modal-state').textContent = statusText;
+  document.getElementById('plantlist-modal-name').textContent = `PLANTLIST — ${label.toUpperCase()}`;
+  document.getElementById('plantlist-modal-species').textContent = species.toUpperCase();
+
+  const image = document.getElementById('plantlist-modal-image');
+  image.src = getPlantlistImage(plant, severity);
+  image.alt = severity === 'offline' ? `${label} telemetry unavailable` : `${label} plant status: ${statusText.toLowerCase()}`;
+
+  document.getElementById('plantlist-modal-moisture').textContent = plantlistValue(record, 'moisture', 1, '%');
+  document.getElementById('plantlist-modal-temperature').textContent = plantlistValue(record, 'temperature', 1, '°C');
+  document.getElementById('plantlist-modal-humidity').textContent = plantlistValue(record, 'humidity', 0, '%');
+  document.getElementById('plantlist-modal-illuminance').textContent = plantlistValue(record, 'illuminance', 0, 'lx');
+  document.getElementById('plantlist-modal-vpd').textContent = plantlistValue(record, 'vpd', 2, 'kPa');
+  document.getElementById('plantlist-modal-dli').textContent = plantlistValue(record, 'dli24h', 2, 'mol/d⋅m²');
+  document.getElementById('plantlist-modal-battery').textContent = plantlistValue(record, 'battery', 0, '%');
+
+  let report = 'ALL PLANT PARAMETERS ARE WITHIN THE NORMAL PLAYBACK RANGE.';
+  if (severity === 'offline') report = 'TELEMETRY TRACK IS OFFLINE. DISPLAYED SENSOR VALUES MAY BE STALE.';
+  else if (problems.length) {
+    report = problems.map(problem => {
+      const sensor = String(problem.sensor_type || 'sensor').replaceAll('_', ' ').toUpperCase();
+      const current = problem.current != null ? ` ${problem.current}` : '';
+      return `${sensor}: ${String(problem.status || 'OUT OF RANGE').toUpperCase()}${current}`;
+    }).join(' // ');
+  }
+  document.getElementById('plantlist-modal-report').textContent = report;
+}
+
+function openPlantlist(entityId) {
+  const dialog = document.getElementById('plantlist-dialog');
+  if (!dialog || !PLANTLIST_PLANTS.some(plant => plant.entity === entityId)) return;
+  plantlistOpener = document.activeElement;
+  liveData.plantlist.selected = entityId;
+  renderPlantlistDialog(entityId);
+  if (!dialog.open) dialog.showModal();
+  dialog.querySelector('.plantlist-dialog-close')?.focus();
+}
+
+function closePlantlist() {
+  const dialog = document.getElementById('plantlist-dialog');
+  if (dialog?.open) dialog.close();
+}
+
+function initPlantlist() {
+  PLANTLIST_PLANTS.forEach(plant => getPlantlistRecord(plant.entity));
+  const grid = document.getElementById('plantlist-cards');
+  const dialog = document.getElementById('plantlist-dialog');
+  grid?.addEventListener('click', event => {
+    const card = event.target.closest('[data-plantlist-entity]');
+    if (card) openPlantlist(card.dataset.plantlistEntity);
+  });
+  dialog?.addEventListener('click', event => {
+    if (event.target !== dialog) return;
+    const rect = dialog.getBoundingClientRect();
+    const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+    if (outside) closePlantlist();
+  });
+  dialog?.addEventListener('close', () => {
+    liveData.plantlist.selected = null;
+    if (plantlistOpener instanceof HTMLElement) plantlistOpener.focus();
+    plantlistOpener = null;
+  });
+  renderPlantlist();
+}
 
 // ── WINAMP-SPECIFIC: Spectrum Analyzer ──
 const SPEC_BARS = 32;
@@ -1963,7 +2390,7 @@ THEME.onStatesLoaded = function() {
   }
 };
 </script>
-<script src="shared.js"></script>
-<script src="washer.js"></script>
+<script src="shared.js?v=20260714-1"></script>
+<script src="washer.js?v=20260714-1"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Theme Consistency Audit — checks all 6 dashboards for structural parity
+// Theme Consistency Audit — checks all dashboards for structural parity
 // Usage: node tools/theme-audit.js
 
 const fs = require('fs');
@@ -13,6 +13,8 @@ const THEMES = [
   { file: 'matrix-dashboard.html',  name: 'Matrix'   },
   { file: 'weyland-dashboard.html', name: 'Weyland'  },
   { file: 'diablo-dashboard.html',  name: 'Diablo'   },
+  { file: 'winamp-dashboard.html',  name: 'Winamp'   },
+  { file: 't2-dashboard.html',      name: 'T2'       },
 ];
 
 const SHARED_FILE = 'shared.js';
@@ -25,6 +27,10 @@ function extractIds(html) {
   let m;
   while ((m = re.exec(html))) ids.add(m[1]);
   return ids;
+}
+
+function extractIdList(html) {
+  return [...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m => m[1]);
 }
 
 function extractGetElementByIds(js) {
@@ -207,7 +213,7 @@ let hookIssues = 0;
 for (const h of hookNames) {
   const vals = themeData.map(t => t.hooks[h]);
   const trueCount = vals.filter(Boolean).length;
-  const flag = (trueCount > 0 && trueCount < 6) ? '⚠️' : '';
+  const flag = (trueCount > 0 && trueCount < themeData.length) ? '⚠️' : '';
   if (flag) hookIssues++;
 
   const line = [
@@ -234,6 +240,7 @@ let orphanIssues = 0;
 for (const t of themeData) {
   const orphans = [];
   for (const id of t.htmlIds) {
+    if (id.includes('${')) continue;
     // Skip page-*, rooms-*, lights-* containers (used by shared.js innerHTML)
     if (id.startsWith('page-')) continue;
     if (['rooms-grid', 'lights-grid', 'sessions-grid', 'mp-grid'].includes(id)) continue;
@@ -316,10 +323,76 @@ console.log('');
 console.log(`   Missing ID issues: ${missingIssues}`);
 console.log('');
 
+// ─── 6. Values, accessibility, registration, secrets ──
+console.log('6. VALUE, ACCESSIBILITY & SECURITY CONTRACTS');
+console.log('─────────────────────────────────────────────────');
+
+let contractIssues = 0;
+for (const t of themeData) {
+  const ids = extractIdList(t.html);
+  const duplicates = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
+  const connToast = t.html.match(/\bconnToast\s*:\s*([^,\n]+)/)?.[1]?.trim() || '';
+  const tabCount = (t.html.match(/<[^>]+\brole=["']tab["'][^>]*>/g) || []).length;
+  const pageCount = (t.html.match(/class="page(?: active)?"/g) || []).length;
+  const checks = [
+    [duplicates.length === 0, `duplicate IDs: ${duplicates.join(', ')}`],
+    [/^(['"]).*\1$/.test(connToast), 'connToast must be a string'],
+    [hasText(t.html, 'role="tablist"'), 'missing tablist'],
+    [tabCount >= 5, 'expected at least five tabs'],
+    [pageCount === tabCount, `tab/page count mismatch: ${tabCount}/${pageCount}`],
+    [hasElement(t.html, 'main-content'), 'missing main content target'],
+    [hasText(t.html, 'aria-live="polite"'), 'missing polite live region'],
+    [/src=["']shared\.js\?v=[^"']+["']/.test(t.html), 'shared.js must have a cache version'],
+    [/src=["']washer\.js\?v=[^"']+["']/.test(t.html), 'washer.js must have a cache version'],
+  ];
+  const failed = checks.filter(([ok]) => !ok).map(([, label]) => label);
+  if (failed.length) {
+    contractIssues += failed.length;
+    console.log(`   ${t.name}: ${failed.join('; ')}`);
+  } else {
+    console.log(`   ${t.name}: ✓`);
+  }
+}
+
+const registeredFiles = new Set([...sharedJs.matchAll(/file:\s*['"]([^'"]+-dashboard\.html)['"]/g)].map(m => m[1]));
+for (const t of THEMES) {
+  if (!registeredFiles.has(t.file)) {
+    contractIssues++;
+    console.log(`   ${t.name}: missing from shared theme switcher`);
+  }
+}
+
+const scanFiles = fs.readdirSync(ROOT).filter(file =>
+  /\.(?:html|js|md|ya?ml)$/i.test(file) && !['config.js', 'entities.js'].includes(file)
+);
+const jwtPattern = /eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/;
+for (const file of scanFiles) {
+  const text = fs.readFileSync(path.join(ROOT, file), 'utf8');
+  if (jwtPattern.test(text)) {
+    contractIssues++;
+    console.log(`   ${file}: token-like JWT literal found`);
+  }
+}
+
+if (!sharedJs.includes('initializeTabAccessibility()')) {
+  contractIssues++;
+  console.log('   shared.js: initial tab accessibility setup missing');
+}
+if (!sharedJs.includes("role=\"dialog\" aria-modal=\"true\"")) {
+  contractIssues++;
+  console.log('   shared.js: accessible weather dialog contract missing');
+}
+
+console.log('');
+console.log(`   Contract issues: ${contractIssues}`);
+console.log('');
+
 // ─── Summary ──────────────────────────────────────────
-totalIssues = structIssues + hookIssues + orphanIssues + cssIssues + missingIssues;
+totalIssues = structIssues + hookIssues + orphanIssues + cssIssues + missingIssues + contractIssues;
 console.log('═══════════════════════════════════════════════════════');
 console.log(`  TOTAL ISSUES: ${totalIssues}`);
-console.log(`    Structural: ${structIssues}  |  Hooks: ${hookIssues}  |  Orphans: ${orphanIssues}  |  CSS: ${cssIssues}  |  Missing: ${missingIssues}`);
+console.log(`    Structural: ${structIssues}  |  Hooks: ${hookIssues}  |  Orphans: ${orphanIssues}  |  CSS: ${cssIssues}  |  Missing: ${missingIssues}  |  Contracts: ${contractIssues}`);
 console.log('═══════════════════════════════════════════════════════');
 console.log('');
+
+if (totalIssues > 0) process.exitCode = 1;

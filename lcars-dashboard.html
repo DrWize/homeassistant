@@ -1177,6 +1177,145 @@ html, body {
   .washer-month-val { width: 65px; text-align: right; color: var(--grey-mid); }
   .washer-lifetime { font-size: 0.65rem; letter-spacing: 2px; color: var(--grey-mid); margin-top: 10px; text-align: center; border-top: 1px solid var(--grey-dark); padding-top: 6px; }
 
+  /* ── ARBORETUM ── */
+  .arboretum-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .arboretum-card {
+    min-width: 0;
+    padding: 0;
+    border: 2px solid var(--teal);
+    border-radius: 20px 4px 20px 4px;
+    background: rgba(4, 8, 12, 0.94);
+    color: var(--tan);
+    font: inherit;
+    text-align: left;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  }
+  .arboretum-card:hover,
+  .arboretum-card:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 0 18px rgba(102, 204, 204, 0.3);
+    outline: none;
+  }
+  .arboretum-card.warning { border-color: var(--orange); }
+  .arboretum-card.critical { border-color: var(--red); }
+  .arboretum-card.offline { border-color: var(--grey-mid); }
+  .arboretum-art-wrap {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: #05070a;
+  }
+  .arboretum-art { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .arboretum-state {
+    position: absolute;
+    right: 7px;
+    bottom: 7px;
+    padding: 3px 10px;
+    border-radius: 12px 2px 12px 2px;
+    background: var(--teal);
+    color: #050505;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+  }
+  .arboretum-card.warning .arboretum-state { background: var(--orange); }
+  .arboretum-card.critical .arboretum-state { background: var(--red); color: #fff; }
+  .arboretum-card.offline .arboretum-state { background: var(--grey-mid); }
+  .arboretum-card-body { display: block; padding: 10px 12px 12px; }
+  .arboretum-card-name { display: block; color: var(--tan); font-size: 0.85rem; font-weight: 700; letter-spacing: 1.5px; }
+  .arboretum-card-species { display: block; min-height: 1.8em; margin-top: 3px; color: var(--purple); font-size: 0.58rem; line-height: 1.35; letter-spacing: 0.8px; text-transform: uppercase; }
+  .arboretum-card-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 9px; }
+  .arboretum-card-metric { min-width: 0; padding: 5px 3px; border-left: 5px solid var(--orange); background: rgba(255, 153, 0, 0.09); text-align: center; }
+  .arboretum-card-metric label { display: block; color: var(--grey-mid); font-size: 0.48rem; letter-spacing: 0.7px; }
+  .arboretum-card-metric span { display: block; margin-top: 3px; color: var(--teal); font-size: 0.67rem; white-space: nowrap; }
+  .arboretum-empty { grid-column: 1 / -1; padding: 32px; border: 2px solid var(--purple); border-radius: 24px 4px; color: var(--tan); text-align: center; letter-spacing: 2px; }
+  .arboretum-dialog {
+    width: min(960px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--tan);
+    overflow: auto;
+  }
+  .arboretum-dialog::backdrop { background: rgba(0, 0, 0, 0.86); backdrop-filter: blur(4px); }
+  .arboretum-shell {
+    position: relative;
+    padding: 18px;
+    border: 4px solid var(--teal);
+    border-radius: 38px 6px 38px 6px;
+    background: #090b10;
+    box-shadow: 0 14px 48px rgba(0, 0, 0, 0.82);
+  }
+  .arboretum-shell::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 34px;
+    width: 34%;
+    height: 9px;
+    border-radius: 0 0 10px 10px;
+    background: var(--orange);
+  }
+  .arboretum-shell.warning { border-color: var(--orange); }
+  .arboretum-shell.critical { border-color: var(--red); }
+  .arboretum-shell.offline { border-color: var(--grey-mid); }
+  .arboretum-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    z-index: 2;
+    width: 34px;
+    height: 28px;
+    border: 0;
+    border-radius: 14px 3px 14px 3px;
+    background: var(--purple);
+    color: #050505;
+    font: 700 18px/1 sans-serif;
+    cursor: pointer;
+  }
+  .arboretum-detail { display: grid; grid-template-columns: minmax(300px, 1.15fr) minmax(300px, 1fr); gap: 16px; padding-top: 18px; }
+  .arboretum-visual { min-height: 320px; border-radius: 28px 4px; background: #030507; overflow: hidden; }
+  .arboretum-image { width: 100%; height: 100%; min-height: 320px; display: block; object-fit: cover; }
+  .arboretum-data { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .arboretum-heading { padding: 10px 14px; border-radius: 20px 3px; background: var(--orange); color: #050505; }
+  .arboretum-name { padding-right: 36px; font-size: 1.05rem; font-weight: 700; letter-spacing: 2px; }
+  .arboretum-species { margin-top: 2px; font-size: 0.61rem; letter-spacing: 1px; text-transform: uppercase; }
+  .arboretum-status { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border-left: 16px solid var(--teal); background: rgba(102, 204, 204, 0.1); }
+  .arboretum-status label { color: var(--grey-mid); font-size: 0.58rem; letter-spacing: 1px; }
+  .arboretum-status-value { color: var(--teal); font-weight: 700; letter-spacing: 1.5px; }
+  .arboretum-shell.warning .arboretum-status { border-color: var(--orange); }
+  .arboretum-shell.warning .arboretum-status-value { color: var(--orange); }
+  .arboretum-shell.critical .arboretum-status { border-color: var(--red); }
+  .arboretum-shell.critical .arboretum-status-value { color: var(--red); }
+  .arboretum-shell.offline .arboretum-status { border-color: var(--grey-mid); }
+  .arboretum-shell.offline .arboretum-status-value { color: var(--grey-mid); }
+  .arboretum-readings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .arboretum-reading { padding: 8px 10px; border-radius: 12px 2px; background: rgba(204, 153, 204, 0.11); }
+  .arboretum-reading label { display: block; color: var(--purple); font-size: 0.55rem; letter-spacing: 1px; text-transform: uppercase; }
+  .arboretum-reading .val { display: block; margin-top: 5px; color: var(--tan); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+  .arboretum-report { flex: 1; padding: 10px 12px; border-radius: 16px 3px; background: rgba(255, 153, 0, 0.09); }
+  .arboretum-report label { color: var(--orange); font-size: 0.55rem; letter-spacing: 1px; }
+  .arboretum-report-text { margin-top: 7px; color: var(--tan); font-size: 0.7rem; line-height: 1.55; }
+  @media (max-width: 1000px) { .arboretum-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 720px) {
+    .arboretum-detail { grid-template-columns: 1fr; }
+    .arboretum-visual, .arboretum-image { min-height: 250px; }
+  }
+  @media (max-width: 520px) {
+    .arboretum-grid, .arboretum-readings { grid-template-columns: 1fr; }
+    .arboretum-dialog { width: calc(100vw - 12px); max-height: calc(100dvh - 12px); }
+    .arboretum-shell { padding: 12px; border-radius: 26px 4px; }
+    .arboretum-visual, .arboretum-image { min-height: 215px; }
+  }
+
   /* ── REDUCED MOTION ── */
   @media (prefers-reduced-motion: reduce) {
     .radar-sweep, .radar-ping { animation: none !important; }
@@ -1278,6 +1417,7 @@ html, body {
         <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-data" onclick="switchTab('data')">DATA</button>
         <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-media" onclick="switchTab('media')">MEDIA</button>
         <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-sensors" onclick="switchTab('sensors')">SENSORS</button>
+        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-plants" onclick="switchTab('plants')">ARBORETUM</button>
       </div>
       <div class="lcars-status">
         <span id="conn-dot" class="status-dot connecting"></span>
@@ -1302,11 +1442,12 @@ html, body {
     <div class="lcars-sidebar">
       <div class="lcars-sidebar-top"></div>
       <div class="lcars-sidebar-buttons">
-        <button class="lcars-btn active" onclick="switchTab('systems')">SYSTEMS</button>
-        <button class="lcars-btn" onclick="switchTab('controls')">CONTROLS</button>
-        <button class="lcars-btn" onclick="switchTab('data')">DATA</button>
-        <button class="lcars-btn" onclick="switchTab('media')">MEDIA</button>
-        <button class="lcars-btn" onclick="switchTab('sensors')">SENSORS</button>
+        <button class="lcars-btn active" data-tab="systems" onclick="switchTab('systems')">SYSTEMS</button>
+        <button class="lcars-btn" data-tab="controls" onclick="switchTab('controls')">CONTROLS</button>
+        <button class="lcars-btn" data-tab="data" onclick="switchTab('data')">DATA</button>
+        <button class="lcars-btn" data-tab="media" onclick="switchTab('media')">MEDIA</button>
+        <button class="lcars-btn" data-tab="sensors" onclick="switchTab('sensors')">SENSORS</button>
+        <button class="lcars-btn" data-tab="plants" onclick="switchTab('plants')">ARBORETUM</button>
         <div style="height:10px;"></div>
         <button class="lcars-btn blue">LIGHTS: <span id="sb-lights">--</span></button>
         <button class="lcars-btn blue">TEMP OUT: <span id="sb-temp">--</span></button>
@@ -1644,6 +1785,50 @@ html, body {
 
       </div>
 
+      <!-- ══════════ ARBORETUM TAB ══════════ -->
+      <div class="page" id="page-plants">
+        <div class="lc-section">
+          <div class="lc-section-pill">Arboretum Life Sciences</div>
+          <div class="lc-section-line"></div>
+          <div class="lc-section-end"></div>
+        </div>
+        <div class="arboretum-grid" id="arboretum-grid"></div>
+
+        <dialog class="arboretum-dialog" id="arboretum-dialog" aria-labelledby="arboretum-modal-name">
+          <section class="arboretum-shell offline" id="arboretum-modal-shell">
+            <button class="arboretum-close" type="button" onclick="closeArboretum()" aria-label="Close plant details">×</button>
+            <div class="arboretum-detail">
+              <div class="arboretum-visual">
+                <img class="arboretum-image" id="arboretum-modal-image" src="/local/plant-status/lcars/pilea/pilea-not-ok.webp" alt="Plant telemetry unavailable">
+              </div>
+              <div class="arboretum-data">
+                <div class="arboretum-heading">
+                  <div class="arboretum-name" id="arboretum-modal-name">BOTANICAL SPECIMEN</div>
+                  <div class="arboretum-species" id="arboretum-modal-species">SPECIES UNKNOWN</div>
+                </div>
+                <div class="arboretum-status">
+                  <label>BIOLOGICAL STATUS</label>
+                  <span class="arboretum-status-value" id="arboretum-modal-state" role="status" aria-live="polite">OFFLINE</span>
+                </div>
+                <div class="arboretum-readings">
+                  <div class="arboretum-reading"><label>Soil Moisture</label><span class="val" id="arboretum-modal-moisture">-- %</span></div>
+                  <div class="arboretum-reading"><label>Temperature</label><span class="val" id="arboretum-modal-temperature">-- °C</span></div>
+                  <div class="arboretum-reading"><label>Air Humidity</label><span class="val" id="arboretum-modal-humidity">-- %</span></div>
+                  <div class="arboretum-reading"><label>Illuminance</label><span class="val" id="arboretum-modal-illuminance">-- lx</span></div>
+                  <div class="arboretum-reading"><label>Vapour Pressure Deficit</label><span class="val" id="arboretum-modal-vpd">-- kPa</span></div>
+                  <div class="arboretum-reading"><label>DLI / 24 Hours</label><span class="val" id="arboretum-modal-dli">-- mol/d⋅m²</span></div>
+                  <div class="arboretum-reading"><label>Sensor Battery</label><span class="val" id="arboretum-modal-battery">-- %</span></div>
+                </div>
+                <div class="arboretum-report">
+                  <label>BOTANICAL DIAGNOSTIC REPORT</label>
+                  <div class="arboretum-report-text" id="arboretum-modal-report">AWAITING SENSOR TELEMETRY...</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </dialog>
+      </div>
+
     </div><!-- /content -->
   </div><!-- /body -->
 
@@ -1681,8 +1866,8 @@ const THEME = {
   title: 'LCARS',
   subtitle: 'HOME AUTOMATION SYSTEM',
   footer: 'STARFLEET HOME AUTOMATION DIVISION',
-  tabs: ['SYSTEMS', 'CONTROLS', 'DATA', 'MEDIA', 'SENSORS'],
-  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  tabs: ['SYSTEMS', 'CONTROLS', 'DATA', 'MEDIA', 'SENSORS', 'ARBORETUM'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'plants'],
   emptyMedia: 'No Active Transmissions',
   connOnline: 'ONLINE',
   connOffline: 'OFFLINE',
@@ -1704,6 +1889,9 @@ const THEME = {
     statusLabels: { idle:'STANDBY', running:'PROCESSING', paused:'SUSPENDED', complete:'CYCLE COMPLETE' },
     lifetimeLabel: 'CUMULATIVE', etaLabel: 'to completion',
   },
+  extraLiveData: {
+    arboretum: { plants: {}, selected: null },
+  },
   onClockUpdate() {
     const sdEl = document.getElementById('stardate-val');
     if (sdEl) sdEl.textContent = calcStardate(new Date());
@@ -1716,13 +1904,16 @@ const THEME = {
   onInit() {
     renderLrs();
     startRadar();
+    initArboretum();
   },
   onStatesLoaded() {
     renderLrs();
     renderLrsWeatherCards();
+    renderArboretum();
   },
   onIngest(id, s) {
     if (id.includes('sun.sun') || id.includes('temperature') || id.includes('weather.')) renderLrs();
+    ingestArboretumState(id, s);
   },
   intervals: [
     [() => renderLrs(), 60000]
@@ -1734,6 +1925,190 @@ const THEME = {
   onNightProtocol() {},
   onWsError() {}
 };
+
+// LCARS-specific plant monitor: ARBORETUM
+const ARBORETUM_PLANTS = ENTITIES.integrations?.plants || [];
+let arboretumOpener = null;
+
+function getArboretumRecord(entityId) {
+  if (!liveData.arboretum.plants[entityId]) {
+    liveData.arboretum.plants[entityId] = { entityState: null, attributes: {}, values: {} };
+  }
+  return liveData.arboretum.plants[entityId];
+}
+
+function getArboretumSeverity(record) {
+  const state = record?.entityState;
+  const problems = Array.isArray(record?.attributes?.problems) ? record.attributes.problems : [];
+  if (!state || state === 'unknown' || state === 'unavailable') return 'offline';
+  if (problems.length > 1) return 'critical';
+  if (problems.length === 1 || state === 'problem') return 'warning';
+  return 'ok';
+}
+
+function getArboretumStatusText(severity) {
+  return severity === 'offline' ? 'OFFLINE' : severity === 'critical' ? 'CRITICAL' : severity === 'warning' ? 'WARNING' : 'HEALTHY';
+}
+
+function getArboretumImageSet(plant) {
+  const imageSet = String(plant.imageSet || 'plant-1');
+  return imageSet === 'plant-1' ? 'pilea' : imageSet;
+}
+
+function getArboretumImage(plant, severity) {
+  const imageSet = getArboretumImageSet(plant);
+  const variant = severity === 'critical' ? 'bad' : severity === 'ok' ? 'ok' : 'not-ok';
+  const safeSet = encodeURIComponent(imageSet);
+  return `/local/plant-status/lcars/${safeSet}/${safeSet}-${variant}.webp`;
+}
+
+function ingestArboretumState(id, state) {
+  if (!ARBORETUM_PLANTS.length || !liveData.arboretum) return;
+  let matchedPlant = null;
+  let sensorKey = null;
+  for (const plant of ARBORETUM_PLANTS) {
+    if (id === plant.entity) {
+      matchedPlant = plant;
+      break;
+    }
+    const match = Object.entries(plant.sensors || {}).find(([, entityId]) => entityId === id);
+    if (match) {
+      matchedPlant = plant;
+      sensorKey = match[0];
+      break;
+    }
+  }
+  if (!matchedPlant) return;
+
+  const record = getArboretumRecord(matchedPlant.entity);
+  if (id === matchedPlant.entity) {
+    record.entityState = state.state;
+    record.attributes = state.attributes || {};
+  } else if (sensorKey) {
+    const value = parseFloat(state.state);
+    record.values[sensorKey] = Number.isFinite(value) ? value : null;
+  }
+  scheduleThemeRender('arboretum', renderArboretum);
+}
+
+function arboretumValue(record, key, decimals, unit) {
+  const value = record?.values?.[key];
+  return Number.isFinite(value) ? `${value.toFixed(decimals)} ${unit}` : `-- ${unit}`;
+}
+
+function renderArboretum() {
+  const grid = document.getElementById('arboretum-grid');
+  if (!grid || !liveData.arboretum) return;
+  if (!ARBORETUM_PLANTS.length) {
+    grid.innerHTML = '<div class="arboretum-empty">NO BOTANICAL SPECIMENS CONFIGURED</div>';
+    return;
+  }
+
+  grid.innerHTML = ARBORETUM_PLANTS.map(plant => {
+    const record = getArboretumRecord(plant.entity);
+    const attrs = record.attributes || {};
+    const severity = getArboretumSeverity(record);
+    const statusText = getArboretumStatusText(severity);
+    const label = plant.label || attrs.friendly_name || plant.entity;
+    const species = attrs.species || 'Species unknown';
+    return `<button type="button" class="arboretum-card ${severity}" data-arboretum-entity="${escapeHtml(plant.entity)}" aria-label="Open ${escapeHtml(label)} plant details">
+      <span class="arboretum-art-wrap">
+        <img class="arboretum-art" src="${getArboretumImage(plant, severity)}" alt="${escapeHtml(label)} status: ${statusText.toLowerCase()}" loading="lazy">
+        <span class="arboretum-state">${statusText}</span>
+      </span>
+      <span class="arboretum-card-body">
+        <span class="arboretum-card-name">${escapeHtml(label.toUpperCase())}</span>
+        <span class="arboretum-card-species">${escapeHtml(species)}</span>
+        <span class="arboretum-card-metrics">
+          <span class="arboretum-card-metric"><label>MOIST</label><span>${arboretumValue(record, 'moisture', 1, '%')}</span></span>
+          <span class="arboretum-card-metric"><label>TEMP</label><span>${arboretumValue(record, 'temperature', 1, '°C')}</span></span>
+          <span class="arboretum-card-metric"><label>BATT</label><span>${arboretumValue(record, 'battery', 0, '%')}</span></span>
+        </span>
+      </span>
+    </button>`;
+  }).join('');
+
+  if (liveData.arboretum.selected) renderArboretumDialog(liveData.arboretum.selected);
+}
+
+function renderArboretumDialog(entityId) {
+  const plant = ARBORETUM_PLANTS.find(item => item.entity === entityId);
+  const shell = document.getElementById('arboretum-modal-shell');
+  if (!plant || !shell) return;
+  const record = getArboretumRecord(entityId);
+  const attrs = record.attributes || {};
+  const problems = Array.isArray(attrs.problems) ? attrs.problems : [];
+  const severity = getArboretumSeverity(record);
+  const statusText = getArboretumStatusText(severity);
+  const label = plant.label || attrs.friendly_name || plant.entity;
+  const species = attrs.species || 'Species unknown';
+
+  shell.classList.remove('ok', 'warning', 'critical', 'offline');
+  shell.classList.add(severity);
+  document.getElementById('arboretum-modal-state').textContent = statusText;
+  document.getElementById('arboretum-modal-name').textContent = label.toUpperCase();
+  document.getElementById('arboretum-modal-species').textContent = species.toUpperCase();
+
+  const image = document.getElementById('arboretum-modal-image');
+  image.src = getArboretumImage(plant, severity);
+  image.alt = severity === 'offline' ? `${label} telemetry unavailable` : `${label} plant status: ${statusText.toLowerCase()}`;
+
+  document.getElementById('arboretum-modal-moisture').textContent = arboretumValue(record, 'moisture', 1, '%');
+  document.getElementById('arboretum-modal-temperature').textContent = arboretumValue(record, 'temperature', 1, '°C');
+  document.getElementById('arboretum-modal-humidity').textContent = arboretumValue(record, 'humidity', 0, '%');
+  document.getElementById('arboretum-modal-illuminance').textContent = arboretumValue(record, 'illuminance', 0, 'lx');
+  document.getElementById('arboretum-modal-vpd').textContent = arboretumValue(record, 'vpd', 2, 'kPa');
+  document.getElementById('arboretum-modal-dli').textContent = arboretumValue(record, 'dli24h', 2, 'mol/d⋅m²');
+  document.getElementById('arboretum-modal-battery').textContent = arboretumValue(record, 'battery', 0, '%');
+
+  let report = 'ALL BOTANICAL PARAMETERS ARE WITHIN NORMAL RANGE.';
+  if (severity === 'offline') report = 'SPECIMEN TELEMETRY IS OFFLINE. DISPLAYED SENSOR VALUES MAY BE STALE.';
+  else if (problems.length) {
+    report = problems.map(problem => {
+      const sensor = String(problem.sensor_type || 'sensor').replaceAll('_', ' ').toUpperCase();
+      const current = problem.current != null ? ` ${problem.current}` : '';
+      return `${sensor}: ${String(problem.status || 'OUT OF RANGE').toUpperCase()}${current}`;
+    }).join(' // ');
+  }
+  document.getElementById('arboretum-modal-report').textContent = report;
+}
+
+function openArboretum(entityId) {
+  const dialog = document.getElementById('arboretum-dialog');
+  if (!dialog || !ARBORETUM_PLANTS.some(plant => plant.entity === entityId)) return;
+  arboretumOpener = document.activeElement;
+  liveData.arboretum.selected = entityId;
+  renderArboretumDialog(entityId);
+  if (!dialog.open) dialog.showModal();
+  dialog.querySelector('.arboretum-close')?.focus();
+}
+
+function closeArboretum() {
+  const dialog = document.getElementById('arboretum-dialog');
+  if (dialog?.open) dialog.close();
+}
+
+function initArboretum() {
+  ARBORETUM_PLANTS.forEach(plant => getArboretumRecord(plant.entity));
+  const grid = document.getElementById('arboretum-grid');
+  const dialog = document.getElementById('arboretum-dialog');
+  grid?.addEventListener('click', event => {
+    const card = event.target.closest('[data-arboretum-entity]');
+    if (card) openArboretum(card.dataset.arboretumEntity);
+  });
+  dialog?.addEventListener('click', event => {
+    if (event.target !== dialog) return;
+    const rect = dialog.getBoundingClientRect();
+    const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+    if (outside) closeArboretum();
+  });
+  dialog?.addEventListener('close', () => {
+    liveData.arboretum.selected = null;
+    if (arboretumOpener instanceof HTMLElement) arboretumOpener.focus();
+    arboretumOpener = null;
+  });
+  renderArboretum();
+}
 
 // LCARS-specific state
 let radarAngle = 0, radarInterval = null, radarBlips = [];
@@ -1924,7 +2299,7 @@ function startRadar() {
   loop();
 }
 </script>
-<script src="shared.js"></script>
-<script src="washer.js"></script>
+<script src="shared.js?v=20260714-1"></script>
+<script src="washer.js?v=20260714-1"></script>
 </body>
 </html>

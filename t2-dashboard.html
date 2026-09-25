@@ -984,6 +984,108 @@ html, body {
 .washer-month-val { width: 65px; text-align: right; color: var(--green-dark); }
 .washer-lifetime { font-size: 0.65rem; letter-spacing: 2px; color: var(--green-dark); margin-top: 10px; text-align: center; border-top: 1px solid #233a55; padding-top: 6px; }
 
+/* BIOSCAN */
+.bioscan-cards {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;
+}
+.bioscan-card {
+  min-width: 0; padding: 0; overflow: hidden; cursor: pointer; text-align: left;
+  color: var(--green); font: inherit; background: rgba(4,10,16,0.86);
+  border: 1px solid var(--green-dark); border-left: 3px solid var(--green-dim);
+  border-radius: 3px; transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+.bioscan-card:hover { border-color: var(--green); box-shadow: 0 0 14px var(--green-glow); transform: translateY(-2px); }
+.bioscan-card.warning { border-left-color: var(--yellow); }
+.bioscan-card.critical { border-left-color: var(--red); }
+.bioscan-card.offline { border-left-color: var(--grey-mid); }
+.bioscan-card-image-wrap { position: relative; display: block; aspect-ratio: 3 / 2; overflow: hidden; background: #080e16; }
+.bioscan-card-image { width: 100%; height: 100%; display: block; object-fit: cover; }
+.bioscan-card-scanlines {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.22;
+  background: repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(127,184,255,0.14) 4px);
+}
+.bioscan-card-state {
+  position: absolute; top: 8px; right: 8px; padding: 3px 7px;
+  border: 1px solid currentColor; background: rgba(3,8,13,0.86);
+  color: var(--green); font-size: 0.58rem; font-weight: 700; letter-spacing: 1.5px;
+}
+.bioscan-card.warning .bioscan-card-state { color: var(--yellow); }
+.bioscan-card.critical .bioscan-card-state { color: var(--red); }
+.bioscan-card.offline .bioscan-card-state { color: var(--grey-mid); }
+.bioscan-card-body { display: block; padding: 10px 11px 11px; }
+.bioscan-card-name { display: block; color: var(--green); font-size: 0.82rem; font-weight: 700; letter-spacing: 2px; }
+.bioscan-card-species { display: block; margin-top: 3px; min-height: 1.8em; color: #79bfff; font-size: 0.56rem; line-height: 1.35; letter-spacing: 1px; text-transform: uppercase; }
+.bioscan-card-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 9px; }
+.bioscan-card-metric { min-width: 0; padding: 5px 4px; border: 1px solid var(--green-dark); text-align: center; }
+.bioscan-card-metric label { display: block; color: #79bfff; font-size: 0.48rem; letter-spacing: 0.7px; }
+.bioscan-card-metric span { display: block; margin-top: 3px; color: var(--green); font-size: 0.67rem; white-space: nowrap; }
+.bioscan-empty { grid-column: 1 / -1; padding: 28px; border: 1px solid var(--green-dark); color: #79bfff; text-align: center; letter-spacing: 2px; }
+
+.bioscan-dialog {
+  width: min(1120px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px);
+  padding: 0; border: 0; overflow: auto; color: var(--green); background: transparent;
+}
+.bioscan-dialog::backdrop { background: rgba(1,5,9,0.88); backdrop-filter: blur(4px); }
+.bioscan-dialog-close {
+  position: absolute; z-index: 4; top: 10px; right: 10px; width: 36px; height: 36px;
+  border: 1px solid var(--green-dim); background: rgba(3,8,13,0.92); color: var(--green);
+  font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer;
+}
+.bioscan-dialog-close:hover { border-color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+.bioscan-shell {
+  position: relative; overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(233,244,255,0.08), rgba(18,24,33,0.84) 46%, rgba(127,184,255,0.05)),
+    var(--panel-bg);
+  border: 1px solid var(--green-dark); border-left: 3px solid var(--green-dim);
+  border-radius: 3px; padding: 14px;
+}
+.bioscan-shell::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.18;
+  background: repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(127,184,255,0.12) 4px);
+}
+.bioscan-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(280px, 1.15fr) minmax(300px, 1fr); gap: 16px; }
+.bioscan-visual { position: relative; min-height: 310px; border: 1px solid var(--green-dark); background: #080e16; overflow: hidden; }
+.bioscan-image { width: 100%; height: 100%; min-height: 310px; display: block; object-fit: cover; }
+.bioscan-reticle { position: absolute; inset: 12px; border: 1px solid rgba(127,184,255,0.34); pointer-events: none; }
+.bioscan-reticle::before,
+.bioscan-reticle::after { content: ''; position: absolute; background: currentColor; color: var(--green); box-shadow: 0 0 7px currentColor; }
+.bioscan-reticle::before { width: 44px; height: 1px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.bioscan-reticle::after { width: 1px; height: 44px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.bioscan-overlay { position: absolute; inset: auto 0 0; padding: 16px; background: linear-gradient(transparent, rgba(3,8,13,0.96)); }
+.bioscan-designation { font-size: 1.35rem; font-weight: 700; letter-spacing: 4px; color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
+.bioscan-species { margin-top: 4px; color: #9dceff; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; }
+.bioscan-data { display: flex; flex-direction: column; gap: 12px; }
+.bioscan-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--green-dark); padding: 12px 14px; background: rgba(4,10,16,0.78); }
+.bioscan-status-label { color: #79bfff; font-size: 0.65rem; letter-spacing: 2px; }
+.bioscan-state { padding: 4px 10px; border: 1px solid currentColor; font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; color: var(--green); text-shadow: 0 0 6px currentColor; }
+.bioscan-shell.warning { border-left-color: var(--yellow); }
+.bioscan-shell.warning .bioscan-state { color: var(--yellow); }
+.bioscan-shell.critical { border-left-color: var(--red); }
+.bioscan-shell.critical .bioscan-state { color: var(--red); }
+.bioscan-shell.offline { border-left-color: var(--grey-mid); }
+.bioscan-shell.offline .bioscan-state { color: var(--grey-mid); }
+.bioscan-readings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.bioscan-reading { min-height: 66px; padding: 9px 11px; border: 1px solid var(--green-dark); border-left: 2px solid var(--green-dim); background: rgba(4,10,16,0.7); }
+.bioscan-reading label { display: block; color: #79bfff; font-size: 0.58rem; letter-spacing: 1.5px; text-transform: uppercase; }
+.bioscan-reading .val { display: block; margin-top: 7px; color: var(--green); font-size: 1rem; font-variant-numeric: tabular-nums; }
+.bioscan-report { flex: 1; padding: 11px 13px; border: 1px solid var(--green-dark); background: rgba(4,10,16,0.7); }
+.bioscan-report-label { color: #79bfff; font-size: 0.58rem; letter-spacing: 1.5px; }
+.bioscan-report-text { margin-top: 8px; color: var(--green); font-size: 0.75rem; line-height: 1.5; letter-spacing: 0.7px; }
+@media (max-width: 1050px) {
+  .bioscan-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 820px) {
+  .bioscan-grid { grid-template-columns: 1fr; }
+  .bioscan-visual, .bioscan-image { min-height: 260px; }
+}
+@media (max-width: 480px) {
+  .bioscan-cards { grid-template-columns: 1fr; }
+  .bioscan-readings { grid-template-columns: 1fr; }
+  .bioscan-visual, .bioscan-image { min-height: 220px; }
+  .bioscan-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
+}
+
 /* WCAG FOCUS */
 :focus-visible {
   outline: 2px solid var(--green);
@@ -1252,6 +1354,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
     <button class="matrix-tab" onclick="switchTab('data')" role="tab" aria-selected="false">TIMELINE</button>
     <button class="matrix-tab" onclick="switchTab('media')" role="tab" aria-selected="false">SURVEILLANCE</button>
     <button class="matrix-tab" onclick="switchTab('sensors')" role="tab" aria-selected="false">DIAGNOSTICS</button>
+    <button class="matrix-tab" onclick="switchTab('bioscan')" role="tab" aria-selected="false">BIOSCAN</button>
   </div>
 
   <!-- CONTENT -->
@@ -1547,6 +1650,51 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
       </div>
     </div>
 
+    <!-- BIOSCAN TAB -->
+    <div class="page" id="page-bioscan">
+      <div class="lc-section">
+        <div class="lc-section-pill">Organic Asset Analysis</div>
+        <div class="lc-section-line"></div>
+        <div class="lc-section-end"></div>
+      </div>
+      <div class="bioscan-cards" id="bioscan-cards"></div>
+
+      <dialog class="bioscan-dialog" id="bioscan-dialog" aria-labelledby="bioscan-modal-name">
+        <button class="bioscan-dialog-close" type="button" onclick="closeBioscan()" aria-label="Close plant details">×</button>
+        <section class="bioscan-shell offline" id="bioscan-modal-shell">
+          <div class="bioscan-grid">
+            <div class="bioscan-visual">
+              <img class="bioscan-image" id="bioscan-modal-image" src="/local/plant-status/t2/plant-1-not-ok.webp" alt="Plant telemetry unavailable">
+              <div class="bioscan-reticle" aria-hidden="true"></div>
+              <div class="bioscan-overlay">
+                <div class="bioscan-designation" id="bioscan-modal-name">PLANT</div>
+                <div class="bioscan-species" id="bioscan-modal-species">SPECIES UNKNOWN</div>
+              </div>
+            </div>
+            <div class="bioscan-data">
+              <div class="bioscan-status">
+                <span class="bioscan-status-label">BIOLOGICAL STATUS</span>
+                <span class="bioscan-state" id="bioscan-modal-state" role="status" aria-live="polite">NO SIGNAL</span>
+              </div>
+              <div class="bioscan-readings">
+                <div class="bioscan-reading"><label>Soil Moisture</label><span class="val" id="bioscan-modal-moisture">-- %</span></div>
+                <div class="bioscan-reading"><label>Temperature</label><span class="val" id="bioscan-modal-temperature">-- °C</span></div>
+                <div class="bioscan-reading"><label>Air Humidity</label><span class="val" id="bioscan-modal-humidity">-- %</span></div>
+                <div class="bioscan-reading"><label>Illuminance</label><span class="val" id="bioscan-modal-illuminance">-- lx</span></div>
+                <div class="bioscan-reading"><label>Vapour Pressure Deficit</label><span class="val" id="bioscan-modal-vpd">-- kPa</span></div>
+                <div class="bioscan-reading"><label>DLI / 24 Hours</label><span class="val" id="bioscan-modal-dli">-- mol/d⋅m²</span></div>
+                <div class="bioscan-reading"><label>Sensor Battery</label><span class="val" id="bioscan-modal-battery">-- %</span></div>
+              </div>
+              <div class="bioscan-report">
+                <div class="bioscan-report-label">ANOMALY REPORT</div>
+                <div class="bioscan-report-text" id="bioscan-modal-report">AWAITING BIOLOGICAL TELEMETRY...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </dialog>
+    </div>
+
   </div><!-- /content -->
 
   <!-- FOOTER -->
@@ -1575,7 +1723,7 @@ body.night-mode .matrix-panel { border-color: var(--green-dim); }
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="config.js"></script>
-<script src="entities.js"></script>
+<script src="entities.js?v=bioscan-grid-1"></script>
 <script>
 // ═══════════════════════════════════════════════════
 // THEME CONFIG
@@ -1584,8 +1732,8 @@ const THEME = {
   title: 'SKYNET T-800',
   subtitle: 'CYBERDYNE SYSTEMS // MODEL 101',
   footer: 'CYBERDYNE SYSTEMS // MODEL 101',
-  tabs: ['SYSTEMS', 'OVERRIDE', 'TIMELINE', 'SURVEILLANCE', 'DIAGNOSTICS'],
-  tabIds: ['systems', 'controls', 'data', 'media', 'sensors'],
+  tabs: ['SYSTEMS', 'OVERRIDE', 'TIMELINE', 'SURVEILLANCE', 'DIAGNOSTICS', 'BIOSCAN'],
+  tabIds: ['systems', 'controls', 'data', 'media', 'sensors', 'bioscan'],
   emptyMedia: '// NO SIGNAL DETECTED //',
   connOnline: 'CONNECTION LOCKED',
   connOffline: 'SIGNAL LOST',
@@ -1609,15 +1757,22 @@ const THEME = {
     lifetimeLabel: 'TOTAL RUNS', etaLabel: 'remaining',
   },
 
+  extraLiveData: {
+    bioscan: { plants: {}, selected: null },
+  },
+
   onIngest(id, s) {
     renderMonitor();
+    ingestBioscanState(id, s);
   },
   onStatesLoaded() {
     renderMonitor();
+    renderBioscan();
   },
   onInit() {
     initRain();
     drawRain();
+    initBioscan();
   },
   onStateChanged() {},
   onAuthOk() {},
@@ -1653,10 +1808,182 @@ function renderMonitor() {
   if (el4) el4.textContent = online + '/' + allIds.length + ' LOCKS';
 }
 
+const BIOSCAN_PLANTS = ENTITIES.integrations?.plants || [];
+
+function getBioscanRecord(entityId) {
+  if (!liveData.bioscan.plants[entityId]) {
+    liveData.bioscan.plants[entityId] = { entityState: null, attributes: {}, values: {} };
+  }
+  return liveData.bioscan.plants[entityId];
+}
+
+function getBioscanSeverity(record) {
+  const state = record?.entityState;
+  const problems = Array.isArray(record?.attributes?.problems) ? record.attributes.problems : [];
+  if (!state || state === 'unknown' || state === 'unavailable') return 'offline';
+  if (problems.length > 1) return 'critical';
+  if (problems.length === 1 || state === 'problem') return 'warning';
+  return 'ok';
+}
+
+function getBioscanStatusText(severity) {
+  return severity === 'offline' ? 'NO SIGNAL' : severity === 'critical' ? 'CRITICAL' : severity === 'warning' ? 'ATTENTION' : 'OK';
+}
+
+function getBioscanImage(plant, severity) {
+  const imageSet = plant.imageSet || 'plant-1';
+  const variant = severity === 'critical' ? 'bad' : severity === 'ok' ? 'ok' : 'not-ok';
+  return `/local/plant-status/t2/${encodeURIComponent(imageSet)}-${variant}.webp`;
+}
+
+function ingestBioscanState(id, state) {
+  if (!BIOSCAN_PLANTS.length || !liveData.bioscan) return;
+  let matchedPlant = null;
+  let sensorKey = null;
+  for (const plant of BIOSCAN_PLANTS) {
+    if (id === plant.entity) {
+      matchedPlant = plant;
+      break;
+    }
+    const match = Object.entries(plant.sensors || {}).find(([, entityId]) => entityId === id);
+    if (match) {
+      matchedPlant = plant;
+      sensorKey = match[0];
+      break;
+    }
+  }
+  if (!matchedPlant) return;
+
+  const record = getBioscanRecord(matchedPlant.entity);
+  if (id === matchedPlant.entity) {
+    record.entityState = state.state;
+    record.attributes = state.attributes || {};
+  } else if (sensorKey) {
+    const value = parseFloat(state.state);
+    record.values[sensorKey] = Number.isFinite(value) ? value : null;
+  }
+  scheduleThemeRender('bioscan', renderBioscan);
+}
+
+function bioscanValue(record, key, decimals, unit) {
+  const value = record?.values?.[key];
+  return Number.isFinite(value) ? `${value.toFixed(decimals)} ${unit}` : `-- ${unit}`;
+}
+
+function renderBioscan() {
+  const grid = document.getElementById('bioscan-cards');
+  if (!grid || !liveData.bioscan) return;
+  if (!BIOSCAN_PLANTS.length) {
+    grid.innerHTML = '<div class="bioscan-empty">NO ORGANIC ASSETS CONFIGURED</div>';
+    return;
+  }
+
+  grid.innerHTML = BIOSCAN_PLANTS.map(plant => {
+    const record = getBioscanRecord(plant.entity);
+    const attrs = record.attributes || {};
+    const severity = getBioscanSeverity(record);
+    const statusText = getBioscanStatusText(severity);
+    const label = plant.label || attrs.friendly_name || plant.entity;
+    const species = attrs.species || 'Species unknown';
+    const image = getBioscanImage(plant, severity);
+    return `<button type="button" class="bioscan-card ${severity}" data-bioscan-entity="${escapeHtml(plant.entity)}" aria-label="Open ${escapeHtml(label)} details">
+      <span class="bioscan-card-image-wrap">
+        <img class="bioscan-card-image" src="${image}" alt="${escapeHtml(label)} status: ${statusText.toLowerCase()}" loading="lazy">
+        <span class="bioscan-card-scanlines" aria-hidden="true"></span>
+        <span class="bioscan-card-state">${statusText}</span>
+      </span>
+      <span class="bioscan-card-body">
+        <span class="bioscan-card-name">${escapeHtml(label.toUpperCase())}</span>
+        <span class="bioscan-card-species">${escapeHtml(species)}</span>
+        <span class="bioscan-card-metrics">
+          <span class="bioscan-card-metric"><label>MOIST</label><span>${bioscanValue(record, 'moisture', 1, '%')}</span></span>
+          <span class="bioscan-card-metric"><label>TEMP</label><span>${bioscanValue(record, 'temperature', 1, '°C')}</span></span>
+          <span class="bioscan-card-metric"><label>BATT</label><span>${bioscanValue(record, 'battery', 0, '%')}</span></span>
+        </span>
+      </span>
+    </button>`;
+  }).join('');
+
+  if (liveData.bioscan.selected) renderBioscanDialog(liveData.bioscan.selected);
+}
+
+function renderBioscanDialog(entityId) {
+  const plant = BIOSCAN_PLANTS.find(item => item.entity === entityId);
+  const shell = document.getElementById('bioscan-modal-shell');
+  if (!plant || !shell) return;
+  const record = getBioscanRecord(entityId);
+  const attrs = record.attributes || {};
+  const problems = Array.isArray(attrs.problems) ? attrs.problems : [];
+  const severity = getBioscanSeverity(record);
+  const statusText = getBioscanStatusText(severity);
+  const label = plant.label || attrs.friendly_name || plant.entity;
+  const species = attrs.species || 'Species unknown';
+
+  shell.classList.remove('ok', 'warning', 'critical', 'offline');
+  shell.classList.add(severity);
+  document.getElementById('bioscan-modal-state').textContent = statusText;
+  document.getElementById('bioscan-modal-name').textContent = label.toUpperCase();
+  document.getElementById('bioscan-modal-species').textContent = species.toUpperCase();
+
+  const image = document.getElementById('bioscan-modal-image');
+  image.src = getBioscanImage(plant, severity);
+  image.alt = severity === 'offline' ? `${label} telemetry unavailable` : `${label} biological status: ${statusText.toLowerCase()}`;
+
+  document.getElementById('bioscan-modal-moisture').textContent = bioscanValue(record, 'moisture', 1, '%');
+  document.getElementById('bioscan-modal-temperature').textContent = bioscanValue(record, 'temperature', 1, '°C');
+  document.getElementById('bioscan-modal-humidity').textContent = bioscanValue(record, 'humidity', 0, '%');
+  document.getElementById('bioscan-modal-illuminance').textContent = bioscanValue(record, 'illuminance', 0, 'lx');
+  document.getElementById('bioscan-modal-vpd').textContent = bioscanValue(record, 'vpd', 2, 'kPa');
+  document.getElementById('bioscan-modal-dli').textContent = bioscanValue(record, 'dli24h', 2, 'mol/d⋅m²');
+  document.getElementById('bioscan-modal-battery').textContent = bioscanValue(record, 'battery', 0, '%');
+
+  let report = 'ALL MONITORED PARAMETERS WITHIN ACCEPTABLE RANGE.';
+  if (severity === 'offline') report = 'TELEMETRY LINK UNAVAILABLE. LAST KNOWN SENSOR VALUES MAY BE STALE.';
+  else if (problems.length) {
+    report = problems.map(problem => {
+      const sensor = String(problem.sensor_type || 'sensor').replaceAll('_', ' ').toUpperCase();
+      const current = problem.current != null ? ` ${problem.current}` : '';
+      return `${sensor}: ${String(problem.status || 'OUT OF RANGE').toUpperCase()}${current}`;
+    }).join(' // ');
+  }
+  document.getElementById('bioscan-modal-report').textContent = report;
+}
+
+function openBioscan(entityId) {
+  const dialog = document.getElementById('bioscan-dialog');
+  if (!dialog || !BIOSCAN_PLANTS.some(plant => plant.entity === entityId)) return;
+  liveData.bioscan.selected = entityId;
+  renderBioscanDialog(entityId);
+  if (!dialog.open) dialog.showModal();
+}
+
+function closeBioscan() {
+  const dialog = document.getElementById('bioscan-dialog');
+  if (dialog?.open) dialog.close();
+}
+
+function initBioscan() {
+  BIOSCAN_PLANTS.forEach(plant => getBioscanRecord(plant.entity));
+  const grid = document.getElementById('bioscan-cards');
+  const dialog = document.getElementById('bioscan-dialog');
+  grid?.addEventListener('click', event => {
+    const card = event.target.closest('[data-bioscan-entity]');
+    if (card) openBioscan(card.dataset.bioscanEntity);
+  });
+  dialog?.addEventListener('click', event => {
+    if (event.target !== dialog) return;
+    const rect = dialog.getBoundingClientRect();
+    const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+    if (outside) closeBioscan();
+  });
+  dialog?.addEventListener('close', () => { liveData.bioscan.selected = null; });
+  renderBioscan();
+}
+
 function updateRainSpeed() {
 }
 </script>
-<script src="shared.js"></script>
-<script src="washer.js"></script>
+<script src="shared.js?v=20260714-1"></script>
+<script src="washer.js?v=20260714-1"></script>
 </body>
 </html>

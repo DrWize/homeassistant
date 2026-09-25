@@ -852,37 +852,33 @@ views:
         name: Washer
         icon: mdi:washing-machine
 
-      # Status row
-      - type: horizontal-stack
-        cards:
-          - type: custom:mushroom-template-card
-            primary: Status
-            secondary: >-
-              {{ states('sensor.bathroom_washer_machine_state') | title }}
-            icon: mdi:washing-machine
-            icon_color: >-
-              {% if states('sensor.bathroom_washer_machine_state') == 'run' %}green
-              {% elif states('sensor.bathroom_washer_machine_state') == 'pause' %}amber
-              {% else %}disabled{% endif %}
-          - type: custom:mushroom-template-card
-            primary: Phase
-            secondary: >-
-              {{ states('sensor.bathroom_washer_job_state') | replace('_', ' ') | title }}
-            icon: mdi:progress-wrench
-            icon_color: >-
-              {% if states('sensor.bathroom_washer_job_state') == 'wash' %}blue
-              {% elif states('sensor.bathroom_washer_job_state') == 'rinse' %}cyan
-              {% elif states('sensor.bathroom_washer_job_state') == 'spin' %}purple
-              {% elif states('sensor.bathroom_washer_job_state') == 'finish' %}green
-              {% else %}disabled{% endif %}
-          - type: custom:mushroom-template-card
-            primary: Done at
-            secondary: >-
-              {% set t = states('sensor.bathroom_washer_completion_time') %}
-              {% if t not in ['unknown', 'unavailable', 'none'] %}
-                {{ as_timestamp(t) | timestamp_custom('%H:%M') }}
-              {% else %}--{% endif %}
-            icon: mdi:clock-check
+      # Current cycle phase + estimated completion time
+      - type: custom:mushroom-template-card
+        entity: sensor.bathroom_washer_completion_time
+        primary: >-
+          {% set job = states('sensor.bathroom_washer_job_state') | lower %}
+          {% if job in ['none', 'finish', 'unknown', 'unavailable', ''] %}
+            Idle
+          {% else %}
+            {{ job | replace('_', ' ') | title }}
+          {% endif %}
+        secondary: >-
+          {% set job = states('sensor.bathroom_washer_job_state') | lower %}
+          {% set t = states('sensor.bathroom_washer_completion_time') %}
+          {% set ts = as_timestamp(t, none) %}
+          {% if job not in ['none', 'finish', 'unknown', 'unavailable', ''] and ts is not none %}
+            Done at {{ ts | timestamp_custom('%H:%M', true) }}
+          {% endif %}
+        icon: mdi:washing-machine
+        icon_color: >-
+          {% set job = states('sensor.bathroom_washer_job_state') | lower %}
+          {% if job == 'weight_sensing' %}amber
+          {% elif job == 'wash' %}blue
+          {% elif job == 'rinse' %}cyan
+          {% elif job == 'spin' %}purple
+          {% else %}disabled{% endif %}
+        tap_action:
+          action: more-info
 
       # Power + lifetime stats row
       - type: horizontal-stack

@@ -301,7 +301,7 @@ document.querySelectorAll(`[data-feature="${feature}"]`).forEach(el => {
 
 This approach is theme-agnostic — each dashboard keeps its own wrapper classes and structure, the `data-feature` attribute is the only contract between HTML and the hiding logic. New features can reuse the same pattern by adding their own `data-feature` value.
 
-### Tabs (5 per dashboard)
+### Tabs
 
 | Tab | Content |
 |-----|---------|
@@ -310,6 +310,63 @@ This approach is theme-agnostic — each dashboard keeps its own wrapper classes
 | **Data** | Weather forecast, Nordpool electricity price charts (48h + bar chart), temperature history graph |
 | **Media** | Plex session details (active streams, bandwidth, transcoding), Sonos/Apple TV now playing with album art and progress bars |
 | **Sensors** | Energy consumption vs. price chart, washer panel (live status + monthly stats), plus theme-specific unique panels |
+| **Plants** | Optional theme-specific plant monitor with local status artwork, key readings, and a full telemetry dialog |
+
+LCARS includes **ARBORETUM**, T2/Skynet includes **BIOSCAN**, and Winamp includes **PLANTLIST**. Every entry in `ENTITIES.integrations.plants` appears in a responsive grid; selecting a card opens its full live telemetry and local status artwork.
+
+#### Plant-tab implementation procedure
+
+Use this procedure for each theme. The five-species artwork catalog is **Pilea**, **Clusia**, **Hedera**, **Sansevieria**, and **Stephanotis**; it is independent of how many plant entities a particular Home Assistant installation configures.
+
+1. Generate three matching status images for each of the five species: `ok`, `not-ok`, and `bad`. Save a 1536×1024 PNG master and an optimized 1536×1024 WebP for every new-theme image. Keep the plant centered and recognizable at card-thumbnail size, maintain the same pot and composition across its three states, and do not embed unrelated text, unapproved logos, or watermarks. Theme-specific specimen markings documented below are allowed. T2 remains the legacy exception: keep its existing optimized 960×640 WebPs and 1536×1024 PNG masters.
+2. Store new-theme artwork under `assets/plant-status/<theme>/<plant>/` using `<plant>-{ok|not-ok|bad}.{png|webp}`. Deploy the WebPs to `/local/plant-status/<theme>/<plant>/<plant>-{ok|not-ok|bad}.webp`.
+3. Add a sixth dashboard tab with internal ID `plants`, a responsive card grid, a themed empty state, and a native detail dialog. T2 is the legacy exception: its internal tab ID is `bioscan`.
+4. Read the configured catalog from `ENTITIES.integrations.plants`. Keep plant state and rendering inside the dashboard's theme-local `extraLiveData`, `onIngest`, `onStatesLoaded`, and `onInit` hooks rather than adding theme-specific behavior to `shared.js`.
+5. Show plant name/species, health, moisture, temperature, and battery on each card. The detail dialog must also show humidity, illuminance, VPD, DLI, and the Home Assistant Plant Monitor problem report.
+6. Apply the shared severity rules: unavailable or unknown plant data is **offline** and uses `not-ok`; no reported problems is **healthy** and uses `ok`; one problem is **warning** and uses `not-ok`; multiple problems is **critical** and uses `bad`. Keep offline, warning, and critical styling visibly distinct even when two states share artwork.
+7. In every new theme, normalize the legacy Pilea `imageSet: 'plant-1'` value to the `pilea` asset directory. Other image-set names map directly to their matching plant directory.
+8. **Live-workspace deployment TODO:** sync the theme dashboard HTML to `Y:\www\` and the optimized WebPs to `Y:\www\plant-status\<theme>\<plant>\` before visual confirmation. Verify that Home Assistant serves them through `/local/plant-status/<theme>/<plant>/`.
+9. Before marking a theme complete, verify exact image dimensions and valid PNG/WebP output; all five plants and all three severities; live state changes; empty and unavailable states; desktop, tablet, and mobile layouts; thumbnail readability; keyboard tab behavior; reduced-motion behavior; and dialog opening/closing by card, close button, Escape, and backdrop.
+
+The artwork states have these shared meanings:
+
+| State | Artwork direction |
+|-------|-------------------|
+| `ok` | Healthy, upright growth in the theme's normal or positive colors |
+| `not-ok` | Mild visible stress with the theme's warning colors |
+| `bad` | Clearly distressed growth with the theme's critical colors |
+
+#### Procedure and art direction by theme
+
+| Theme | Tab | Status | Theme-specific implementation direction |
+|-------|-----|--------|-----------------------------------------|
+| LCARS | `ARBORETUM` | Artwork: ✅ Complete<br>Tab: ✅ Complete | The completed implementation uses clean Starfleet botanical displays with black and cream surfaces plus orange, lilac, and teal LCARS geometry. It uses teal for healthy, amber for warning, red for critical states, the shared nested paths, the `plants` tab ID, and the `plant-1` → `pilea` compatibility alias. |
+| Pip-Boy | `FLORA` | Artwork: ✅ Complete<br>Tab: ✅ Complete | The completed implementation uses a rugged monochrome CRT botanical scan with green phosphor, restrained amber warning accents, and red critical treatment. It follows the shared nested paths, uses the `plants` tab ID, and keeps the `plant-1` → `pilea` compatibility alias. |
+| C64 | `GARDEN` | Artwork: ✅ Complete<br>Tab: ✅ Complete | The completed implementation uses readable 8-bit plant sprites, chunky violet C64 framing, cyan/green healthy states, yellow/orange warnings, and red/brown critical states. It follows the shared nested paths, uses the `plants` tab ID, and keeps the `plant-1` → `pilea` compatibility alias. |
+| Matrix | `BIOCODE` | Artwork: ✅ Complete<br>Tab: ✅ Complete | The completed implementation presents photorealistic plants emerging from restrained digital rain with black code-etched pots and a perspective grid. It uses emerald for healthy, amber for warning, and red for critical states without obscuring the plant, follows the shared nested paths, uses the `plants` tab ID, and keeps the `plant-1` → `pilea` compatibility alias. |
+| Weyland | `XENOBOTANY` | Artwork: ✅ Complete<br>Tab: ✅ Complete | The completed implementation uses corporate specimen-bay photography with off-white and gunmetal hardware, plus a restrained Weyland-Yutani Corp decal on every specimen pot. It uses cool white/blue for healthy, amber for warning, and red diagnostics for critical states, follows the shared nested paths, uses the `plants` tab ID, and keeps the `plant-1` → `pilea` compatibility alias. |
+| Diablo | `HERBARIUM` | Artwork: ✅ Complete<br>Tab: ✅ Complete | The completed implementation uses a gothic alchemical display with dark carved stone, aged brass, parchment, and a Stone of Jordan rune on every specimen pot. It uses gold for healthy, orange for warning, and crimson for critical states, follows the shared nested paths, uses the `plants` tab ID, and keeps the `plant-1` → `pilea` compatibility alias. |
+| Winamp | `PLANTLIST` | Artwork: ✅ Complete<br>Tab: ✅ Complete | The completed implementation uses a black/chrome media-player frame, subtle green LCD glow, and spectrum-analyzer accents. It uses the `plants` tab ID, nested WebP paths, and the `plant-1` → `pilea` compatibility alias. |
+| T2 / Skynet | `BIOSCAN` | Artwork: ✅ Complete<br>Tab: ✅ Complete | The completed implementation uses a blue/orange/red scan-chamber treatment and the legacy `bioscan` tab ID. Its deployed artwork remains at the flat URL `/local/plant-status/t2/<imageSet>-{ok|not-ok|bad}.webp`; do not migrate it as part of another theme rollout. |
+
+Winamp already treats `imageSet: 'plant-1'` as an alias for `pilea`; future themes must keep the same compatibility mapping so existing plant configuration does not need to change. T2 continues to use `plant-1` directly because its deployed filenames use the legacy flat convention.
+
+```js
+plants: [{
+  entity: 'plant.plant_1',
+  label: 'Plant 1',
+  imageSet: 'plant-1', // Legacy T2 name; new themes resolve this to /pilea/
+  sensors: {
+    moisture: 'sensor.plant_1_soil_moisture',
+    temperature: 'sensor.plant_1_temperature',
+    humidity: 'sensor.plant_1_air_humidity',
+    illuminance: 'sensor.plant_1_illuminance',
+    vpd: 'sensor.plant_1_vapour_pressure_deficit',
+    dli24h: 'sensor.plant_1_dli_24h',
+    battery: 'sensor.plant_1_battery',
+  },
+}],
+```
 
 ### Room Configuration
 

@@ -37,6 +37,27 @@ if (!ENTITIES.rooms || ENTITIES.rooms.length === 0) {
   showConfigError('No rooms configured',
     'Add at least one room to ENTITIES.rooms in entities.js.');
 }
+
+/** Escape text before inserting it into an HTML template. */
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[ch]);
+}
+
+/** Accept only normal HTTP(S) media URLs and return an attribute-safe value. */
+function safeMediaUrl(value) {
+  if (!value) return null;
+  try {
+    const base = `${String(HA_BASE).replace(/\/+$/, '')}/`;
+    const url = new URL(String(value), base);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    return escapeHtml(url.href);
+  } catch {
+    return null;
+  }
+}
+
 // Warn about placeholder values (still allow loading)
 (function checkPlaceholders() {
   const json = JSON.stringify(ENTITIES);
@@ -163,9 +184,24 @@ const ALL_SENSOR_IDS = new Set(rooms.flatMap(r =>
 const LC_POWER_SENSORS = rooms.flatMap(r => (r.power || []).map(p => p.sensor));
 const LC_KWH_SENSORS   = Object.fromEntries(rooms.flatMap(r => (r.power || []).map(p => [p.sensor, p.kwh])));
 const LC_POWER_LABELS  = Object.fromEntries(rooms.flatMap(r => (r.power || []).map(p => [p.sensor, p.label])));
+const KWH_ENTITY_IDS   = new Set(Object.values(LC_KWH_SENSORS).filter(Boolean));
 
 // Backward compat: rooms still need powerSensors array for renderRooms
 rooms.forEach(r => { if (!r.powerSensors) r.powerSensors = (r.power || []).map(p => p.sensor); });
+
+// Map every room-affecting entity to the room cards that need updating.
+const ROOM_IDS_BY_ENTITY = new Map();
+rooms.forEach(room => {
+  const ids = [
+    room.sensors?.temp, room.sensors?.humidity, room.sensors?.lux,
+    ...(room.lights || []).map(light => light.id),
+    ...(room.powerSensors || []),
+  ].filter(Boolean);
+  ids.forEach(id => {
+    if (!ROOM_IDS_BY_ENTITY.has(id)) ROOM_IDS_BY_ENTITY.set(id, new Set());
+    ROOM_IDS_BY_ENTITY.get(id).add(room.id);
+  });
+});
 
 // ═══════════════════════════════════════════════════
 // AVAILABLE THEMES
@@ -202,28 +238,80 @@ let liveData = {
 
 let toastTimer;
 let ws = null, msgId = 1, wsReady = false, reconnectTimer = null;
+let authRejected = false;
+let reconnectAttempts = 0;
 let weatherForecastMsgId = null;
 
 let switcherTimer = null;
+let bulkIngesting = false;
+let renderFrameId = null;
+const pendingRoomIds = new Set();
+const pendingRenderSections = new Set();
+const pendingThemeRenders = new Map();
+
+function scheduleRender(section, roomIds = null) {
+  if (bulkIngesting) return;
+  if (section === 'rooms' && roomIds) roomIds.forEach(id => pendingRoomIds.add(id));
+  else pendingRenderSections.add(section);
+  if (renderFrameId !== null) return;
+  renderFrameId = requestAnimationFrame(flushScheduledRenders);
+}
+
+function scheduleThemeRender(key, fn) {
+  if (bulkIngesting) return;
+  pendingThemeRenders.set(key, fn);
+  scheduleRender('theme');
+}
+
+function flushScheduledRenders() {
+  if (renderFrameId !== null) cancelAnimationFrame(renderFrameId);
+  renderFrameId = null;
+  if (pendingRoomIds.size) renderRooms(new Set(pendingRoomIds));
+  pendingRoomIds.clear();
+
+  const sections = new Set(pendingRenderSections);
+  pendingRenderSections.clear();
+  if (sections.has('enviro')) renderEnviro();
+  if (sections.has('sun')) renderSun();
+  if (sections.has('daynight')) updateDayNight();
+  if (sections.has('nordpool-bars')) renderNordpoolBars();
+  if (sections.has('nordpool-48h')) renderNordpool48h();
+  if (sections.has('temp-graph')) renderTempGraph();
+  if (sections.has('media')) renderMedia();
+  if (sections.has('media-players')) renderMediaPlayers();
+  if (sections.has('energy')) renderLcEnergy();
+  if (sections.has('power-panel')) renderPowerPanel();
+  const themeRenders = [...pendingThemeRenders.values()];
+  pendingThemeRenders.clear();
+  themeRenders.forEach(fn => fn());
+}
+
+function registerDashboardInterval(fn, ms) {
+  return setInterval(() => {
+    if (!document.hidden) fn();
+  }, ms);
+}
 
 // ═══════════════════════════════════════════════════
 // RENDER: ROOMS
 // ═══════════════════════════════════════════════════
 /** Render room cards with sensor readings, light switches, and dimmer sliders.
  *  Runs on both the Systems and Controls tabs (builds cards for each). */
-function renderRooms() {
+function renderRooms(targetRoomIds = null) {
   const si = THEME.sensors || { temp: {icon:'🌡 ',unit:'°C'}, hum: {icon:'💧 ',unit:'%'}, lux: {icon:'☀ ',unit:' lx'}, power: {icon:'⚡ ',unit:' W'} };
   const dc = THEME.dimmerColors || { fill: '--orange', bg: '--grey' };
   const tabs = [THEME.tabIds[0], THEME.tabIds[1]];
+  const targetRooms = targetRoomIds ? rooms.filter(room => targetRoomIds.has(room.id)) : rooms;
 
   tabs.forEach(tab => {
     const el = document.getElementById(`rooms-${tab}`);
     if (!el) return;
-    el.innerHTML = '';
-    rooms.forEach(room => {
+    if (!targetRoomIds) el.innerHTML = '';
+    targetRooms.forEach(room => {
       const anyOn = room.lights.some(l => liveData.lights[l.id]);
       const card = document.createElement('div');
       card.className = `room-card ${anyOn ? 'lit' : ''}`;
+      card.dataset.roomId = room.id;
 
       const tempVal = room.sensors.temp     ? liveData.sensors[room.sensors.temp]     ?? null : null;
       const humVal  = room.sensors.humidity ? liveData.sensors[room.sensors.humidity] ?? null : null;
@@ -231,7 +319,7 @@ function renderRooms() {
 
       let html = `
         <div class="room-header">
-          <div class="room-name">${room.name}</div>
+          <div class="room-name">${escapeHtml(room.name)}</div>
           <div class="room-lit-badge">ACTIVE</div>
         </div>
         <div class="room-body">
@@ -265,7 +353,7 @@ function renderRooms() {
           if (tab === tabs[0]) {
             html += `<div class="light-row ${on ? 'on' : ''}">
               <span class="light-indicator"></span>
-              <span class="light-label">${light.label}</span>
+              <span class="light-label">${escapeHtml(light.label)}</span>
               <span class="light-state">${on ? 'ON' : 'OFF'}</span>
             </div>`;
           } else {
@@ -274,9 +362,9 @@ function renderRooms() {
             const safeId = light.id.replace('.', '_');
             html += `<div class="light-row ${on ? 'on' : ''}" id="lrow-${safeId}">
               <span class="light-indicator"></span>
-              <span class="light-label">${light.label}</span>
+               <span class="light-label">${escapeHtml(light.label)}</span>
               <label class="lc-toggle">
-                <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleLight('${light.id}', this.checked)" aria-label="Toggle ${light.label}">
+                 <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleLight('${light.id}', this.checked)" aria-label="Toggle ${escapeHtml(light.label)}">
                 <span class="lc-toggle-track"></span>
                 <span class="lc-toggle-thumb"></span>
               </label>
@@ -285,7 +373,7 @@ function renderRooms() {
               html += `<div class="dimmer-row ${on ? 'visible' : ''}" id="dim-${safeId}">
                 <span class="dimmer-label">DIM</span>
                 <input type="range" class="lc-dimmer" min="1" max="255" value="${bri}"
-                  oninput="dimLight('${light.id}', this.value)" aria-label="Brightness for ${light.label}"
+                   oninput="dimLight('${light.id}', this.value)" aria-label="Brightness for ${escapeHtml(light.label)}"
                   style="background:linear-gradient(to right,var(${dc.fill}) 0%,var(${dc.fill}) ${briPct}%,var(${dc.bg}) ${briPct}%,var(${dc.bg}) 100%)">
                 <span class="dimmer-pct" id="dpct-${safeId}">${briPct}%</span>
               </div>`;
@@ -303,7 +391,11 @@ function renderRooms() {
 
       html += `</div>`; // room-body
       card.innerHTML = html;
-      el.appendChild(card);
+      const existing = targetRoomIds
+        ? [...el.children].find(child => child.dataset.roomId === String(room.id))
+        : null;
+      if (existing) existing.replaceWith(card);
+      else el.appendChild(card);
     });
   });
 
@@ -332,7 +424,7 @@ function toggleLight(entityId, on) {
   const sep = THEME.toastArrow || '→';
   showToast(`${entityId.split('.')[1]} ${sep} ${on ? 'ON' : 'OFF'}`);
   if (THEME.onToggleLight) THEME.onToggleLight(entityId, on);
-  renderRooms();
+  scheduleRender('rooms', ROOM_IDS_BY_ENTITY.get(entityId));
   haCall('light', on ? 'turn_on' : 'turn_off', { entity_id: entityId });
 }
 
@@ -350,6 +442,7 @@ function nightProtocol() {
  * @param {string} entityId - e.g. 'light.living_room_window'
  * @param {number|string} value - brightness 0-255 (HA native range)
  */
+const dimSendTimers = new Map();
 function dimLight(entityId, value) {
   const bri = parseInt(value);
   liveData.brightness[entityId] = bri;
@@ -363,7 +456,11 @@ function dimLight(entityId, value) {
     `linear-gradient(to right,var(${dc.fill}) 0%,var(${dc.fill}) ${pct}%,var(${dc.bg}) ${pct}%,var(${dc.bg}) 100%)`;
   const sep = THEME.toastArrow || '→';
   showToast(`${entityId.split('.')[1]} ${sep} ${pct}%`);
-  haCall('light', 'turn_on', { entity_id: entityId, brightness: bri });
+  clearTimeout(dimSendTimers.get(entityId));
+  dimSendTimers.set(entityId, setTimeout(() => {
+    dimSendTimers.delete(entityId);
+    haCall('light', 'turn_on', { entity_id: entityId, brightness: bri });
+  }, 120));
 }
 
 // ═══════════════════════════════════════════════════
@@ -450,7 +547,11 @@ function renderWeather() {
     const hh  = d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
     const t   = s.temperature ?? '--';
     const slotIdx = i * 3;
-    html += `<div class="weather-card ${i === 0 ? 'now' : ''}" onclick="showWeatherPopup(${slotIdx})" style="cursor:pointer;">
+    html += `<div class="weather-card ${i === 0 ? 'now' : ''}" role="button" tabindex="0"
+      aria-label="${escapeHtml(`Forecast ${hh}, ${condLabel(s.condition)}, ${t} degrees`)}"
+      onclick="showWeatherPopup(${slotIdx})"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showWeatherPopup(${slotIdx})}"
+      style="cursor:pointer;">
       <div class="wc-time">${hh}</div>
       <div class="wc-icon">${condIcon(s.condition)}</div>
       <div class="wc-temp">${t}°</div>
@@ -464,6 +565,7 @@ function renderWeather() {
 // ═══════════════════════════════════════════════════
 // WEATHER DETAIL POPUP
 // ═══════════════════════════════════════════════════
+let weatherPopupReturnFocus = null;
 (function injectWeatherPopupCSS() {
   const style = document.createElement('style');
   style.textContent = `
@@ -622,12 +724,27 @@ function renderWeather() {
   const overlay = document.createElement('div');
   overlay.className = 'weather-popup-overlay';
   overlay.id = 'weather-popup-overlay';
-  overlay.innerHTML = '<div class="weather-popup" id="weather-popup"></div>';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.innerHTML = '<div class="weather-popup" id="weather-popup" role="dialog" aria-modal="true" aria-labelledby="weather-popup-title"></div>';
   overlay.addEventListener('click', e => {
     if (e.target === overlay) closeWeatherPopup();
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeWeatherPopup();
+    if (!overlay.classList.contains('visible')) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeWeatherPopup();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusable = [...overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
   });
   document.body.appendChild(overlay);
 })();
@@ -660,7 +777,7 @@ function showWeatherPopup(slotIdx) {
 
   let html = '';
   html += `<div class="wp-header">
-    <div class="wp-title">FORECAST DETAIL</div>
+    <div class="wp-title" id="weather-popup-title">FORECAST DETAIL</div>
     <button class="wp-close" onclick="closeWeatherPopup()">CLOSE</button>
   </div>`;
 
@@ -701,7 +818,12 @@ function showWeatherPopup(slotIdx) {
   const popup = document.getElementById('weather-popup');
   const overlay = document.getElementById('weather-popup-overlay');
   if (popup) popup.innerHTML = html;
-  if (overlay) overlay.classList.add('visible');
+  if (overlay) {
+    weatherPopupReturnFocus = document.activeElement;
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.classList.add('visible');
+    popup?.querySelector('.wp-close')?.focus();
+  }
 
   setTimeout(() => {
     const rows = popup.querySelectorAll('.wp-hourly-row');
@@ -711,7 +833,11 @@ function showWeatherPopup(slotIdx) {
 
 function closeWeatherPopup() {
   const overlay = document.getElementById('weather-popup-overlay');
-  if (overlay) overlay.classList.remove('visible');
+  if (!overlay?.classList.contains('visible')) return;
+  overlay.classList.remove('visible');
+  overlay.setAttribute('aria-hidden', 'true');
+  if (weatherPopupReturnFocus?.isConnected) weatherPopupReturnFocus.focus();
+  weatherPopupReturnFocus = null;
 }
 
 function renderNordpool48h() {
@@ -855,11 +981,31 @@ function switchTab(id) {
   });
   if (THEME.onSwitchTab) THEME.onSwitchTab(id, tabIds);
   document.querySelectorAll('.page').forEach(p => {
-    p.classList.remove('active');
-    p.setAttribute('role', 'tabpanel');
+    const isActive = p.id === `page-${id}`;
+    p.classList.toggle('active', isActive);
+    p.hidden = !isActive;
   });
-  const panel = document.getElementById(`page-${id}`);
-  if (panel) { panel.classList.add('active'); panel.focus(); }
+}
+
+function initializeTabAccessibility() {
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  tabs.forEach((tab, index) => {
+    const tabId = THEME.tabIds[index];
+    if (!tabId) return;
+    const active = document.getElementById(`page-${tabId}`)?.classList.contains('active') || false;
+    if (!tab.id) tab.id = `tab-${tabId}`;
+    tab.setAttribute('aria-controls', `page-${tabId}`);
+    tab.setAttribute('aria-selected', String(active));
+    tab.setAttribute('tabindex', active ? '0' : '-1');
+  });
+  document.querySelectorAll('.page').forEach(panel => {
+    const tabId = panel.id.replace(/^page-/, '');
+    const active = panel.classList.contains('active');
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', `tab-${tabId}`);
+    panel.setAttribute('tabindex', '-1');
+    panel.hidden = !active;
+  });
 }
 
 // ═══════════════════════════════════════════════════
@@ -944,50 +1090,51 @@ function renderMedia() {
   const sessions = Object.entries(liveData.sessions);
   if (sessions.length === 0) { grid.innerHTML = ''; updateNoMediaMsg(); return; }
 
-  const haBase = HA_BASE;
   let html = '';
   sessions.forEach(([num, s]) => {
-    const posterUrl = s.image_url ? haBase + s.image_url : null;
+    const posterUrl = safeMediaUrl(s.image_url);
+    const userThumbUrl = safeMediaUrl(s.user_thumb);
     const isEpisode = s.media_type === 'episode';
     const pct = Math.min(100, Math.max(0, s.progress || 0));
     const isTranscode = (s.transcode_decision || '').includes('transcode');
+    const stateClass = s.state === 'paused' ? 'paused' : 'playing';
     const showLine = isEpisode && s.grandparent_title
       ? `${s.grandparent_title} · ${s.parent_title}`
       : (s.year ? String(s.year) : '');
     const displayTitle = isEpisode ? s.title : (s.grandparent_title || s.title);
 
-    html += `<div class="session-card ${s.state}">
+    html += `<div class="session-card ${stateClass}">
       <div class="session-poster">
         ${posterUrl
           ? `<img src="${posterUrl}" alt="poster" onerror="this.parentElement.innerHTML='<div class=\\"session-poster-ph\\">▶</div>'">`
           : '<div class="session-poster-ph">▶</div>'}
       </div>
       <div class="session-info">
-        ${showLine ? `<div class="session-show">${showLine}</div>` : ''}
-        <div class="session-title">${displayTitle || s.full_title || 'Unknown'}</div>
+        ${showLine ? `<div class="session-show">${escapeHtml(showLine)}</div>` : ''}
+        <div class="session-title">${escapeHtml(displayTitle || s.full_title || 'Unknown')}</div>
         <div class="session-badges">
-          ${s.video_resolution ? `<span class="sbadge orange">${s.video_resolution}</span>` : ''}
-          ${s.video_codec      ? `<span class="sbadge">${s.video_codec.toUpperCase()}</span>` : ''}
-          ${s.audio_codec      ? `<span class="sbadge">${s.audio_codec.toUpperCase()}</span>` : ''}
-          <span class="sbadge ${isTranscode ? 'amber' : 'hi'}">${(s.transcode_decision || 'DIRECT PLAY').toUpperCase()}</span>
-          <span class="sbadge ${s.location === 'lan' ? 'hi' : 'amber'}">${(s.location || 'LAN').toUpperCase()}</span>
-          ${s.content_rating ? `<span class="sbadge">${s.content_rating}</span>` : ''}
+          ${s.video_resolution ? `<span class="sbadge orange">${escapeHtml(s.video_resolution)}</span>` : ''}
+          ${s.video_codec      ? `<span class="sbadge">${escapeHtml(String(s.video_codec).toUpperCase())}</span>` : ''}
+          ${s.audio_codec      ? `<span class="sbadge">${escapeHtml(String(s.audio_codec).toUpperCase())}</span>` : ''}
+          <span class="sbadge ${isTranscode ? 'amber' : 'hi'}">${escapeHtml(String(s.transcode_decision || 'DIRECT PLAY').toUpperCase())}</span>
+          <span class="sbadge ${s.location === 'lan' ? 'hi' : 'amber'}">${escapeHtml(String(s.location || 'LAN').toUpperCase())}</span>
+          ${s.content_rating ? `<span class="sbadge">${escapeHtml(s.content_rating)}</span>` : ''}
         </div>
-        ${s.summary ? `<div class="session-summary">${s.summary}</div>` : ''}
+        ${s.summary ? `<div class="session-summary">${escapeHtml(s.summary)}</div>` : ''}
         <div class="session-user" style="margin-top:4px;">
           <div class="session-avatar">
-            ${s.user_thumb ? `<img src="${s.user_thumb}" alt="avatar">` : ''}
+            ${userThumbUrl ? `<img src="${userThumbUrl}" alt="avatar">` : ''}
           </div>
-          <span>${s.user.toUpperCase()}</span>
+          <span>${escapeHtml(String(s.user || '').toUpperCase())}</span>
           <span style="opacity:0.4;">·</span>
-          <span>${s.player || s.platform}</span>
+          <span>${escapeHtml(s.player || s.platform)}</span>
           ${s.state === 'paused' ? '<span style="color:var(--blue);margin-left:6px;">⏸ Paused</span>' : ''}
         </div>
         <div class="session-progress-wrap">
           <div class="session-progress-label">
-            <span>${s.duration || '--'}</span>
+            <span>${escapeHtml(s.duration || '--')}</span>
             <span>${pct}%</span>
-            <span>ETA ${s.stream_eta || '--'}</span>
+            <span>ETA ${escapeHtml(s.stream_eta || '--')}</span>
           </div>
           <div class="session-progress-bar">
             <div class="session-progress-fill ${s.state === 'paused' ? 'paused' : ''}" style="width:${pct}%"></div>
@@ -1019,14 +1166,13 @@ function renderMediaPlayers() {
   const players = Object.entries(liveData.mediaPlayers);
   if (players.length === 0) { grid.innerHTML = ''; updateNoMediaMsg(); return; }
 
-  const haBase = HA_BASE;
   let html = '';
   players.forEach(([id, p]) => {
-    const artUrl = p.art ? haBase + p.art : null;
+    const artUrl = safeMediaUrl(p.art);
     const volPct = p.volume !== null ? Math.round(p.volume * 100) : null;
     const typeIcon = p.type === 'ATV' ? '📺' : '🔊';
     const stateLabel = p.state === 'paused' ? '⏸ Paused' : '▶ Playing';
-    const ctBadge = p.contentType ? p.contentType.toUpperCase() : '';
+    const ctBadge = p.contentType ? String(p.contentType).toUpperCase() : '';
     const artistLine = p.artist || '';
     const albumLine = p.album || '';
     const appLine = p.app || '';
@@ -1039,7 +1185,7 @@ function renderMediaPlayers() {
     if (p.repeat && p.repeat !== 'off') extraBadges += `<span class="mp-badge">RPT${p.repeat === 'one' ? '1' : ''}</span>`;
     if (p.muted) extraBadges += '<span class="mp-badge muted">MUTED</span>';
 
-    html += `<div class="mp-card ${p.state}">
+    html += `<div class="mp-card ${p.state === 'paused' ? 'paused' : 'playing'}">
       <div class="mp-art">
         ${artUrl
           ? `<img src="${artUrl}" alt="art" onerror="this.parentElement.innerHTML='<div class=\\'mp-art-ph\\'>${typeIcon}</div>'">`
@@ -1048,15 +1194,15 @@ function renderMediaPlayers() {
       <div class="mp-info">
         <div class="mp-name">
           <span class="mp-state-dot"></span>
-          ${p.friendly || p.label}
-          <span class="mp-type">${p.type}</span>
-          ${ctBadge ? `<span class="mp-type">${ctBadge}</span>` : ''}
+          ${escapeHtml(p.friendly || p.label)}
+          <span class="mp-type">${escapeHtml(p.type)}</span>
+          ${ctBadge ? `<span class="mp-type">${escapeHtml(ctBadge)}</span>` : ''}
         </div>
-        ${p.title ? `<div class="mp-title">${p.title}</div>` : `<div class="mp-title" style="color:var(--grey-mid);">--</div>`}
-        ${artistLine ? `<div class="mp-artist">${artistLine}</div>` : ''}
-        ${albumLine ? `<div class="mp-artist" style="color:var(--grey-mid);">${albumLine}</div>` : ''}
-        ${appLine && appLine !== artistLine ? `<div class="mp-source">${appLine}</div>` : ''}
-        <div class="mp-source">${stateLabel}${p.source ? ' · ' + p.source : ''}${extraBadges ? ' ' + extraBadges : ''}</div>
+        ${p.title ? `<div class="mp-title">${escapeHtml(p.title)}</div>` : `<div class="mp-title" style="color:var(--grey-mid);">--</div>`}
+        ${artistLine ? `<div class="mp-artist">${escapeHtml(artistLine)}</div>` : ''}
+        ${albumLine ? `<div class="mp-artist" style="color:var(--grey-mid);">${escapeHtml(albumLine)}</div>` : ''}
+        ${appLine && appLine !== artistLine ? `<div class="mp-source">${escapeHtml(appLine)}</div>` : ''}
+        <div class="mp-source">${stateLabel}${p.source ? ' · ' + escapeHtml(p.source) : ''}${extraBadges ? ' ' + extraBadges : ''}</div>
         ${progressPct !== null ? `<div class="mp-progress-wrap">
           <div class="mp-progress-bar"><div class="mp-progress-fill" style="width:${progressPct.toFixed(1)}%"></div></div>
           <div class="mp-progress-label"><span>${pos || '--'}</span><span>${dur || '--'}</span></div>
@@ -1091,7 +1237,10 @@ function lcTotalPower() {
 function lcUpdatePowerHistory() {
   const w = lcTotalPower();
   const p = liveData.elecNow || 0;
-  liveData.powerHistory.push({ time: Date.now(), watts: w, price: p });
+  const now = Date.now();
+  const last = liveData.powerHistory[liveData.powerHistory.length - 1];
+  if (last && now - last.time < 60000) Object.assign(last, { time: now, watts: w, price: p });
+  else liveData.powerHistory.push({ time: now, watts: w, price: p });
   if (liveData.powerHistory.length > 48) liveData.powerHistory.shift();
 }
 
@@ -1272,6 +1421,7 @@ function haConnect() {
     // Step 2: Auth succeeded — fetch initial data and subscribe to updates
     } else if (msg.type === 'auth_ok') {
       wsReady = true;
+      reconnectAttempts = 0;
       setConnStatus('online');
       showToast(THEME.connToast);
       if (THEME.onAuthOk) THEME.onAuthOk();
@@ -1297,6 +1447,8 @@ function haConnect() {
 
     // Auth failed — bad token
     } else if (msg.type === 'auth_invalid') {
+      authRejected = true;
+      wsReady = false;
       setConnStatus('offline');
       showToast('AUTH FAILURE — CHECK TOKEN');
       if (THEME.onAuthFail) THEME.onAuthFail();
@@ -1305,7 +1457,9 @@ function haConnect() {
     } else if (msg.type === 'result' && msg.result) {
       // get_states returns an array of all entity states — ingest them all and render everything
       if (Array.isArray(msg.result)) {
+        bulkIngesting = true;
         msg.result.forEach(s => ingestState(s));
+        bulkIngesting = false;
         renderRooms(); renderEnviro(); renderNordpoolBars();
         renderSun(); renderNordpool48h(); renderTempGraph(); renderMedia();
         renderLcEnergy(); renderPowerPanel(); renderMediaPlayers();
@@ -1333,9 +1487,8 @@ function haConnect() {
       ingestState(s);
       const id = s.entity_id;
       // Re-render affected UI sections based on which entity changed
-      if (id.startsWith('light.') || ALL_SENSOR_IDS.has(id)) renderRooms();
-      if (id in liveData.power) renderRooms(); // Power sensor changes must also update room cards
-      if (INT.sun && id === INT.sun)      { renderSun(); updateDayNight(); }
+      if (ROOM_IDS_BY_ENTITY.has(id)) scheduleRender('rooms', ROOM_IDS_BY_ENTITY.get(id));
+      if (INT.sun && id === INT.sun)      { scheduleRender('sun'); scheduleRender('daynight'); }
       if (INT.weather && id === INT.weather) {
         // Weather entity changed — re-fetch the hourly forecast
         weatherForecastMsgId = msgId;
@@ -1346,11 +1499,11 @@ function haConnect() {
           return_response: true
         }));
       }
-      if (id.includes('nordpool'))       { renderNordpoolBars(); renderNordpool48h(); }
+      if (id.includes('nordpool'))       { scheduleRender('nordpool-bars'); scheduleRender('nordpool-48h'); }
       if ([INT.outsideTemp, INT.nordpool, INT.nordpoolExtra].filter(Boolean).includes(id)) {
-        renderEnviro();
+        scheduleRender('enviro');
       }
-      if (FEATURES.washer && INT.washer?.jobState && id === INT.washer.jobState) renderEnviro();
+      if (FEATURES.washer && INT.washer?.jobState && id === INT.washer.jobState) scheduleRender('enviro');
       if (THEME.onStateChanged) THEME.onStateChanged(id, s);
     }
   };
@@ -1363,7 +1516,11 @@ function haConnect() {
     wsReady = false;
     setConnStatus('offline');
     clearTimeout(reconnectTimer);
-    reconnectTimer = setTimeout(haConnect, 5000); // Auto-reconnect after 5s
+    if (!authRejected) {
+      const delay = Math.min(30000, 1000 * (2 ** reconnectAttempts)) + Math.floor(Math.random() * 500);
+      reconnectAttempts += 1;
+      reconnectTimer = setTimeout(haConnect, delay);
+    }
   };
 }
 
@@ -1458,29 +1615,28 @@ function ingestState(s) {
     } else {
       delete liveData.sessions[sessionNum];
     }
-    renderMedia();
+    scheduleRender('media');
   }
-  if (INT.tautulli?.streamCount    && id === INT.tautulli.streamCount)    { liveData.streamCount = parseInt(s.state) || 0; renderMedia(); }
+  if (INT.tautulli?.streamCount    && id === INT.tautulli.streamCount)    { liveData.streamCount = parseInt(s.state) || 0; scheduleRender('media'); }
   if (INT.tautulli?.directPlay     && id === INT.tautulli.directPlay)     { liveData.streamDirectPlay = parseInt(s.state) || 0; }
   if (INT.tautulli?.transcode      && id === INT.tautulli.transcode)      { liveData.streamTranscode = parseInt(s.state) || 0; }
   if (INT.tautulli?.totalBandwidth && id === INT.tautulli.totalBandwidth) { liveData.totalBandwidth = parseFloat(s.state) || 0; }
   if (INT.tautulli?.lanBandwidth   && id === INT.tautulli.lanBandwidth)   { liveData.lanBandwidth = parseFloat(s.state) || 0; }
-  if (INT.tautulli?.wanBandwidth   && id === INT.tautulli.wanBandwidth)   { liveData.wanBandwidth = parseFloat(s.state) || 0; renderMedia(); }
+  if (INT.tautulli?.wanBandwidth   && id === INT.tautulli.wanBandwidth)   { liveData.wanBandwidth = parseFloat(s.state) || 0; scheduleRender('media'); }
 
   // ── Power sensors: per-room wattage, tracked for energy chart history ──
   if (id in liveData.power) {
     const v = parseFloat(s.state);
     liveData.power[id] = isNaN(v) ? null : v;
     lcUpdatePowerHistory();
-    renderLcEnergy();
-    renderPowerPanel();
+    scheduleRender('energy');
+    scheduleRender('power-panel');
   }
   // ── kWh sensors: cumulative energy consumption ──
-  const kwhIds = new Set(Object.values(LC_KWH_SENSORS));
-  if (kwhIds.has(id)) {
+  if (KWH_ENTITY_IDS.has(id)) {
     const v = parseFloat(s.state);
     if (!isNaN(v) && v < 100000) liveData.kwh[id] = v;
-    renderPowerPanel();
+    scheduleRender('power-panel');
   }
   if (INT.outsideLux && id === INT.outsideLux) {
     liveData.outsideLux = isNaN(parseFloat(s.state)) ? null : parseFloat(s.state);
@@ -1512,7 +1668,7 @@ function ingestState(s) {
     } else {
       delete liveData.mediaPlayers[id];
     }
-    renderMediaPlayers();
+    scheduleRender('media-players');
   }
 
   if (FEATURES.washer && typeof washerIngest === 'function') washerIngest(id, s);
@@ -1521,7 +1677,7 @@ function ingestState(s) {
     const temps = s.attributes?.temps;
     if (Array.isArray(temps)) {
       liveData.tempNext24h = temps.slice(0, 24).map(Number);
-      renderTempGraph();
+      scheduleRender('temp-graph');
     }
   }
   if (INT.nordpool48h && (id === INT.nordpool48h || id === 'sensor.nordpool')) {
@@ -1531,7 +1687,7 @@ function ingestState(s) {
       liveData.nordpool48h = [...today, ...tomorrow].map(e => ({
         start: e.start, value: parseFloat(e.value)
       }));
-      renderNordpool48h();
+      scheduleRender('nordpool-48h');
     }
   }
 
@@ -1595,6 +1751,8 @@ function buildThemeMenu() {
 // INIT
 // ═══════════════════════════════════════════════════
 (function sharedInit() {
+  initializeTabAccessibility();
+
   // Hide UI elements for disabled features
   Object.entries(FEATURES).forEach(([feature, enabled]) => {
     if (!enabled) {
@@ -1620,12 +1778,12 @@ function buildThemeMenu() {
   updateDayNight(); // apply stored day/night preference and set button label
 
   // Clock
-  setInterval(updateClock, 1000);
+  registerDashboardInterval(updateClock, 1000);
   updateClock();
-  setInterval(renderSun, 60000);
+  registerDashboardInterval(renderSun, 60000);
 
   // Theme-specific intervals
-  if (THEME.intervals) THEME.intervals.forEach(([fn, ms]) => setInterval(fn, ms));
+  if (THEME.intervals) THEME.intervals.forEach(([fn, ms]) => registerDashboardInterval(fn, ms));
 
   // Theme-specific init
   if (THEME.onInit) THEME.onInit();
@@ -1655,6 +1813,14 @@ function buildThemeMenu() {
     }
   });
 
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    updateClock();
+    renderSun();
+    flushScheduledRenders();
+    if (THEME.onVisibilityChange) THEME.onVisibilityChange(true);
+  });
+
   // Fullscreen persistence — requires a user gesture, so wait for first interaction
   if (localStorage.getItem('ha_fs') === '1') {
     const goFS = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); };
@@ -1681,6 +1847,18 @@ function buildThemeMenu() {
   const themeSwitcher = document.getElementById('theme-switcher');
   if (themeSwitcher) {
     themeSwitcher.addEventListener('click', () => { clearTimeout(switcherTimer); switcherTimer = setTimeout(hideSwitcher, 20000); });
+  }
+  const themeZone = document.querySelector('.theme-zone');
+  if (themeZone) {
+    themeZone.setAttribute('role', 'button');
+    themeZone.setAttribute('tabindex', '0');
+    if (!themeZone.getAttribute('aria-label')) themeZone.setAttribute('aria-label', 'Open dashboard controls');
+    themeZone.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        showSwitcher();
+      }
+    });
   }
   document.addEventListener('click', e => { if (!e.target.closest('.theme-switcher') && !e.target.closest('.theme-zone')) hideSwitcher(); });
 })();

@@ -125,5 +125,26 @@ const ENTITIES = {
     //   spinLevel:   'select.bathroom_washer_spin_level',
     //   rinses:      'number.bathroom_washer_rinse_cycles',
     // },
+
+    // ── Plants ──
+    // Used by each completed plant tab. Leave empty to show the no-assets state.
+    // Add as many plants as needed. New themes use the species directories listed in the README;
+    // legacy imageSet: 'plant-1' resolves to Pilea everywhere except T2, which keeps its flat asset path.
+    plants: [],
+    // Or configure one or more plants:
+    // plants: [{
+    //   entity: 'plant.YOUR_PLANT',
+    //   label: 'Plant 1',
+    //   imageSet: 'plant-1',
+    //   sensors: {
+    //     moisture:    'sensor.YOUR_PLANT_SOIL_MOISTURE',
+    //     temperature: 'sensor.YOUR_PLANT_TEMPERATURE',
+    //     humidity:    'sensor.YOUR_PLANT_AIR_HUMIDITY',
+    //     illuminance: 'sensor.YOUR_PLANT_ILLUMINANCE',
+    //     vpd:         'sensor.YOUR_PLANT_VPD',
+    //     dli24h:      'sensor.YOUR_PLANT_DLI_24H',
+    //     battery:     'sensor.YOUR_PLANT_SENSOR_BATTERY',
+    //   },
+    // }],
   },
 };
