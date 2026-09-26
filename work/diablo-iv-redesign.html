@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diablo — Gold and Hellfire</title>
+<style>
+  body { margin:0; background:#101218; }
+  #d4-concepts { width: 100%; color: #eadbc2; font-family: Georgia, 'Times New Roman', serif; }
+  #d4-concepts * { box-sizing: border-box; }
+  #d4-concepts .d4-stage { min-height: 700px; overflow: hidden; position: relative; isolation: isolate; background: radial-gradient(ellipse at 16% -8%,rgba(142,102,49,.16),transparent 38%),radial-gradient(ellipse at 82% 18%,rgba(112,20,15,.23),transparent 42%),radial-gradient(ellipse at 46% 112%,rgba(102,59,24,.12),transparent 45%),linear-gradient(135deg,#100c09 0%,#070605 48%,#0c0807 100%); box-shadow: 0 24px 70px rgba(0,0,0,.55),inset 0 0 120px rgba(0,0,0,.72); }
+  #d4-concepts .d4-stage::before { content: ''; position: absolute; z-index: -2; inset: 0; pointer-events: none; opacity: .34; background: repeating-linear-gradient(117deg,transparent 0 42px,rgba(207,164,90,.025) 43px 44px),repeating-linear-gradient(63deg,transparent 0 64px,rgba(0,0,0,.16) 65px 66px),radial-gradient(circle at 20% 26%,rgba(210,164,87,.11) 0 1px,transparent 2px),radial-gradient(circle at 74% 66%,rgba(160,42,27,.14) 0 1px,transparent 2px); background-size:auto,auto,41px 41px,57px 57px; }
+  #d4-concepts .d4-stage::after { content: ''; position: absolute; z-index: -1; width: 720px; height: 720px; left: 50%; top: 52%; pointer-events: none; transform: translate(-50%,-50%) rotate(13deg) scaleY(.62); border-radius: 50%; opacity: .12; background: repeating-conic-gradient(from 15deg,rgba(213,169,91,.42) 0 1deg,transparent 1deg 15deg),repeating-radial-gradient(circle,transparent 0 58px,rgba(213,169,91,.24) 59px 60px); -webkit-mask-image: radial-gradient(circle,transparent 0 18%,#000 19% 72%,transparent 73%); mask-image: radial-gradient(circle,transparent 0 18%,#000 19% 72%,transparent 73%); }
+  #d4-concepts .d4-shell { position: relative; z-index: 1; min-height: 700px; display: grid; grid-template-columns: minmax(0,1fr); background: linear-gradient(90deg,rgba(0,0,0,.22),transparent 18% 82%,rgba(0,0,0,.28)); }
+  #d4-concepts .d4-rail { background: linear-gradient(180deg,#0c0a08,#15100c 46%,#090807); border-right: 1px solid #4e3a25; display: flex; flex-direction: column; align-items: center; padding: 18px 10px; gap: 11px; }
+  #d4-concepts .d4-mark { width: 48px; height: 48px; display: grid; place-items: center; color: #d0aa64; border: 1px solid #75552d; background: #120e0a; transform: rotate(45deg); margin-bottom: 14px; }
+  #d4-concepts .d4-mark span { transform: rotate(-45deg); font-size: 22px; }
+  #d4-concepts .d4-nav { width: 56px; min-height: 52px; border: 0; border-left: 2px solid transparent; background: transparent; color: #81735f; display: grid; place-items: center; gap: 2px; font: 500 10px/1 Georgia,serif; letter-spacing: 1px; text-transform: uppercase; }
+  #d4-concepts .d4-nav b { font-size: 19px; font-weight: 400; }
+  #d4-concepts .d4-nav.active { color: #edcf91; border-left-color: #b52b1f; background: linear-gradient(90deg,rgba(181,43,31,.2),transparent); }
+  #d4-concepts .d4-rail-spacer { flex: 1; }
+  #d4-concepts .d4-main { min-width: 0; display: flex; flex-direction: column; }
+  #d4-concepts .d4-header { min-height: 72px; display: flex; align-items: center; gap: 20px; padding: 12px 24px; border-bottom: 1px solid #4e3a25; background: linear-gradient(180deg,rgba(218,181,111,.055),transparent); }
+  #d4-concepts .d4-title { min-width: 0; }
+  #d4-concepts .d4-title small { display: block; color: #a49377; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; }
+  #d4-concepts .d4-title h1 { margin: 4px 0 0; color: #ead8b6; font-size: 24px; font-weight: 500; letter-spacing: 6px; text-transform: uppercase; }
+  #d4-concepts .d4-live { margin-left: auto; color: #b99c6a; text-align: right; font-size: 12px; letter-spacing: 1px; }
+  #d4-concepts .d4-live strong { display: block; color: #7eaa78; font-weight: 500; }
+  #d4-concepts .d4-topnav { min-height: 44px; display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); padding: 0 24px; background: #0b0907; border-bottom: 1px solid #4e3a25; }
+  #d4-concepts .d4-topnav button { min-width: 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #89765a; font: 500 10px/1 Georgia,serif; letter-spacing: 2px; text-transform: uppercase; }
+  #d4-concepts .d4-topnav button.active { color: #edcf91; border-bottom-color: #b52b1f; background: linear-gradient(180deg,rgba(181,43,31,.12),transparent); }
+  #d4-concepts .d4-content { padding: 20px 22px 24px; position: relative; }
+  #d4-concepts .d4-overview { display: grid; grid-template-columns: minmax(260px,1.25fr) minmax(300px,2fr); gap: 16px; }
+  #d4-concepts .d4-altar { min-height: 245px; position: relative; display: grid; place-items: center; border: 1px solid #60472d; background: radial-gradient(circle at center,rgba(158,37,25,.3),transparent 38%),linear-gradient(145deg,rgba(24,17,12,.96),rgba(9,7,6,.9)); box-shadow: inset 0 0 60px rgba(0,0,0,.5),0 16px 34px rgba(0,0,0,.18); overflow: hidden; }
+  #d4-concepts .d4-altar::before, #d4-concepts .d4-altar::after { content: ''; position: absolute; width: 180px; height: 180px; border: 1px solid rgba(207,164,90,.24); transform: rotate(45deg); }
+  #d4-concepts .d4-altar::after { width: 122px; height: 122px; border-color: rgba(176,38,25,.46); }
+  #d4-concepts .d4-sigil { position: relative; z-index: 1; text-align: center; }
+  #d4-concepts .d4-sigil-icon { width: 92px; height: 92px; margin: 0 auto 12px; display: grid; place-items: center; border: 1px solid #b42b1f; border-radius: 50%; color: #e6be72; box-shadow: 0 0 30px rgba(180,43,31,.26), inset 0 0 24px rgba(180,43,31,.2); font-size: 36px; }
+  #d4-concepts .d4-sigil label { display:block; color:#9b8a70; font-size:10px; letter-spacing:3px; text-transform:uppercase; }
+  #d4-concepts .d4-sigil strong { display:block; margin-top:5px; color:#f0dab1; font-size:18px; font-weight:500; letter-spacing:2px; }
+  #d4-concepts .d4-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  #d4-concepts .d4-stat { min-height:117px; padding:15px; border-top:1px solid #6c4e2d; background:linear-gradient(150deg,rgba(28,21,16,.94),rgba(12,9,7,.88)); box-shadow:0 12px 26px rgba(0,0,0,.14); position:relative; }
+  #d4-concepts .d4-stat::after { content:''; position:absolute; left:0; bottom:0; width:34%; height:2px; background:#93261d; }
+  #d4-concepts .d4-stat label { color:#9f8d70; font-size:10px; letter-spacing:2px; text-transform:uppercase; }
+  #d4-concepts .d4-stat strong { display:block; margin-top:12px; color:#e7ce9e; font-size:25px; font-weight:500; }
+  #d4-concepts .d4-stat span { display:block; margin-top:5px; color:#887966; font-size:11px; }
+  #d4-concepts .d4-section-head { display:flex; align-items:center; gap:12px; margin:20px 0 10px; color:#c7a96f; font-size:12px; letter-spacing:3px; text-transform:uppercase; }
+  #d4-concepts .d4-section-head::before { content:'◆'; color:#9e281e; }
+  #d4-concepts .d4-section-head::after { content:''; height:1px; flex:1; background:linear-gradient(90deg,#674826,transparent); }
+  #d4-concepts .d4-rooms { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+  #d4-concepts .d4-room { min-height:145px; padding:14px; background:linear-gradient(145deg,rgba(23,18,14,.94),rgba(11,8,7,.86)); border-bottom:2px solid #4e3924; box-shadow:0 14px 28px rgba(0,0,0,.16); position:relative; }
+  #d4-concepts .d4-room.on { border-bottom-color:#c69b51; box-shadow:inset 0 -12px 30px rgba(198,155,81,.04); }
+  #d4-concepts .d4-room.alert { border-bottom-color:#b52b1f; background:linear-gradient(145deg,#21100c,#0d0907); }
+  #d4-concepts .d4-room h3 { margin:0; color:#ddc49a; font-size:13px; font-weight:500; letter-spacing:2px; text-transform:uppercase; }
+  #d4-concepts .d4-room-state { position:absolute; right:12px; top:12px; color:#a9926c; font-size:9px; letter-spacing:1px; }
+  #d4-concepts .d4-room-data { display:flex; gap:14px; margin-top:25px; color:#93836b; font-size:11px; }
+  #d4-concepts .d4-room-data strong { display:block; margin-top:3px; color:#ead7b2; font-size:14px; font-weight:500; }
+  #d4-concepts .d4-flame { height:3px; margin-top:19px; background:#282018; position:relative; }
+  #d4-concepts .d4-flame span { display:block; height:100%; background:linear-gradient(90deg,#92251c,#d58d3d,#e6bd6c); box-shadow:0 0 10px rgba(213,141,61,.28); }
+  #d4-concepts .d4-palette { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:18px; color:#857865; font-size:11px; letter-spacing:1px; }
+  #d4-concepts .d4-swatch { width:20px; height:20px; border:1px solid rgba(255,255,255,.12); }
+
+  #d4-concepts .forge { background:radial-gradient(ellipse at 92% 108%,rgba(255,92,22,.46),transparent 34%),radial-gradient(ellipse at 44% 116%,rgba(199,42,18,.38),transparent 48%),radial-gradient(ellipse at 8% 16%,rgba(126,26,18,.24),transparent 36%),linear-gradient(150deg,#180806 0%,#060404 48%,#150705 100%); }
+  #d4-concepts .forge::before { opacity:.72; background:radial-gradient(circle at 12% 78%,rgba(255,196,91,.84) 0 1px,transparent 2px),radial-gradient(circle at 68% 24%,rgba(255,91,36,.66) 0 1px,transparent 2px),radial-gradient(circle at 88% 64%,rgba(255,166,60,.7) 0 1px,transparent 2px),radial-gradient(circle at 36% 88%,rgba(255,107,39,.62) 0 1px,transparent 2px),radial-gradient(ellipse at 94% 74%,rgba(255,82,22,.24),transparent 23%),repeating-linear-gradient(108deg,transparent 0 54px,rgba(217,62,27,.055) 55px 56px); background-size:71px 71px,97px 97px,53px 53px,83px 83px,auto,auto; }
+  #d4-concepts .forge::after { width:auto; height:49%; left:-8%; right:-8%; top:auto; bottom:-16%; border-radius:48% 52% 0 0 / 24% 31% 0 0; opacity:.82; transform:none; filter:saturate(1.18); background:radial-gradient(ellipse at 12% 74%,#ffd078 0 .7%,rgba(255,121,32,.92) 1.5%,rgba(177,31,15,.68) 3.5%,transparent 10%),radial-gradient(ellipse at 48% 83%,#ffbb57 0 .8%,rgba(246,78,25,.82) 2%,rgba(144,24,14,.6) 4%,transparent 12%),radial-gradient(ellipse at 86% 62%,#ffd06b 0 .7%,rgba(255,104,27,.92) 1.6%,rgba(176,31,14,.7) 3.5%,transparent 11%),linear-gradient(166deg,transparent 0 17%,rgba(255,150,52,.82) 17.5% 18.1%,rgba(180,34,17,.58) 18.4%,transparent 19.3% 44%,rgba(225,48,20,.62) 44.5% 45.3%,transparent 46%),linear-gradient(194deg,transparent 0 24%,rgba(255,174,62,.9) 24.5% 25.1%,rgba(185,37,16,.62) 25.4%,transparent 26.3% 61%,rgba(184,31,15,.54) 61.5% 62.2%,transparent 63%),radial-gradient(ellipse at 54% 118%,rgba(190,38,15,.84),rgba(66,12,8,.72) 43%,transparent 72%); -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 24%,#000 100%); mask-image:linear-gradient(to bottom,transparent 0,#000 24%,#000 100%); }
+  #d4-concepts .forge .d4-shell { grid-template-columns:minmax(0,1fr); background:linear-gradient(90deg,rgba(0,0,0,.26),transparent 14% 78%,rgba(34,4,2,.2)); }
+  #d4-concepts .forge .d4-rail { display:none; }
+  #d4-concepts .forge .d4-header { min-height:86px; padding-inline:28px; border-bottom:2px solid #9c2819; background:linear-gradient(90deg,rgba(34,8,6,.9),rgba(8,5,4,.82) 50%,rgba(43,9,5,.88)); box-shadow:0 10px 32px rgba(0,0,0,.28); }
+  #d4-concepts .forge .d4-title h1 { color:#e8d8bc; }
+  #d4-concepts .forge .d4-topnav { background:rgba(9,5,4,.84); border-bottom-color:#6f1a12; }
+  #d4-concepts .forge .d4-topnav button.active { color:#ffd079; border-bottom-color:#ef572c; text-shadow:0 0 16px rgba(255,104,40,.32); }
+  #d4-concepts .forge-grid { display:grid; grid-template-columns:minmax(230px,.8fr) minmax(380px,1.8fr) minmax(230px,.8fr); gap:12px; }
+  #d4-concepts .forge-column { display:grid; gap:10px; align-content:start; }
+  #d4-concepts .forge-panel { padding:15px; background:linear-gradient(145deg,rgba(15,13,12,.78),rgba(8,7,7,.68)); border:1px solid rgba(135,78,47,.52); box-shadow:inset 0 1px rgba(255,183,103,.035),0 16px 34px rgba(0,0,0,.3); backdrop-filter:blur(5px); }
+  #d4-concepts .forge-panel h3 { margin:0 0 14px; color:#aa9169; font-size:11px; font-weight:500; letter-spacing:2px; text-transform:uppercase; }
+  #d4-concepts .forge-kpi { color:#e8d4ae; font-size:28px; }
+  #d4-concepts .forge-kpi small { color:#8c775e; font-size:11px; }
+  #d4-concepts .forge-list { display:grid; gap:9px; }
+  #d4-concepts .forge-list div { display:flex; justify-content:space-between; gap:10px; color:#8f7e68; font-size:11px; padding-bottom:8px; border-bottom:1px solid #2c2118; }
+  #d4-concepts .forge-list strong { color:#d8be94; font-weight:500; }
+  #d4-concepts .forge-map { min-height:475px; position:relative; display:grid; place-items:center; overflow:hidden; background:radial-gradient(circle at center,rgba(157,31,18,.3),transparent 43%),linear-gradient(145deg,rgba(20,11,8,.8),rgba(6,5,5,.69)); border:1px solid rgba(142,65,34,.68); box-shadow:inset 0 0 70px rgba(0,0,0,.34),0 18px 38px rgba(0,0,0,.3); backdrop-filter:blur(4px); }
+  #d4-concepts .forge-map::before { content:''; position:absolute; inset:9%; background:repeating-radial-gradient(circle at center,transparent 0 45px,rgba(190,141,67,.08) 46px 47px); transform:scaleY(.72) rotate(-8deg); }
+  #d4-concepts .forge-plan { width:78%; position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; transform:rotate(-2deg); }
+  #d4-concepts .forge-room { min-height:86px; display:grid; place-items:center; text-align:center; color:#aa9679; background:rgba(12,10,9,.76); border:1px solid rgba(111,71,43,.72); box-shadow:inset 0 0 22px rgba(0,0,0,.28); font-size:10px; letter-spacing:1px; text-transform:uppercase; }
+  #d4-concepts .forge-room.active { color:#ffd783; border-color:#d94827; background:rgba(31,11,8,.7); box-shadow:0 0 26px rgba(226,62,29,.24),inset 0 0 22px rgba(199,45,24,.15); }
+  #d4-concepts .forge-room strong { display:block; margin-top:5px; color:#e4cfaa; font-size:15px; font-weight:500; }
+  #d4-concepts .forge-banner { margin-top:12px; padding:12px 16px; display:flex; align-items:center; gap:14px; background:linear-gradient(90deg,rgba(55,13,8,.82),rgba(13,8,7,.7)); border-left:3px solid #ed572c; color:#e6bc78; box-shadow:0 10px 24px rgba(0,0,0,.25); font-size:11px; letter-spacing:1px; backdrop-filter:blur(4px); }
+  #d4-concepts .forge-banner strong { color:#f0d9ae; font-weight:500; }
+  #d4-concepts .forge .d4-palette { margin-top:12px; }
+
+  /* Brighter gold, hellfire and spectral accents on dim charcoal surfaces. */
+  #d4-concepts { --ivory:#fff3db; --muted:#c9bdad; --gold:#ffd276; --fire:#ff813d; --ice:#8bd9ee; --life:#91e0b5; --alert:#ff8274; }
+  #d4-concepts > section + section { margin-top:28px; }
+  #d4-concepts .d4-stage:not(.forge) { background:radial-gradient(ellipse at 4% 12%,#395366 0,transparent 48%),radial-gradient(ellipse at 95% 65%,#8b402b 0,transparent 50%),radial-gradient(ellipse at 45% 115%,#b07b38 0,transparent 48%),linear-gradient(125deg,#19242e,#22202a 55%,#39221d); box-shadow:inset 0 0 100px #06090d55; }
+  #d4-concepts .d4-stage:not(.forge)::after { opacity:.3; }
+  #d4-concepts .forge { background:radial-gradient(ellipse at 100% 90%,#df631f 0,transparent 45%),radial-gradient(ellipse at 5% 95%,#a93228 0,transparent 44%),radial-gradient(ellipse at 65% 0%,#69313f 0,transparent 52%),linear-gradient(135deg,#29202c,#231820 50%,#602b21); box-shadow:inset 0 0 100px #13090b55; }
+  #d4-concepts .forge::after { bottom:-8%; opacity:.95; }
+  #d4-concepts .d4-header, #d4-concepts .forge .d4-header { background:linear-gradient(90deg,#12161ee6,#211820b8); border-bottom-color:#ffd27666; }
+  #d4-concepts .d4-title h1, #d4-concepts .forge .d4-title h1 { color:var(--ivory); text-shadow:0 2px 18px #ffb65344; }
+  #d4-concepts .d4-title small, #d4-concepts .d4-section-head, #d4-concepts .forge-panel h3 { color:var(--gold); }
+  #d4-concepts .d4-live, #d4-concepts .d4-palette { color:var(--muted); }
+  #d4-concepts .d4-live strong { color:var(--life); }
+  #d4-concepts .d4-topnav, #d4-concepts .forge .d4-topnav { background:#11151de0; border-bottom-color:#ffd27644; }
+  #d4-concepts .d4-topnav button { color:var(--muted); }
+  #d4-concepts .d4-topnav button.active, #d4-concepts .forge .d4-topnav button.active { color:var(--gold); border-bottom-color:var(--fire); background:linear-gradient(180deg,#ffad4324,#ff813d08); }
+  #d4-concepts .d4-topnav button:hover { color:var(--ivory); background:#ffd27618; }
+  #d4-concepts button:focus-visible { outline:2px solid var(--ice); outline-offset:-4px; }
+  #d4-concepts .d4-stat, #d4-concepts .d4-room, #d4-concepts .forge-panel { background:linear-gradient(145deg,#171c24ed,#11151bdc); border:1px solid #bfc5d12e; box-shadow:0 12px 28px #0004,inset 0 1px #ffffff06; }
+  #d4-concepts .d4-altar, #d4-concepts .forge-map { background:radial-gradient(ellipse at center,#f29c3324,transparent 60%),linear-gradient(145deg,#171c24ed,#11151bd9); border-color:#ffd27666; box-shadow:inset 0 0 65px #0003,0 14px 30px #0004; }
+  #d4-concepts .d4-sigil-icon { color:var(--gold); border-color:var(--fire); box-shadow:0 0 38px #ff813d55,inset 0 0 25px #ff813d26; }
+  #d4-concepts .d4-sigil label, #d4-concepts .d4-stat label, #d4-concepts .d4-stat span, #d4-concepts .d4-room-data, #d4-concepts .forge-kpi small, #d4-concepts .forge-list div { color:var(--muted); }
+  #d4-concepts .d4-sigil strong, #d4-concepts .d4-stat strong, #d4-concepts .d4-room h3, #d4-concepts .d4-room-data strong, #d4-concepts .forge-list strong, #d4-concepts .forge-room strong { color:var(--ivory); }
+  #d4-concepts .d4-stat { border-top:2px solid var(--gold); }
+  #d4-concepts .d4-stat::after { background:var(--gold); }
+  #d4-concepts .d4-stat:first-child { border-top-color:var(--ice); }
+  #d4-concepts .d4-stat:first-child strong { color:var(--ice); }
+  #d4-concepts .d4-stat:nth-child(2) strong { color:var(--gold); }
+  #d4-concepts .d4-stat:nth-child(3) strong, #d4-concepts .forge-kpi { color:var(--fire); }
+  #d4-concepts .d4-stat:nth-child(4) strong { color:var(--life); }
+  #d4-concepts .d4-room.on { border-bottom:2px solid var(--life); }
+  #d4-concepts .d4-room-state { color:var(--life); }
+  #d4-concepts .d4-room.alert { background:linear-gradient(145deg,#321e25ed,#17151de8); border-bottom:2px solid var(--alert); }
+  #d4-concepts .d4-room.alert .d4-room-state { color:var(--alert); }
+  #d4-concepts .d4-flame { background:#ffffff14; }
+  #d4-concepts .d4-flame span { background:linear-gradient(90deg,#ff5744,var(--fire),var(--gold)); box-shadow:0 0 12px #ff813d55; }
+  #d4-concepts .d4-section-head::before { color:var(--fire); }
+  #d4-concepts .forge-list div { border-bottom-color:#ffffff16; }
+  #d4-concepts .forge-room { color:var(--muted); background:#111720e8; border-color:#aabacc44; }
+  #d4-concepts .forge-room.active { color:var(--gold); background:#3a2920e8; border-color:var(--gold); box-shadow:0 0 22px #ffb64c25,inset 0 0 22px #ffac4312; }
+  #d4-concepts .forge-banner { background:#291920eb; border-left-color:var(--alert); color:var(--muted); }
+  #d4-concepts .forge-banner strong { color:var(--alert); }
+  #d4-concepts .d4-palette .d4-swatch:nth-of-type(1) { background:#171c24 !important; }
+  #d4-concepts .d4-palette .d4-swatch:nth-of-type(2) { background:var(--fire) !important; }
+  #d4-concepts .d4-palette .d4-swatch:nth-of-type(3) { background:var(--gold) !important; }
+  #d4-concepts .d4-palette .d4-swatch:nth-of-type(4) { background:var(--ice) !important; }
+  #d4-concepts .d4-palette .d4-swatch:nth-of-type(5) { background:var(--life) !important; }
+  #d4-concepts .d4-palette .d4-swatch:nth-of-type(6) { background:var(--ivory) !important; }
+  @media (min-width:761px) and (max-width:960px) { #d4-concepts .forge-grid { grid-template-columns:minmax(0,1fr); } }
+  @media (max-width: 760px) {
+    #d4-concepts .d4-stage, #d4-concepts .d4-shell { min-height: 1040px; }
+    #d4-concepts .d4-shell { grid-template-columns: minmax(0,1fr); }
+    #d4-concepts .d4-title h1 { font-size:18px; letter-spacing:3px; }
+    #d4-concepts .d4-overview, #d4-concepts .forge-grid { grid-template-columns:1fr; }
+    #d4-concepts .d4-rooms { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    #d4-concepts .d4-topnav { grid-template-columns:repeat(3,minmax(0,1fr)); padding:0 12px; }
+    #d4-concepts .d4-topnav button { min-height:40px; }
+    #d4-concepts .forge-map { min-height:380px; }
+    #d4-concepts .forge-column:last-child { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+  @media (max-width: 460px) {
+    #d4-concepts .d4-stage, #d4-concepts .d4-shell { min-height: 1320px; }
+    #d4-concepts .d4-header { padding-inline:12px; }
+    #d4-concepts .d4-live { display:none; }
+    #d4-concepts .d4-content { padding:14px 12px 20px; }
+    #d4-concepts .d4-stats, #d4-concepts .d4-rooms, #d4-concepts .forge-column:last-child { grid-template-columns:1fr; }
+  }
+</style>
+
+<div id="d4-concepts" class="viz-carousel" aria-label="Diablo IV dashboard redesign concepts">
+  <section data-variant="Cathedral Reliquary" aria-label="Cathedral Reliquary dashboard concept">
+    <div class="d4-stage">
+      <div class="d4-shell">
+        <main class="d4-main">
+          <header class="d4-header">
+            <div class="d4-title"><small>Horadric household</small><h1>Sanctuary</h1></div>
+            <div class="d4-live"><strong>● BOUND</strong>FRI 25 SEP · 23:04</div>
+          </header>
+          <nav class="d4-topnav" aria-label="Dashboard sections"><button class="active" type="button">Sanctum</button><button type="button">Torches</button><button type="button">Omens</button><button type="button">Echoes</button><button type="button">Alchemy</button><button type="button">Herbarium</button></nav>
+          <div class="d4-content">
+            <div class="d4-overview">
+              <section class="d4-altar" aria-label="Home status">
+                <div class="d4-sigil"><div class="d4-sigil-icon">◇</div><label>Sanctum state</label><strong>ALL WARDS HOLD</strong></div>
+              </section>
+              <section class="d4-stats" aria-label="Key household readings">
+                <div class="d4-stat"><label>The wilds</label><strong>11.4 °C</strong><span>Cold · clear skies</span></div>
+                <div class="d4-stat"><label>Gold tribute</label><strong>1.644 SEK</strong><span>Current tariff</span></div>
+                <div class="d4-stat"><label>Burning torches</label><strong>6</strong><span>Across four chambers</span></div>
+                <div class="d4-stat"><label>Arcane draw</label><strong>215.5 W</strong><span>Within expected bounds</span></div>
+              </section>
+            </div>
+            <div class="d4-section-head">Sanctum chambers</div>
+            <section class="d4-rooms" aria-label="Rooms">
+              <article class="d4-room on"><h3>Living room</h3><span class="d4-room-state">AWAKE</span><div class="d4-room-data"><span>Warmth<strong>22.0°</strong></span><span>Moisture<strong>57%</strong></span></div><div class="d4-flame"><span style="width:52%"></span></div></article>
+              <article class="d4-room on"><h3>Kitchen</h3><span class="d4-room-state">AWAKE</span><div class="d4-room-data"><span>Warmth<strong>23.7°</strong></span><span>Light<strong>7 lx</strong></span></div><div class="d4-flame"><span style="width:76%"></span></div></article>
+              <article class="d4-room on"><h3>Bedroom</h3><span class="d4-room-state">GUARDED</span><div class="d4-room-data"><span>Warmth<strong>20.8°</strong></span><span>Moisture<strong>50%</strong></span></div><div class="d4-flame"><span style="width:68%"></span></div></article>
+              <article class="d4-room alert"><h3>Guest room</h3><span class="d4-room-state">HIGH DRAW</span><div class="d4-room-data"><span>Warmth<strong>21.8°</strong></span><span>Power<strong>136 W</strong></span></div><div class="d4-flame"><span style="width:91%"></span></div></article>
+            </section>
+            <div class="d4-palette" aria-label="Proposed palette"><span>PALETTE</span><i class="d4-swatch" style="background:#080706"></i><i class="d4-swatch" style="background:#18110c"></i><i class="d4-swatch" style="background:#4e3a25"></i><i class="d4-swatch" style="background:#b52b1f"></i><i class="d4-swatch" style="background:#d58d3d"></i><i class="d4-swatch" style="background:#ead8b6"></i><span>obsidian · old stone · iron · blood · ember · bone</span></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <section data-variant="Hellforge War Table" aria-label="Hellforge War Table dashboard concept">
+    <div class="d4-stage forge">
+      <div class="d4-shell">
+        <main class="d4-main">
+          <header class="d4-header">
+            <div class="d4-title"><small>Household dominion</small><h1>The Hellforge</h1></div>
+            <div class="d4-live"><strong>● LINK FORGED</strong>23:04</div>
+          </header>
+          <nav class="d4-topnav" aria-label="Dashboard sections"><button class="active" type="button">Dominion</button><button type="button">Flames</button><button type="button">Omens</button><button type="button">Echoes</button><button type="button">Relics</button><button type="button">Herbarium</button></nav>
+          <div class="d4-content">
+            <div class="forge-grid">
+              <div class="forge-column">
+                <section class="forge-panel"><h3>Current burden</h3><div class="forge-kpi">215.5 <small>W</small></div><div class="d4-flame"><span style="width:42%"></span></div></section>
+                <section class="forge-panel"><h3>Environmental omens</h3><div class="forge-list"><div><span>Outside</span><strong>11.4 °C</strong></div><div><span>Sky</span><strong>Below</strong></div><div><span>Tariff</span><strong>1.644 SEK</strong></div><div><span>Washer</span><strong>Dormant</strong></div></div></section>
+              </div>
+              <div>
+                <section class="forge-map" aria-label="Interactive room map concept">
+                  <div class="forge-plan">
+                    <div class="forge-room active">Living<strong>22.0°</strong></div><div class="forge-room">Kitchen<strong>23.7°</strong></div><div class="forge-room">Balcony<strong>14.9°</strong></div>
+                    <div class="forge-room">Hall<strong>23.4°</strong></div><div class="forge-room active">Bedroom<strong>20.8°</strong></div><div class="forge-room active">Guest<strong>136 W</strong></div>
+                    <div class="forge-room">Bath<strong>23.0°</strong></div><div class="forge-room">Wardrobe<strong>26.5°</strong></div><div class="forge-room">Plants<strong>3 thrive</strong></div>
+                  </div>
+                </section>
+                <div class="forge-banner"><span>◆</span><strong>ATTENTION</strong><span>Guest room draw exceeds the nightly ward.</span></div>
+              </div>
+              <div class="forge-column">
+                <section class="forge-panel"><h3>Torches</h3><div class="forge-kpi">6 <small>burning</small></div><div class="d4-flame"><span style="width:66%"></span></div></section>
+                <section class="forge-panel"><h3>Strongest draws</h3><div class="forge-list"><div><span>Guest room</span><strong>136.3 W</strong></div><div><span>Living room</span><strong>69.5 W</strong></div><div><span>Kitchen</span><strong>5.5 W</strong></div><div><span>Bedroom</span><strong>3.8 W</strong></div></div></section>
+              </div>
+            </div>
+            <div class="d4-palette" aria-label="Proposed palette"><span>PALETTE</span><i class="d4-swatch" style="background:#060404"></i><i class="d4-swatch" style="background:#140b08"></i><i class="d4-swatch" style="background:#56301f"></i><i class="d4-swatch" style="background:#c33a23"></i><i class="d4-swatch" style="background:#e7b85e"></i><i class="d4-swatch" style="background:#e8d8bc"></i><span>void · char · rust · hellfire · brass · parchment</span></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+</div>

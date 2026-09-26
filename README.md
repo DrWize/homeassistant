@@ -105,7 +105,7 @@ The previews below were refreshed after a cross-theme readability and contrast p
 - **C64**: BASIC-style system log on the Security tab that logs events as numbered BASIC lines
 - **Matrix**: Digital rain canvas background that responds to total power usage and slows at night
 - **Weyland**: MOTHER AI status readout panel showing atmospheric, life support, and power diagnostics
-- **Diablo IV**: Worldstone terminal readout with Cinzel Decorative font, black-cathedral panels, marrow text, tarnished brass hierarchy, soulfire blue data accents, and restrained oxblood danger states
+- **Diablo IV**: Worldstone terminal readout with Cinzel Decorative font, a glowing hellfire background, dim charcoal data panels, ivory text, luminous gold highlights, ice-blue readings, mint status indicators, and coral alerts
 - **Winamp**: 32-bar spectrum analyzer mapped to real sensors (power, temperature, humidity, lux), EQ-style vertical dimmer sliders, transport controls (play/pause/stop for spectrum, prev/next for tabs), LED marquee with scrolling live data, and rainbow graph mode for all charts
 - **Skynet**: Terminator 2 / Cyberdyne tactical HUD with blue metallic panels, white readouts, T-800/Cyberdyne naming, theme-matched power/data charts, responsive mobile header/tabs, and the same hidden lower-left theme-menu hotspot used by the other dashboards
 

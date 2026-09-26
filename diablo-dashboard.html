@@ -12,13 +12,13 @@
 <style>
 
 :root {
-  /* Diablo IV palette — black cathedral, tarnished brass, marrow, and soulfire */
-  --amber:     #ddb56d;
-  --amber-dim: #9b815c;
-  --amber-glow: rgba(221,181,109,0.32);
-  --green:     #82b987;
-  --red:       #c94a45;
-  --white:     #fff1d8;
+  /* Gold and hellfire — bright accents on dim charcoal data surfaces. */
+  --amber:     #ffd276;
+  --amber-dim: #c9bdad;
+  --amber-glow: rgba(255,210,118,0.32);
+  --green:     #91e0b5;
+  --red:       #ff8274;
+  --white:     #fff3db;
   --bg:        #050608;
   --bg2:       #101114;
   --panel:     #15171b;
@@ -27,14 +27,14 @@
   --grey:      #2a2d34;
   --grey-mid:  #d4c3a7;
   --grey-dark: #17191e;
-  --orange:    #c7753f;
-  --yellow:    #e7c779;
-  --teal:      #74b8ad;
-  --blue:      #84a9d6;
-  --gold:      #e7c779;
+  --orange:    #ff813d;
+  --yellow:    #ffd276;
+  --teal:      #91e0b5;
+  --blue:      #8bd9ee;
+  --gold:      #ffd276;
   --crimson:   #7d2829;
-  --ember:     #b85f39;
-  --bone:      #f5e7cd;
+  --ember:     #ff813d;
+  --bone:      #fff3db;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1530,6 +1530,66 @@ body.night-mode {
 .herbarium-report-text { margin-top: 7px; color: #c7b79c; font-size: .68rem; line-height: 1.6; }
 @media (max-width:820px) { .herbarium-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .herbarium-dialog-body { grid-template-columns:1fr; } .herbarium-dialog-art,.herbarium-dialog-image { min-height:240px; } }
 @media (max-width:500px) { .herbarium-grid,.herbarium-readings { grid-template-columns:1fr; } .herbarium-dialog { width:calc(100vw - 12px);max-height:calc(100dvh - 12px); } .herbarium-dialog-art,.herbarium-dialog-image { min-height:210px; } }
+/* Approved Gold and Hellfire palette, shared across every dashboard tab. */
+html { background:#17131b; }
+body {
+  background:radial-gradient(ellipse at 100% 90%,#df631f,transparent 45%),
+    radial-gradient(ellipse at 5% 95%,#a93228,transparent 44%),
+    radial-gradient(ellipse at 65% 0%,#69313f,transparent 52%),
+    linear-gradient(135deg,#29202c,#231820 50%,#602b21);
+}
+.wy-frame { position:relative; isolation:isolate; }
+.wy-frame::before {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(circle at 12% 78%,#ffc45b99 0 1px,transparent 2px),
+    radial-gradient(circle at 88% 64%,#ffa63c88 0 1px,transparent 2px);
+  background-size:173px 163px,229px 211px;
+  mask-image:linear-gradient(transparent 25%,#000);
+}
+.wy-frame::after {
+  content:''; position:absolute; left:0; right:0; bottom:0; height:32%; z-index:-1; pointer-events:none;
+  background:linear-gradient(166deg,transparent 17%,#ff963488 17.5% 18%,transparent 19% 44%,#e1301466 44.5% 45%,transparent 46%),
+    linear-gradient(194deg,transparent 24%,#ffae3eaa 24.5% 25%,transparent 26% 61%,#b81f1555 61.5% 62%,transparent 63%),
+    radial-gradient(ellipse at 90% 110%,#ff813d88,transparent 60%);
+  mask-image:linear-gradient(transparent,#000);
+}
+.wy-content { background:transparent; }
+.wy-header { background:linear-gradient(90deg,#12161eed,#211820d9); border-bottom-color:#ffd27666; }
+.wy-tabs, .wy-footer { background:#11151de8; border-color:#ffd27644; }
+.wy-tab { color:var(--amber-dim); background:#11151dcc; border-color:#ffd27644; }
+.wy-tab.active { color:var(--gold); background:linear-gradient(#ffad4324,#ff813d08),#171c24; border-color:var(--gold); }
+.wy-tab:hover { color:var(--white); background:#302824; }
+.status-block, .room-card, .solar-block, .weather-card, .media-stat-block,
+.session-card, .mp-card, .lc-power-panel, .np48-chart, .temp-graph-wrap,
+.lc-energy-chart, #washer-panel, .mother-terminal, .herbarium-card, .herbarium-empty {
+  background:linear-gradient(145deg,#171c24ed,#11151be8);
+  border-color:#bfc5d14d;
+  box-shadow:0 12px 28px #0004,inset 0 1px #ffffff08;
+}
+.status-block { border-left-color:var(--gold); }
+.status-block.orange { border-left-color:var(--ember); }
+.status-block.purple { border-left-color:var(--red); }
+.status-block.teal { border-left-color:var(--teal); }
+.room-card.lit { border-color:var(--gold); }
+.lc-power-panel, .np48-chart, .temp-graph-wrap, .lc-energy-chart, #washer-panel { border-left-color:var(--blue); }
+.mother-terminal { border-left-color:var(--ember); }
+.status-block label, .solar-block label, .media-stat-block label,
+.lc-power-hero-stat label, .lc-device-table th, .data-label, .diag-key,
+.light-label, .light-state, .sensor-chip, .herbarium-card-species,
+.herbarium-metric label, .herbarium-dialog-state-row label,
+.herbarium-reading label, .herbarium-report label { color:var(--amber-dim); }
+.status-block.orange .val, .sensor-chip.active.temp, .data-val.mid,
+.room-total-w, .watts-val, #np-next-val { color:var(--ember); }
+.watts-val.off { color:var(--amber-dim); }
+.sensor-chip.active.hum, .sensor-chip.active.lux { color:var(--blue); border-color:var(--blue); }
+.herbarium-card-id { color:var(--gold); }
+.herbarium-dialog, .herbarium-dialog-shell { background:var(--panel); }
+.herbarium-metric, .herbarium-reading, .herbarium-report { background:#11151b; border-color:#bfc5d14d; }
+.herbarium-card.warning .herbarium-status, .herbarium-dialog-shell.warning .herbarium-dialog-state { color:var(--ember); }
+.herbarium-card.critical .herbarium-status, .herbarium-dialog-shell.critical .herbarium-dialog-state { color:var(--red); }
+.skip-link { background:var(--gold); }
+body.night-mode { background:radial-gradient(ellipse at 95% 110%,#642918,transparent 55%),#111018; }
+body.night-mode .wy-frame::before, body.night-mode .wy-frame::after { opacity:.25; }
 </style>
 </head>
 <body class="crt-flicker">
