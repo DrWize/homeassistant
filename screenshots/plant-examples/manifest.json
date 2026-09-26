@@ -1,0 +1,49 @@
+{
+  "generated": [
+    {
+      "theme": "c64",
+      "plant": "pilea",
+      "file": "c64-pilea.png"
+    },
+    {
+      "theme": "diablo",
+      "plant": "pilea",
+      "file": "diablo-pilea.png"
+    },
+    {
+      "theme": "lcars",
+      "plant": "pilea",
+      "file": "lcars-pilea.png"
+    },
+    {
+      "theme": "matrix",
+      "plant": "pilea",
+      "file": "matrix-pilea.png"
+    },
+    {
+      "theme": "pipboy",
+      "plant": "pilea",
+      "file": "pipboy-pilea.png"
+    },
+    {
+      "theme": "t2",
+      "plant": "pilea",
+      "file": "t2-pilea.png"
+    },
+    {
+      "theme": "weyland",
+      "plant": "pilea",
+      "file": "weyland-pilea.png"
+    },
+    {
+      "theme": "winamp",
+      "plant": "pilea",
+      "file": "winamp-pilea.png"
+    }
+  ],
+  "states": [
+    "green",
+    "yellow",
+    "red"
+  ]
+}

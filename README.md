@@ -338,6 +338,35 @@ The artwork states have these shared meanings:
 | `not-ok` | Mild visible stress with the theme's warning colors |
 | `bad` | Clearly distressed growth with the theme's critical colors |
 
+#### Generated plant-status gallery
+
+The screenshot gallery is generated locally from the dashboard and artwork files. The generator discovers every `*-dashboard.html` file with a matching `assets/plant-status/<theme>/` directory, discovers complete plant artwork sets, supplies mock telemetry, and captures healthy, warning, and critical dialog states. It does not need a Home Assistant connection or token.
+
+```powershell
+# First-time dependency
+py -m pip install playwright pillow
+
+# Rebuild every discovered theme and plant
+py tools/capture-plant-gallery.py
+
+# Rebuild only one example plant, or limit the themes while iterating
+py tools/capture-plant-gallery.py --plant pilea
+py tools/capture-plant-gallery.py --plant pilea --theme lcars --theme t2
+```
+
+Each run writes three-state contact sheets and a machine-readable manifest to `screenshots/plant-examples/`. Adding more plant artwork directories or another dashboard theme automatically expands the next full run; the script has no hardcoded theme or plant catalog.
+
+| Theme | Pilea example: healthy · warning · critical |
+|-------|---------------------------------------------|
+| LCARS | ![LCARS Pilea plant states](screenshots/plant-examples/lcars-pilea.png) |
+| Pip-Boy | ![Pip-Boy Pilea plant states](screenshots/plant-examples/pipboy-pilea.png) |
+| C64 | ![C64 Pilea plant states](screenshots/plant-examples/c64-pilea.png) |
+| Matrix | ![Matrix Pilea plant states](screenshots/plant-examples/matrix-pilea.png) |
+| Weyland | ![Weyland Pilea plant states](screenshots/plant-examples/weyland-pilea.png) |
+| Diablo | ![Diablo Pilea plant states](screenshots/plant-examples/diablo-pilea.png) |
+| Winamp | ![Winamp Pilea plant states](screenshots/plant-examples/winamp-pilea.png) |
+| T2 / Skynet | ![T2 Pilea plant states](screenshots/plant-examples/t2-pilea.png) |
+
 #### Procedure and art direction by theme
 
 | Theme | Tab | Status | Theme-specific implementation direction |
