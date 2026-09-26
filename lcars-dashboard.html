@@ -1399,6 +1399,393 @@ html, body {
 .mp-type,
 .mp-badge { background: #30303c; color: #f2f2f5; }
 .watts-val.off { color: #aaaabc; }
+/* ═══════════════════════════════════════════
+   RESPONSIVE LCARS 2.0 SHELL
+═══════════════════════════════════════════ */
+:root {
+  --shell-rail: 184px;
+  --shell-gap: 8px;
+  --header-h: 60px;
+  --footer-h: 30px;
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 20px;
+  --panel: #080812;
+  --panel-raised: #0d0d1b;
+  --panel-soft: #141426;
+  --line: #44445d;
+  --text: #ffe1bd;
+  --text-muted: #b8b4c9;
+  --touch: 44px;
+}
+
+html, body { width: 100%; max-width: 100%; overflow: hidden; }
+body {
+  color: var(--text);
+  background:
+    radial-gradient(circle at 82% 12%, rgba(102, 204, 204, 0.08), transparent 30%),
+    radial-gradient(circle at 20% 90%, rgba(204, 153, 204, 0.07), transparent 34%),
+    var(--bg);
+}
+body.night-mode {
+  --orange: #d98218;
+  --tan: #e8c9a8;
+  --blue: #7d7dc7;
+  --purple: #aa78aa;
+  --teal: #58b6b6;
+  --yellow: #dedb54;
+  --grey: #343446;
+  --grey-mid: #aaa9bd;
+  --panel: #07070d;
+  --panel-raised: #0b0b14;
+  --panel-soft: #11111d;
+  --line: #3f3f54;
+  --text: #efd7bc;
+  --text-muted: #b5b1c2;
+}
+
+.lcars-frame {
+  display: grid;
+  grid-template-rows: var(--header-h) minmax(0, 1fr) var(--footer-h);
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+.lcars-top {
+  display: grid;
+  grid-template-columns: var(--shell-rail) var(--shell-gap) minmax(0, 1fr) 46px;
+  height: var(--header-h);
+  min-width: 0;
+}
+.lcars-top-corner {
+  width: auto;
+  min-width: 0;
+  border-radius: 34px 0 0 0;
+  padding: 0 18px;
+  background: linear-gradient(90deg, #ffad25, var(--orange));
+}
+.lcars-top-corner span { font-size: 1.15rem; letter-spacing: 4px; }
+.lcars-top-gap, .lcars-bottom-gap { width: auto; }
+.lcars-top-bar {
+  min-width: 0;
+  padding: 0 var(--space-4);
+  background: linear-gradient(90deg, var(--orange), #ffb23d);
+  justify-content: flex-end;
+}
+.lcars-top-bar-end { width: auto; border-radius: 0 0 0 30px; }
+.lcars-nav { display: none; min-width: 0; }
+.lcars-status { margin-left: auto; color: #07070a; }
+.status-dot { width: 9px; height: 9px; }
+.stardate-val { color: #102e30; }
+
+.lcars-body { min-width: 0; overflow: hidden; }
+.lcars-sidebar { width: var(--shell-rail); min-width: 0; }
+.lcars-sidebar-top { height: 42px; border-radius: 0 0 0 32px; }
+.lcars-sidebar-buttons { gap: 7px; padding: 12px 0; }
+.lcars-btn {
+  min-height: var(--touch);
+  height: var(--touch);
+  width: calc(100% - 16px);
+  padding: 0 14px 0 8px;
+  border-radius: 0 24px 24px 0;
+  font-size: 0.72rem;
+  color: #09090c;
+}
+.lcars-btn:hover { width: calc(100% - 7px); }
+.lcars-btn.active { width: 100%; border-radius: 0; }
+.lcars-sidebar-bottom { height: 32px; border-radius: 0 28px 0 0; }
+.lcars-gap { width: var(--shell-gap); }
+.lcars-content {
+  min-width: 0;
+  width: 100%;
+  padding: var(--space-4);
+  padding-left: var(--space-3);
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+.page { width: 100%; min-width: 0; }
+.page.active { animation: lcars-panel-in 180ms ease-out; }
+@keyframes lcars-panel-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lcars-bottom {
+  display: grid;
+  grid-template-columns: var(--shell-rail) var(--shell-gap) minmax(0, 1fr) 46px;
+  height: var(--footer-h);
+  min-width: 0;
+}
+.lcars-bottom-left, .lcars-bottom-bar-end { width: auto; }
+.lcars-bottom-bar {
+  min-width: 0;
+  padding: 0 var(--space-4);
+  gap: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.lc-section { margin: 24px 0 12px; min-width: 0; }
+.lc-section-pill {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 18px;
+  border-radius: 18px 3px 3px 18px;
+  color: #08080b;
+  font-size: 0.7rem;
+}
+.lc-section-line { background: linear-gradient(90deg, var(--line), transparent); }
+.lc-section-end { box-shadow: 0 0 10px currentColor; }
+
+.status-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.status-block, .solar-block, .media-stat-block, .lrs-stat, .lc-energy-stat {
+  min-width: 0;
+  background: linear-gradient(145deg, var(--panel-raised), var(--panel));
+  border-color: var(--line);
+  border-radius: 3px 16px 3px 3px;
+}
+.status-block { padding: 12px 14px; }
+.status-block label, .solar-block label, .media-stat-block label,
+.lrs-stat label, .lc-energy-stat label { color: var(--text-muted); }
+.status-block .val { color: var(--text); }
+
+.room-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(270px, 100%), 1fr));
+  gap: 12px;
+}
+.room-card, .session-card, .mp-card, .lc-power-panel, .lc-energy-wrap {
+  min-width: 0;
+  background: linear-gradient(145deg, var(--panel-raised), var(--panel));
+  border-color: var(--line);
+  border-radius: 3px 20px 3px 3px;
+}
+.room-card::before { width: 7px; }
+.room-header { min-height: 48px; border-color: var(--line); }
+.room-body { padding: 12px 14px 14px 18px; }
+.room-name { color: #ffb44c; }
+.sensor-chip { min-height: 28px; background: var(--panel-soft); color: var(--text-muted); }
+.light-row { min-height: var(--touch); }
+.light-label, .light-state { color: var(--text-muted); }
+.lc-toggle { width: 48px; height: var(--touch); }
+.lc-toggle-track { top: 10px; bottom: 10px; border-radius: 13px; }
+.lc-toggle-thumb { width: 18px; height: 18px; top: 13px; left: 3px; }
+.lc-toggle input:checked ~ .lc-toggle-thumb { left: 27px; }
+.lc-dimmer {
+  height: var(--touch);
+  background: linear-gradient(var(--grey), var(--grey)) center / 100% 5px no-repeat;
+}
+.lc-dimmer::-webkit-slider-thumb { width: 20px; height: 20px; }
+.lc-dimmer::-moz-range-thumb { width: 20px; height: 20px; }
+.dimmer-row.visible { max-height: 52px; min-height: var(--touch); }
+.night-protocol-btn { min-height: var(--touch); }
+.arboretum-close { width: var(--touch); height: var(--touch); }
+
+.solar-strip, .media-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.solar-block { text-align: left; border-top: 0; border-left: 4px solid var(--yellow); padding: 12px 14px; }
+.weather-row { scroll-snap-type: x proximity; scrollbar-color: var(--blue) transparent; }
+.weather-card { min-width: 92px; padding: 10px 8px; scroll-snap-align: start; background: var(--panel); border-color: var(--line); }
+.np48-chart, .temp-graph-wrap, .lc-energy-chart { min-width: 0; overflow: hidden; }
+.np48-legend, .lc-energy-legend { color: var(--text-muted); }
+.data-row { min-height: var(--touch); }
+.diag-row { min-height: 42px; align-items: center; }
+.diag-key { color: var(--text-muted); }
+.diag-val { color: var(--text); }
+
+.sessions-grid, .mp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); }
+.session-card, .mp-card { width: 100%; max-width: none; }
+.no-streams { border-color: var(--line); border-radius: 3px 20px 3px 3px; color: var(--text-muted); }
+
+.lrs-wrap { align-items: stretch; }
+.lrs-radar { box-shadow: inset 0 0 28px rgba(102, 204, 204, 0.16), 0 0 16px rgba(102, 204, 204, 0.08); }
+.lrs-data-panel { min-width: 0; }
+.lrs-data-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.lrs-stat { padding: 10px 12px; }
+
+.arboretum-grid { gap: 14px; }
+.arboretum-card { background: linear-gradient(145deg, var(--panel-raised), var(--panel)); }
+.arboretum-dialog { max-width: min(1040px, calc(100vw - 32px)); }
+.arboretum-shell { background: var(--panel-raised); }
+
+.theme-zone {
+  width: 48px;
+  height: 48px;
+  bottom: max(0px, env(safe-area-inset-bottom));
+  left: max(0px, env(safe-area-inset-left));
+}
+.theme-switcher {
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  left: calc(10px + env(safe-area-inset-left));
+  align-items: center;
+}
+.theme-switcher-btn { min-width: var(--touch); width: var(--touch); height: var(--touch); background: var(--panel-raised); }
+.theme-menu { max-height: min(70vh, 420px); overflow-y: auto; }
+
+@media (max-width: 959px) {
+  :root { --mobile-header-brand: 52px; --mobile-header-nav: 48px; }
+  .lcars-frame {
+    grid-template-rows: calc(var(--mobile-header-brand) + var(--mobile-header-nav)) minmax(0, 1fr) 0;
+  }
+  .lcars-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--mobile-header-brand) var(--mobile-header-nav);
+    height: auto;
+    min-height: 0;
+  }
+  .lcars-top-corner {
+    grid-area: 1 / 1;
+    width: 100%;
+    padding: 0 18px;
+    border-radius: 0 0 26px 0;
+    background:
+      linear-gradient(90deg, var(--orange) 0 43%, var(--purple) 43% 58%, var(--teal) 58% 72%, var(--orange) 72%);
+  }
+  .lcars-top-corner span {
+    align-self: center;
+    padding: 2px 12px;
+    border-radius: 18px;
+    background: #07070a;
+    color: var(--orange);
+    font-size: 1rem;
+  }
+  .lcars-top-gap, .lcars-top-bar-end { display: none; }
+  .lcars-top-bar { display: contents; }
+  .lcars-status {
+    grid-area: 1 / 1;
+    z-index: 2;
+    justify-self: end;
+    align-self: center;
+    max-width: 58%;
+    padding-right: 14px;
+    gap: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .lcars-nav {
+    grid-area: 2 / 1;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    padding: 4px 12px;
+    gap: 7px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    background: #050508;
+    border-bottom: 2px solid var(--orange);
+    scroll-snap-type: x proximity;
+  }
+  .lcars-nav::-webkit-scrollbar { display: none; }
+  .lcars-nav-btn {
+    flex: 0 0 auto;
+    min-height: var(--touch);
+    padding: 6px 18px;
+    border: 1px solid var(--line);
+    border-radius: 20px 4px 20px 4px;
+    color: var(--tan);
+    scroll-snap-align: center;
+  }
+  .lcars-nav-btn.active { border-color: var(--purple); color: #08080b; }
+  .lcars-body { display: block; }
+  .lcars-sidebar, .lcars-gap { display: none; }
+  .lcars-content {
+    height: 100%;
+    padding: 16px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  .lcars-bottom { display: none; }
+  .status-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lcars-content .room-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .arboretum-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sessions-grid, .mp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lrs-wrap { flex-direction: column; }
+  .lrs-radar-container { align-self: center; }
+}
+
+@media (max-width: 599px) {
+  :root { --mobile-header-brand: 52px; --mobile-header-nav: 48px; }
+  .lcars-status { max-width: 62%; font-size: 0.67rem; }
+  .lcars-status .status-date,
+  .lcars-status .status-date-separator,
+  .lcars-status .stardate-display { display: none; }
+  .lcars-nav { padding-inline: 10px; }
+  .lcars-nav-btn { min-height: var(--touch); padding-inline: 16px; font-size: 0.72rem; }
+  .lcars-content { padding: 12px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+  .lc-section { margin: 20px 0 10px; }
+  .lc-section-pill { max-width: calc(100vw - 48px); overflow: hidden; text-overflow: ellipsis; letter-spacing: 2px; }
+  .status-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .status-block { min-width: 0 !important; padding: 10px 11px; }
+  .status-block:last-child { grid-column: 1 / -1; }
+  .status-block label { font-size: 0.61rem; letter-spacing: 1.4px; }
+  .status-block .val { font-size: 0.94rem; }
+  .lcars-content .room-grid, .sessions-grid, .mp-grid, .arboretum-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .room-card { padding: 0 !important; }
+  .room-header { padding: 9px 11px 8px 17px; }
+  .room-body { padding: 10px 11px 12px 17px; }
+  .sensor-row { margin-bottom: 7px; }
+  .light-row { min-height: 46px; }
+  .solar-strip, .media-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .solar-block, .media-stat-block { min-width: 0; padding: 10px; }
+  .weather-card { min-width: 88px; }
+  .data-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) 72px; gap: 7px; }
+  .data-label, .data-val { width: auto; }
+  .diag-row { gap: 14px; }
+  .diag-val { max-width: 62%; text-align: right; overflow-wrap: anywhere; }
+  .session-card { min-width: 0; padding: 10px; gap: 10px; }
+  .session-poster { width: 72px; }
+  .mp-card { min-width: 0; padding: 10px; }
+  .lrs-radar { width: min(220px, 72vw); height: min(220px, 72vw); }
+  .lrs-radar canvas { width: 100%; height: 100%; }
+  .lrs-data-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lrs-data-row .lrs-stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .lc-energy-header { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lc-energy-stat:last-child { grid-column: 1 / -1; }
+  .np48-chart, .lc-energy-chart { height: 116px; }
+  .np48-legend, .lc-energy-legend { gap: 8px; font-size: 0.58rem; }
+  .lc-power-panel { padding: 12px; overflow: hidden; }
+  .lc-power-hero { align-items: flex-start; gap: 10px; }
+  .lc-power-hero-main { font-size: clamp(1.55rem, 9vw, 2.2rem); }
+  .lc-device-table, .lc-device-table tbody { display: block; width: 100%; }
+  .lc-device-table thead { display: none; }
+  .lc-device-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .lc-device-table td { display: block; width: auto !important; padding: 0 !important; border: 0; }
+  .lc-device-table td:nth-child(2), .lc-device-table td:nth-child(4) { text-align: right; }
+  .lc-device-table td:nth-child(3) { grid-column: 1; }
+  .arboretum-dialog { width: calc(100vw - 8px); max-width: none; max-height: calc(100dvh - 8px); }
+  .arboretum-shell { padding: 10px; border-width: 3px; }
+  .arboretum-detail { gap: 10px; }
+  .arboretum-visual, .arboretum-image { min-height: 190px; }
+  .arboretum-readings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .theme-switcher { flex-wrap: wrap-reverse; max-width: calc(100vw - 20px); }
+  .toast { left: 12px; right: 12px; bottom: calc(64px + env(safe-area-inset-bottom)); max-width: none; }
+}
+
+@media (max-width: 370px) {
+  .lcars-top-corner span { padding-inline: 9px; letter-spacing: 3px; }
+  .lcars-status { font-size: 0.61rem; gap: 5px; }
+  .lcars-status .status-connection-separator { display: none; }
+  .solar-strip, .media-strip { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page.active { animation: none; }
+  .lcars-nav { scroll-behavior: auto; }
+}
 </style>
 </head>
 <body>
@@ -1412,20 +1799,20 @@ html, body {
     <div class="lcars-top-gap"></div>
     <div class="lcars-top-bar">
       <div class="lcars-nav" role="tablist" aria-label="Dashboard sections">
-        <button class="lcars-nav-btn active" role="tab" aria-selected="true" aria-controls="page-systems" onclick="switchTab('systems')">SYSTEMS</button>
-        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-controls" onclick="switchTab('controls')">CONTROLS</button>
-        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-data" onclick="switchTab('data')">DATA</button>
-        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-media" onclick="switchTab('media')">MEDIA</button>
-        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-sensors" onclick="switchTab('sensors')">SENSORS</button>
-        <button class="lcars-nav-btn" role="tab" aria-selected="false" aria-controls="page-plants" onclick="switchTab('plants')">ARBORETUM</button>
+        <button class="lcars-nav-btn active" data-tab="systems" role="tab" aria-selected="true" aria-controls="page-systems" onclick="switchTab('systems')">SYSTEMS</button>
+        <button class="lcars-nav-btn" data-tab="controls" role="tab" aria-selected="false" aria-controls="page-controls" onclick="switchTab('controls')">CONTROLS</button>
+        <button class="lcars-nav-btn" data-tab="data" role="tab" aria-selected="false" aria-controls="page-data" onclick="switchTab('data')">DATA</button>
+        <button class="lcars-nav-btn" data-tab="media" role="tab" aria-selected="false" aria-controls="page-media" onclick="switchTab('media')">MEDIA</button>
+        <button class="lcars-nav-btn" data-tab="sensors" role="tab" aria-selected="false" aria-controls="page-sensors" onclick="switchTab('sensors')">SENSORS</button>
+        <button class="lcars-nav-btn" data-tab="plants" role="tab" aria-selected="false" aria-controls="page-plants" onclick="switchTab('plants')">ARBORETUM</button>
       </div>
       <div class="lcars-status">
         <span id="conn-dot" class="status-dot connecting"></span>
         <span id="conn-label">INITIALIZING</span>
-        <span style="opacity:0.5;">|</span>
+        <span class="status-separator status-connection-separator" style="opacity:0.5;">|</span>
         <span id="clock-lcars">--:--:--</span>
-        <span id="date-lcars" style="opacity:0.7;">--- -- ----</span>
-        <span style="opacity:0.4;">|</span>
+        <span id="date-lcars" class="status-date" style="opacity:0.7;">--- -- ----</span>
+        <span class="status-separator status-date-separator" style="opacity:0.4;">|</span>
         <div class="stardate-display" aria-label="Stardate">
           <span class="stardate-label">STARDATE</span>
           <span class="stardate-val" id="stardate-val">-----.--</span>
@@ -1897,9 +2284,22 @@ const THEME = {
     if (sdEl) sdEl.textContent = calcStardate(new Date());
   },
   onSwitchTab(tabId) {
-    document.querySelectorAll('.lcars-sidebar .lcars-btn').forEach(b => {
+    document.querySelectorAll('.lcars-sidebar .lcars-btn, .lcars-nav-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.tab === tabId);
     });
+    const content = document.getElementById('main-content');
+    if (content) content.scrollTo({ top: 0, behavior: 'auto' });
+    if (window.matchMedia('(max-width: 959px)').matches) {
+      const nav = document.querySelector('.lcars-nav');
+      const active = nav?.querySelector(`[data-tab="${tabId}"]`);
+      if (nav && active) {
+        const left = active.offsetLeft - ((nav.clientWidth - active.offsetWidth) / 2);
+        nav.scrollTo({
+          left: Math.max(0, left),
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+        });
+      }
+    }
   },
   onInit() {
     renderLrs();

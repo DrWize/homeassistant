@@ -54,7 +54,7 @@ winamp-dashboard.html, t2-dashboard.html, tools/setup.html (optional, for the wi
 
 | Theme | File | Inspired By |
 |-------|------|-------------|
-| **LCARS** | `lcars-dashboard.html` | Star Trek computer interface |
+| **LCARS** | `lcars-dashboard.html` | Refined classic Star Trek interface with phone, tablet, desktop, and kiosk layouts |
 | **Pip-Boy 3000** | `pipboy-dashboard.html` | Fallout series Pip-Boy |
 | **Commodore 64** | `c64-dashboard.html` | Commodore 64 home computer |
 | **Matrix** | `matrix-dashboard.html` | The Matrix digital rain |
@@ -67,6 +67,8 @@ The previews below were refreshed after a cross-theme readability and contrast p
 
 ### LCARS — Star Trek
 ![LCARS Dashboard](screenshots/lcars-systems.png)
+![LCARS Arboretum Desktop](screenshots/lcars-arboretum-desktop.png)
+![LCARS Arboretum Mobile Detail](screenshots/lcars-arboretum-mobile.png)
 ![LCARS Tabs Demo](screenshots/lcars-demo.gif)
 
 ### Pip-Boy 3000 — Fallout
@@ -98,7 +100,7 @@ The previews below were refreshed after a cross-theme readability and contrast p
 ![Skynet Tabs Demo](screenshots/t2-demo.gif)
 
 ### Theme-Specific Extras
-- **LCARS**: Animated radar sweep on the Sensors tab with randomized blip contacts
+- **LCARS**: Responsive two-tier mobile command header, slim desktop command rail, adaptive LCARS panels, and an animated sensor radar with randomized blip contacts
 - **Pip-Boy**: Geiger counter that ticks based on ambient lux, plus a threat assessment panel
 - **C64**: BASIC-style system log on the Security tab that logs events as numbered BASIC lines
 - **Matrix**: Digital rain canvas background that responds to total power usage and slows at night

@@ -141,8 +141,9 @@ function validateEntities(states) {
       }
       .weather-card, .forecast-card { min-width: 100px; flex-shrink: 0; }
 
-      /* Sidebar: hide on mobile (use top nav instead) */
-      .lcars-sidebar, .sidebar { display: none !important; }
+      /* Generic themes use their top navigation on mobile. LCARS owns its
+         responsive shell in lcars-dashboard.html. */
+      .sidebar { display: none !important; }
       .lcars-main, .main-content { margin-left: 0 !important; }
 
       /* Nordpool chart: ensure it scrolls */
